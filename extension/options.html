@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Orbita — настройки</title>
+    <link rel="stylesheet" href="options.css" />
+  </head>
+  <body>
+    <main class="page">
+      <div class="brand">
+        <img src="icons/icon128.png" alt="" width="56" height="56" />
+        <div>
+          <h1>Orbita</h1>
+          <p class="tag" id="title"></p>
+        </div>
+      </div>
+
+      <section class="card">
+        <h2 id="secEntry"></h2>
+        <label class="row2"><span>URL</span><input type="text" id="channel" spellcheck="false" /></label>
+        <div class="row2">
+          <select id="lang" class="select"></select>
+          <button class="primary" id="go" type="button"></button>
+        </div>
+        <p class="note" id="entryNote"></p>
+        <p class="subhead" id="secRecent"></p>
+        <ul class="channels" id="recentList"></ul>
+      </section>
+
+      <section class="card">
+        <h2 id="secIdentity"></h2>
+        <label class="row2"><span id="lblAnon"></span><input type="checkbox" id="anon" /></label>
+        <label class="row2"><span id="lblName"></span><input type="text" id="name" maxlength="67" /></label>
+        <p class="note" id="avatarNote"></p>
+        <p class="note" id="nameWarn"></p>
+        <p class="subhead" id="secSiteNicks"></p>
+        <ul class="channels" id="nickList"></ul>
+      </section>
+
+      <section class="card">
+        <h2 id="secServer"></h2>
+        <label class="row2"><span id="lblSync"></span><input type="checkbox" id="syncOn" /></label>
+        <p class="note" id="serverHint"></p>
+        <div class="row2">
+          <button class="primary" id="testServer" type="button">ping</button>
+          <span id="serverState" class="state"></span>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2 id="secUi"></h2>
+        <label class="row2"><span id="lblUiLang"></span><select id="uiLang" class="select"></select></label>
+        <label class="row2"><span id="lblFilter"></span><input type="checkbox" id="filter" /></label>
+        <label class="row2"><span id="lblShowHidden"></span><input type="checkbox" id="showHidden" /></label>
+        <label class="row2"><span id="lblEnabled"></span><input type="checkbox" id="enabled" /></label>
+      </section>
+
+      <section class="card">
+        <h2 id="secSites"></h2>
+        <ul class="channels" id="hiddenList"></ul>
+        <div class="row2">
+          <input type="text" id="hiddenInput" spellcheck="false" placeholder="example.com" />
+          <button class="primary" id="addHidden" type="button">+</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2 id="secData"></h2>
+        <p class="note" id="dataStats"></p>
+        <div class="row2">
+          <button class="primary" id="clear" type="button"></button>
+          <a id="rules" class="link" href="rules.html" target="_blank" rel="noopener"></a>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2 id="secHow"></h2>
+        <ul class="howto" id="howto"></ul>
+      </section>
+    </main>
+    <script type="module" src="options.js"></script>
+  </body>
+</html>

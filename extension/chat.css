@@ -1,0 +1,2108 @@
+/* Theme tokens are injected by themes.js onto :root (--ink, --bubble, --grad …).
+   The fallbacks below keep the UI readable if a skin fails to load. */
+:root {
+  --ink: #0d2c4a;
+  --muted: #4b708f;
+  --panel: rgba(228, 246, 255, 0.88);
+  --panel-alt: rgba(255, 255, 255, 0.7);
+  --line: rgba(47, 127, 242, 0.3);
+  --bubble: rgba(255, 255, 255, 0.95);
+  --bubble-ink: #0d2c4a;
+  --bubble-sub: #4b708f;
+  --accent: #1f8fe0;
+  --accent-2: #1d6fc0;
+  --accent-ink: #ffffff;
+  --score-bg: rgba(255, 255, 255, 0.85);
+  --score-ink: #0d2c4a;
+  --link: #0a5cc0;
+  --star: #e08a00;
+  --flame: #ff7a1a;
+  --gold: #ffc93c;
+  --drawer: rgba(255, 255, 255, 0.45);
+  --search-bg: rgba(255, 255, 255, 0.96);
+  --search-ink: #0d2c4a;
+  --grad: none;
+  --grad-alpha: 0.18;
+  --aurora: none;
+  --bg-image: none;
+  --bg-size: cover;
+  --bg-repeat: no-repeat;
+  --bg-alpha: 0;
+  --fx-col: 168px;
+  --lenta-col: 280px;
+  --radius: 10px;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--ink);
+  font: 13px/1.45 system-ui, "Segoe UI", Roboto, sans-serif;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* a class-level display must never beat the hidden attribute */
+[hidden] {
+  display: none !important;
+}
+
+.wrap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: var(--panel);
+  border-radius: 0 0 12px 12px;
+  overflow: hidden;
+}
+
+/* ---------- standalone chat in its own tab ----------
+   When a page can't host the overlay (blocked or unreachable site) chat.html opens in a
+   tab. It has to read as the same card the overlay shows, not fill the viewport. */
+html.standalone body {
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: color-mix(in srgb, var(--panel) 40%, transparent);
+}
+
+html.standalone .wrap {
+  width: min(var(--stand-w, 1180px), calc(100vw - 32px));
+  height: min(var(--stand-h, 680px), calc(100vh - 32px));
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: 0 18px 46px rgba(0, 0, 0, 0.3);
+}
+
+.bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.bg-aurora {
+  background-image: var(--aurora);
+  z-index: 0;
+}
+
+.bg-img {
+  background-image: var(--bg-image);
+  background-size: var(--bg-size);
+  background-repeat: var(--bg-repeat);
+  background-position: center;
+  opacity: var(--bg-alpha);
+  z-index: 1;
+}
+
+.bg-grad {
+  background-image: var(--grad);
+  opacity: var(--grad-alpha);
+  z-index: 2;
+}
+
+.cols,
+.top {
+  position: relative;
+  z-index: 3;
+}
+
+/* ---------- header, sits above the chat column ---------- */
+.top {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--line);
+  flex: 0 0 auto;
+  cursor: grab;
+  touch-action: none;
+  background: color-mix(in srgb, var(--panel-alt) 55%, transparent);
+}
+
+.top.dragging {
+  cursor: grabbing;
+}
+
+.top button,
+.top select,
+.top input,
+.top .field {
+  cursor: pointer;
+}
+
+.top .search input {
+  cursor: text;
+}
+
+.cluster {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.top .row2 {
+  gap: 8px;
+}
+
+.top .row1 .flag-btn {
+  margin-left: auto;
+}
+
+.top .row2 .clients {
+  margin-left: 4px;
+}
+
+.corner {
+  all: unset;
+  cursor: pointer;
+  width: 28px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--panel-alt);
+  color: var(--ink);
+  font-size: 13px;
+  flex: 0 0 auto;
+}
+
+.corner:hover {
+  border-color: var(--accent);
+}
+
+.corner[aria-pressed="true"] {
+  background: var(--accent);
+  color: var(--accent-ink);
+  border-color: var(--accent);
+}
+
+.field {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.field-label {
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.select {
+  background: var(--panel-alt);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 4px 6px;
+  font-size: 12px;
+}
+
+.lang-btn {
+  background: var(--panel-alt);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.lang-btn:hover,
+.tool:hover,
+.send:hover,
+.mini:hover {
+  border-color: var(--accent);
+}
+
+.lang-btn b {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.flag-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--panel-alt);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 3px 6px;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.flag-btn:hover,
+.flag-btn[aria-pressed="true"] {
+  border-color: var(--accent);
+}
+
+.flag-btn[aria-pressed="true"] {
+  background: color-mix(in srgb, var(--accent) 26%, transparent);
+}
+
+.flag-btn b {
+  color: var(--accent);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.flag-btn svg,
+.lang-flags svg {
+  display: block;
+  width: 20px;
+  height: 13px;
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--ink) 22%, transparent);
+}
+
+/* Кнопки шапки стоят в пилюлях 56×21 и 26×26 с зазором 4-6 px и скруглением 999px:
+   углы пилюли и межкиллерные щели кнопке не принадлежат, и чтобы открыть список языков
+   человек выцеливал середину. Невидимый ::before дорастляет зону нажатия на 5 px во все
+   стороны — пиксели между соседями перестают быть мёртвыми, внешний вид не меняется
+   (размер щели 4-6 px, поэтому расширенные соседние зоны перекрывают её целиком). */
+.top .cluster > button,
+.top .tools > button {
+  position: relative;
+}
+
+.top .cluster > button::before,
+.top .tools > button::before {
+  content: "";
+  position: absolute;
+  inset: -5px;
+}
+
+.search {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--search-bg);
+  color: var(--search-ink);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 2px 8px;
+  min-width: 150px;
+  flex: 1 1 150px;
+  max-width: 260px;
+}
+
+.search input {
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font-size: 12px;
+  width: 100%;
+  color: inherit;
+}
+
+.q-clear {
+  all: unset;
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 12px;
+  padding: 0 2px;
+}
+
+.views {
+  display: flex;
+  gap: 3px;
+}
+
+.views button {
+  all: unset;
+  cursor: pointer;
+  padding: 4px 9px;
+  border-radius: 999px;
+  font-size: 12px;
+  color: var(--muted);
+  border: 1px solid transparent;
+}
+
+.views button[aria-pressed="true"] {
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+  color: var(--ink);
+  border-color: var(--accent);
+}
+
+.clients {
+  font-size: 11px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.clients b {
+  color: var(--accent);
+  font-size: 13px;
+}
+
+.tools {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.tool {
+  all: unset;
+  cursor: pointer;
+  width: 26px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: var(--panel-alt);
+  color: var(--ink);
+  font-size: 12px;
+}
+
+.tool[aria-pressed="true"] {
+  background: color-mix(in srgb, var(--accent) 28%, transparent);
+}
+
+.tool:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+
+.tool svg {
+  width: 15px;
+  height: 15px;
+  fill: var(--accent);
+}
+
+/* ---------- columns ---------- */
+.cols {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-rows: minmax(0, 1fr);
+  flex: 1;
+  min-height: 0;
+}
+
+/* pinned tracks: hiding a drawer must not let the chat borrow its column */
+.fx {
+  grid-column: 1;
+}
+
+.chat {
+  grid-column: 2;
+}
+
+.lenta {
+  grid-column: 3;
+}
+
+.chat {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+.fx {
+  padding: 8px;
+  overflow-y: auto;
+  background: var(--drawer);
+  border-top: 1px solid var(--line);
+}
+
+/* the drawer header and filters stay put, only the list scrolls */
+.lenta {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 8px;
+  overflow: hidden;
+  background: var(--drawer);
+  border-top: 1px solid var(--line);
+}
+
+.fx {
+  width: var(--fx-col);
+  border-right: 1px solid var(--line);
+}
+
+.lenta {
+  width: var(--lenta-col);
+  border-left: 1px solid var(--line);
+}
+
+.fx h3 {
+  margin: 0 0 4px;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+}
+
+.fx-hint,
+.lenta-hint,
+.fx-soon {
+  margin: 0 0 8px;
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.fx-soon {
+  margin-top: 10px;
+  border-top: 1px dashed var(--line);
+  padding-top: 8px;
+}
+
+.fx-grid {
+  display: grid;
+  gap: 6px;
+}
+
+.fx-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel-alt);
+  padding: 6px;
+  cursor: grab;
+  text-align: center;
+  position: relative;
+  touch-action: none;
+  user-select: none;
+}
+
+.fx-card:active {
+  cursor: grabbing;
+}
+
+.fx-card .emo {
+  font-size: 24px;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  margin: 0 auto 2px;
+  line-height: 1.2;
+}
+
+.fx-card .fx-art {
+  display: block;
+  width: 44px;
+  height: 44px;
+}
+
+.fx-card .nm {
+  font-size: 11px;
+  display: block;
+  margin-top: 2px;
+  color: var(--ink);
+}
+
+.fx-card .ds {
+  font-size: 9px;
+  color: var(--muted);
+  display: block;
+}
+
+/* остаток заряда на сутки: 3 огня или 1 щит */
+.fx-card .fx-left {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  padding: 0 5px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  color: var(--ink);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+.fx-card[aria-pressed="true"] {
+  border-color: var(--accent);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--accent) 45%, transparent) inset;
+}
+
+.fx-card.locked {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.fx-card.locked::after {
+  content: "🔒";
+  position: absolute;
+  top: 3px;
+  right: 4px;
+  font-size: 10px;
+}
+
+.fx-card.spent {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.fx-card.spent .fx-left {
+  background: color-mix(in srgb, var(--flame) 22%, transparent);
+}
+
+/* значки оживают, когда на панель смотрят: transform и opacity внутри SVG Chromium
+   не может вынести на композитор, поэтому каждая петля — это перерисовка документа
+   каждые 16 мс. В простое (ник не трогает анимации) оверлей стоит без единого кадра. */
+.fx-card .fire,
+.fx-ghost .fire {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: fxLick 0.9s ease-in-out infinite alternate;
+}
+
+.fx-card .visor,
+.fx-ghost .visor {
+  animation: visorGlow 1.8s ease-in-out infinite alternate;
+}
+
+.fx-card .shield,
+.fx-ghost .shield {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  animation: fxBob 3.2s ease-in-out infinite;
+}
+
+.fx-card .fire,
+.fx-card .visor,
+.fx-card .shield {
+  animation-play-state: paused;
+}
+
+.fx:hover .fx-card .fire,
+.fx:hover .fx-card .visor,
+.fx:hover .fx-card .shield,
+.fx-card[aria-pressed="true"] .fire,
+.fx-card[aria-pressed="true"] .visor,
+.fx-card[aria-pressed="true"] .shield,
+.fx-ghost .fire,
+.fx-ghost .visor,
+.fx-ghost .shield {
+  animation-play-state: running;
+}
+
+@keyframes fxLick {
+  from {
+    transform: scaleY(0.86) scaleX(1.04);
+    opacity: 0.85;
+  }
+  to {
+    transform: scaleY(1.1) scaleX(0.94);
+    opacity: 1;
+  }
+}
+
+@keyframes visorGlow {
+  from {
+    opacity: 0.75;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fxBob {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-2px) rotate(-2deg);
+  }
+}
+
+/* то, что тащит указатель: призрак нарисован в кадре чата и не ловит клики */
+.fx-ghost {
+  position: fixed;
+  z-index: 60;
+  width: 56px;
+  height: 56px;
+  margin: 0;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.45));
+}
+
+.fx-ghost .fx-art {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+html.fx-dragging,
+html.fx-dragging .fx-card {
+  cursor: grabbing;
+}
+
+/* на узком экране панель лежит поверх чата: во время перетаскивания она не ловит
+   клики и слегка прозрачнеет, чтобы сообщение под ней можно было поджечь */
+html.fx-dragging .fx {
+  pointer-events: none;
+  opacity: 0.55;
+}
+
+html.fx-dragging .msg {
+  cursor: copy;
+}
+
+.msg.fx-target {
+  outline: 2px dashed color-mix(in srgb, var(--flame) 85%, transparent);
+  outline-offset: 3px;
+  border-radius: 12px;
+}
+
+html.fx-drag-shield .msg.fx-target {
+  outline-color: color-mix(in srgb, var(--gold) 90%, transparent);
+}
+
+/* ---------- feed ---------- */
+.feed {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 10px 12px 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent-2) transparent;
+}
+
+.feed::-webkit-scrollbar {
+  width: 10px;
+}
+
+.feed::-webkit-scrollbar-thumb {
+  background: var(--accent-2);
+  border-radius: 8px;
+}
+
+.msg {
+  position: relative;
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: start;
+}
+
+.ava {
+  width: 44px;
+  height: 44px;
+  border-radius: 13px;
+  background: var(--bubble);
+  background-size: cover;
+  background-position: center;
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-size: 19px;
+  font-weight: 700;
+  position: relative;
+  border: 1px solid var(--line);
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.18);
+}
+
+/* glass sheen on every avatar */
+.ava::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(158deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.1) 44%, rgba(255, 255, 255, 0) 62%);
+  pointer-events: none;
+}
+
+.ava .letter {
+  position: relative;
+  z-index: 1;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+.ava img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+}
+
+/* значок эффекта в углу аватара: огонь поменьше, щит — заметный, снизу справа */
+.ava .fx-tag {
+  position: absolute;
+  right: -7px;
+  bottom: -7px;
+  width: 20px;
+  height: 20px;
+  z-index: 4;
+  pointer-events: none;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6));
+}
+
+.ava .fx-tag .fx-art {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.ava .fx-tag-shield {
+  width: 25px;
+  height: 25px;
+  right: -10px;
+  bottom: -10px;
+}
+
+.ava .fx-tag-flame {
+  animation: tagFlicker 0.75s ease-in-out infinite alternate;
+  animation-play-state: paused;
+}
+
+@keyframes tagFlicker {
+  from {
+    transform: scale(0.92) rotate(-3deg);
+  }
+  to {
+    transform: scale(1.07) rotate(3deg);
+  }
+}
+
+.bubble {
+  position: relative;
+  background: var(--bubble);
+  color: var(--bubble-ink);
+  border-radius: var(--radius);
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  min-width: 0;
+}
+
+.bubble::before {
+  content: "";
+  position: absolute;
+  left: -7px;
+  top: 14px;
+  border: 6px solid transparent;
+  border-right-color: var(--bubble);
+}
+
+.bubble .head {
+  display: flex;
+  gap: 6px;
+  align-items: baseline;
+  font-size: 11px;
+  color: var(--bubble-sub);
+}
+
+.bubble .head .nm {
+  font-weight: 700;
+  color: var(--bubble-ink);
+}
+
+.bubble .txt {
+  margin: 4px 0 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 13px;
+}
+
+/* цитата стоит НАД ответом (как в тредах форумов), поэтому отступ снизу не нужен —
+   расстояние до своего текста держит margin у `.txt` */
+.bubble .quote {
+  margin: 4px 0 0;
+  padding: 3px 6px;
+  border-left: 2px solid var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  font-size: 11px;
+  color: var(--bubble-sub);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.bubble .chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 5px;
+}
+
+.chip {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  color: var(--bubble-ink);
+  text-decoration: none;
+  border: 1px solid var(--line);
+}
+
+.chip:hover {
+  background: color-mix(in srgb, var(--accent) 26%, transparent);
+}
+
+.votes {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 46px;
+}
+
+.votes .row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.vbtn {
+  all: unset;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  color: var(--muted);
+  padding: 2px 3px;
+  border-radius: 5px;
+}
+
+.vbtn:hover {
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  color: var(--ink);
+}
+
+.vbtn.up[aria-pressed="true"] {
+  color: var(--accent);
+}
+
+.vbtn.down[aria-pressed="true"] {
+  color: #ef4444;
+}
+
+.score {
+  min-width: 30px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--score-ink);
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  padding: 1px 4px;
+  background: var(--score-bg);
+}
+
+.score.neg {
+  color: #ff9c9c;
+  border-color: rgba(239, 68, 68, 0.5);
+}
+
+.vbtn.star[aria-pressed="true"] {
+  color: var(--star);
+  text-shadow: 0 0 8px color-mix(in srgb, var(--star) 70%, transparent);
+}
+
+.vbtn.report[aria-pressed="true"],
+.vbtn.hide[aria-pressed="true"] {
+  color: #ef4444;
+}
+
+.vbtn.del {
+  font-size: 13px;
+}
+
+.vbtn.del[aria-pressed="true"] {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.stars-count {
+  font-size: 10px;
+  color: var(--star);
+}
+
+.msg.hidden-msg .bubble {
+  background: color-mix(in srgb, #3a1218 82%, var(--bubble));
+  color: #ffd9d9;
+  border-color: rgba(239, 68, 68, 0.45);
+  font-style: italic;
+}
+
+.msg.hidden-msg .bubble::before {
+  border-right-color: color-mix(in srgb, #3a1218 82%, var(--bubble));
+}
+
+/* спрятанное решение комнаты: текст свёрнут, но счётчик минусов и кнопка «показать» на виду */
+.hidden-bubble {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-style: normal;
+}
+
+.hid-marks {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.hid-num {
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 1px 7px;
+  border: 1px solid var(--line);
+  background: var(--score-bg);
+  color: var(--score-ink);
+}
+
+.hid-num.neg {
+  color: #ff9c9c;
+  border-color: rgba(239, 68, 68, 0.5);
+}
+
+.hid-num.warn {
+  color: var(--star);
+  border-color: color-mix(in srgb, var(--star) 55%, transparent);
+}
+
+.vbtn.reveal {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+}
+
+/* collapsed (user-hidden) message: a thin strip, controls stay reachable */
+.msg.collapsed {
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+.msg.collapsed .ava {
+  opacity: 0.25;
+  filter: grayscale(1);
+}
+
+.strip {
+  height: 10px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--muted) 45%, transparent);
+  border: 1px solid var(--line);
+  position: relative;
+}
+
+.strip::after {
+  content: attr(data-label);
+  position: absolute;
+  left: 0;
+  top: -13px;
+  font-size: 9px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+/* jumped-to message from the right drawer: accent outline, then fades out */
+.msg.jump .bubble {
+  animation: jumpFlash 2.6s ease-out 1;
+  border-color: var(--accent-2);
+}
+
+@keyframes jumpFlash {
+  0% {
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 70%, transparent);
+  }
+  70% {
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 45%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+/* ---------- effects: fire and guardian ----------
+   Состояние (горит / под щитом) — статичное: свечение, рамка и градиент пузыря.
+   Движение — только там, где оно не стоит перерисовки: transform и opacity.
+   `box-shadow` и `background-position` анимировать нельзя: каждый кадр заново
+   растеризует пузырь целиком, и на слабом железе один горящий комментарий
+   грузит процессор до десятков процентов. Плюс всё движение живёт лишь на
+   строках в поле зрения (`.live` их включает чату IntersectionObserver).
+   Разовое (.fx-hit) — только что нанесённый удар: кольцо, дрожь, пар при тушении. */
+@keyframes flameDance {
+  0% {
+    transform: translateX(-50%) scaleY(0.82) skewX(-5deg);
+    opacity: 0.8;
+  }
+  55% {
+    transform: translateX(-53%) scaleY(1.14) skewX(6deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(-47%) scaleY(0.95) skewX(-2deg);
+    opacity: 0.9;
+  }
+}
+
+@keyframes embersUp {
+  0% {
+    transform: translateY(8px) scale(0.9);
+    opacity: 0;
+  }
+  25% {
+    opacity: 0.95;
+  }
+  100% {
+    transform: translateY(-30px) scale(1.15);
+    opacity: 0;
+  }
+}
+
+.msg.fx-flame .bubble {
+  border-color: color-mix(in srgb, var(--flame) 65%, var(--line));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--flame) 8%, var(--bubble)), color-mix(in srgb, var(--flame) 22%, var(--bubble)));
+  box-shadow: 0 0 16px color-mix(in srgb, var(--flame) 42%, transparent);
+}
+
+/* угли над пузырём */
+.msg.fx-flame .bubble::after {
+  content: "";
+  position: absolute;
+  top: -2px;
+  right: 10px;
+  width: 54px;
+  height: 44px;
+  background: radial-gradient(2px 2px at 12% 82%, var(--gold), transparent 70%),
+    radial-gradient(2px 2px at 44% 94%, var(--flame), transparent 70%),
+    radial-gradient(1.6px 1.6px at 68% 88%, var(--gold), transparent 70%),
+    radial-gradient(2.2px 2.2px at 88% 78%, var(--flame), transparent 70%);
+  animation: embersUp 2.6s linear infinite;
+  animation-play-state: paused;
+  pointer-events: none;
+}
+
+/* языки пламени над головой: аватар горит вместе с сообщением */
+.msg.fx-flame .ava {
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.18), 0 0 0 2px var(--flame),
+    0 -8px 20px color-mix(in srgb, var(--gold) 55%, transparent);
+}
+
+.msg.fx-flame .ava::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 88%;
+  width: 36px;
+  height: 40px;
+  transform: translateX(-50%);
+  background: radial-gradient(52% 44% at 50% 78%, var(--gold) 0 46%, transparent 74%),
+    radial-gradient(40% 42% at 28% 86%, var(--flame) 0 44%, transparent 72%),
+    radial-gradient(40% 42% at 72% 86%, var(--flame) 0 44%, transparent 72%),
+    radial-gradient(32% 36% at 50% 60%, var(--flame) 0 47%, transparent 77%);
+  animation: flameDance 0.95s ease-in-out infinite alternate;
+  animation-play-state: paused;
+  pointer-events: none;
+  z-index: 3;
+}
+
+@keyframes shieldBreath {
+  from {
+    transform: scale(0.94);
+  }
+  to {
+    transform: scale(1.06);
+  }
+}
+
+.ava.fx-shield {
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.18), 0 0 0 2px color-mix(in srgb, var(--gold) 85%, transparent),
+    0 0 14px color-mix(in srgb, var(--gold) 45%, transparent);
+}
+
+/* блик — неподвижный слой фона самого пузыря: overflow: hidden срезал бы хвостик-указатель */
+.msg.fx-shield .bubble {
+  border-color: color-mix(in srgb, var(--gold) 70%, var(--line));
+  background-image: linear-gradient(100deg, transparent 32%, color-mix(in srgb, var(--gold) 60%, transparent) 50%, transparent 68%),
+    linear-gradient(180deg, color-mix(in srgb, var(--gold) 10%, var(--bubble)), color-mix(in srgb, var(--gold) 24%, var(--bubble)));
+  background-size: 240% 100%, 100% 100%;
+  background-position: 50% 0, 0 0;
+  background-repeat: no-repeat, no-repeat;
+  box-shadow: 0 0 16px color-mix(in srgb, var(--gold) 42%, transparent);
+}
+
+.msg.fx-shield .fx-tag-shield {
+  animation: shieldBreath 2.6s ease-in-out infinite alternate;
+  animation-play-state: paused;
+}
+
+/* Двигается только то, на что смотрят: чат навешивает .live на строки в поле зрения,
+   вне экрана огонь и щит замирают — вид при этом остаётся тот же. */
+.msg.live.fx-flame .bubble::after,
+.msg.live.fx-flame .ava::after,
+.msg.live .fx-tag-flame,
+.msg.live.fx-shield .fx-tag-shield {
+  animation-play-state: running;
+}
+
+@keyframes impactRing {
+  0% {
+    transform: translate(-50%, -50%) scale(0.12);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0;
+  }
+}
+
+@keyframes rowShake {
+  0%,
+  100% {
+    transform: none;
+  }
+  20% {
+    transform: translateX(-3px);
+  }
+  45% {
+    transform: translateX(3px);
+  }
+  70% {
+    transform: translateX(-2px);
+  }
+}
+
+@keyframes steamUp {
+  0% {
+    transform: translateY(8px) scale(0.55);
+    opacity: 0;
+  }
+  30% {
+    opacity: 0.95;
+  }
+  100% {
+    transform: translateY(-24px) scale(1.35);
+    opacity: 0;
+  }
+}
+
+.msg.fx-hit::after {
+  content: "";
+  position: absolute;
+  left: 22px;
+  top: 22px;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  transform: translate(-50%, -50%) scale(0.12);
+  animation: impactRing 0.85s cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
+  pointer-events: none;
+  z-index: 4;
+}
+
+.msg.fx-hit-flame {
+  animation: rowShake 0.5s ease-in-out;
+}
+
+.msg.fx-hit-flame::after {
+  color: var(--flame);
+}
+
+.msg.fx-hit-shield::after {
+  color: var(--gold);
+}
+
+.msg.fx-quench::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: -4px;
+  width: 48px;
+  height: 44px;
+  background: radial-gradient(13px 11px at 32% 72%, rgba(255, 255, 255, 0.9), transparent 72%),
+    radial-gradient(10px 8px at 66% 58%, rgba(255, 255, 255, 0.72), transparent 72%);
+  animation: steamUp 1.15s ease-out forwards;
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* ---------- composer ---------- */
+.composer {
+  display: flex;
+  gap: 8px;
+  padding: 8px 12px 10px;
+  border-top: 1px solid var(--line);
+  background: color-mix(in srgb, var(--panel-alt) 60%, transparent);
+  flex: 0 0 auto;
+}
+
+.composer .who {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  cursor: pointer;
+  width: 52px;
+}
+
+.composer .who-name {
+  font-size: 9px;
+  color: var(--muted);
+  max-width: 52px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.composer-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.quote-line {
+  font-size: 11px;
+  color: var(--muted);
+  border-left: 2px solid var(--accent);
+  padding: 2px 6px;
+  margin-bottom: 4px;
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#text {
+  width: 100%;
+  box-sizing: border-box;
+  resize: none;
+  max-height: 32vh;
+  overflow-y: auto;
+  background: var(--search-bg);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 6px 8px;
+  color: var(--search-ink);
+  font: 13px/1.4 system-ui, sans-serif;
+  outline: none;
+}
+
+#text:focus {
+  border-color: var(--accent);
+}
+
+.composer-foot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.quota {
+  font-size: 11px;
+  color: var(--star);
+  min-width: 74px;
+}
+
+.hint {
+  flex: 1;
+  font-size: 10px;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.send {
+  all: unset;
+  cursor: pointer;
+  background: var(--accent);
+  color: var(--accent-ink);
+  border-radius: 10px;
+  padding: 4px 16px;
+  font-size: 14px;
+  border: 1px solid var(--accent-2);
+}
+
+.notice {
+  margin: 0 12px;
+  padding: 6px 8px;
+  font-size: 11px;
+  border-radius: 6px;
+  background: color-mix(in srgb, #ef4444 16%, transparent);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #ffd7d7;
+}
+
+/* ---------- link feed ---------- */
+.lenta-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* two switches in the drawer header: global feed / my messages */
+.lenta-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+.lenta-tabs .tab {
+  all: unset;
+  flex: 1;
+  cursor: pointer;
+  text-align: center;
+  font-size: 11px;
+  padding: 4px 6px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--panel-alt);
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lenta-tabs .tab[aria-pressed="true"] {
+  background: var(--accent);
+  border-color: var(--accent-2);
+  color: var(--accent-ink);
+  font-weight: 600;
+}
+
+.lenta-tabs .tab:focus-visible {
+  outline: 2px solid var(--accent-2);
+  outline-offset: 1px;
+}
+
+/* счётчик непрочитанных ответов висит прямо на вкладке, поэтому её видно,
+   даже когда раздел «Ответы» закрыт */
+.lenta-tabs .tab-count {
+  display: inline-block;
+  min-width: 15px;
+  margin-left: 3px;
+  padding: 0 3px;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 15px;
+  background: var(--accent-2);
+  color: var(--accent-ink);
+}
+
+.lenta-tabs .tab[aria-pressed="true"] .tab-count {
+  background: var(--panel-alt);
+  color: var(--muted);
+}
+
+.answer-src {
+  font-size: 10.5px;
+  color: var(--muted);
+  padding: 2px 0 4px 8px;
+  margin-bottom: 2px;
+  border-left: 2px solid var(--line);
+  word-break: break-word;
+}
+
+.lenta-list li.unread {
+  border-color: var(--accent-2);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.lenta-list .post-link {
+  all: unset;
+  cursor: pointer;
+  display: block;
+  font-size: 11px;
+  color: var(--link);
+  text-align: left;
+  word-break: break-word;
+}
+
+.lenta-list .post-link:hover {
+  text-decoration: underline;
+  color: color-mix(in srgb, var(--link) 60%, #fff);
+}
+
+.lenta-list .post-link:focus-visible {
+  outline: 2px solid var(--accent-2);
+  outline-offset: 1px;
+}
+
+.lenta-list .when {
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.lenta-list li {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 5px 7px;
+  background: var(--panel-alt);
+}
+
+/* ссылки комментария — маленькие чипы в цвет скина, а не ссылка во всю ширину */
+.lenta-list .links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 2px;
+}
+
+.lenta-list a.hyper {
+  color: var(--accent-ink);
+  text-decoration: none;
+  font-size: 10px;
+  border: 1px solid var(--accent-2);
+  border-radius: 999px;
+  padding: 1px 8px;
+  background: var(--accent);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lenta-list a.hyper:hover {
+  filter: brightness(1.08);
+}
+
+.lenta-list .sub {
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 2px;
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.lenta-list .sub b {
+  color: var(--accent);
+}
+
+.lenta-filters {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
+.lenta-list .join {
+  all: unset;
+  cursor: pointer;
+  align-self: flex-start;
+  border: 1px solid var(--accent-2);
+  background: var(--accent);
+  color: var(--accent-ink);
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.lenta-list .join:hover {
+  filter: brightness(1.08);
+}
+
+.lang-flags li button {
+  align-items: center;
+}
+
+.lang-flags li button .nm {
+  flex: 1;
+}
+
+.lang-flags li button.current {
+  background: color-mix(in srgb, var(--accent) 26%, transparent);
+  color: var(--ink);
+}
+
+.lang-flags li button .tick {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.empty {
+  padding: 18px 10px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+/* ---------- popovers ---------- */
+.popover {
+  position: fixed;
+  z-index: 20;
+  top: 46px;
+  left: 12px;
+  width: 268px;
+  max-height: 74vh;
+  overflow-y: auto;
+  background: color-mix(in srgb, var(--panel) 96%, #000);
+  border: 1px solid var(--accent);
+  border-radius: 10px;
+  padding: 8px;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.5);
+  color: var(--ink);
+}
+
+.popover.profile {
+  left: auto;
+  right: 12px;
+  width: 320px;
+}
+
+.popover.mirror {
+  left: auto;
+  right: 48px;
+  width: 300px;
+}
+
+/* the site the profile applies to: nicks are remembered per host */
+.pop-site {
+  margin: -4px 0 8px;
+  font-size: 11px;
+  color: var(--muted);
+  word-break: break-all;
+}
+
+.pop-site b {
+  color: var(--accent);
+}
+
+.field-block {
+  margin-bottom: 6px;
+}
+
+.field-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 11px;
+  margin-bottom: 3px;
+}
+
+.field-head .count {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* a long nickname has to stay readable while it is typed */
+.big-input {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--search-bg);
+  border: 1px solid var(--accent);
+  border-radius: 7px;
+  padding: 7px 9px;
+  font: 600 14px/1.3 system-ui, "Segoe UI", Roboto, sans-serif;
+  color: var(--search-ink);
+  outline: none;
+}
+
+.big-input:focus {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 35%, transparent);
+}
+
+.mirror-hint {
+  margin: 0 0 8px;
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.mirror-add {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.mirror-add .big-input {
+  flex: 1;
+  min-width: 0;
+  font-weight: 400;
+  font-size: 12px;
+}
+
+.mirror-add .mini {
+  flex: 0 0 auto;
+  font-size: 15px;
+  line-height: 1;
+  padding: 4px 10px;
+}
+
+.mirror-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px 6px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: var(--panel-alt);
+  margin-bottom: 4px;
+  font-size: 11px;
+}
+
+.mirror-list li.home {
+  border-color: var(--accent);
+}
+
+.mirror-list .addr {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mirror-list .tag {
+  color: var(--muted);
+  font-size: 10px;
+}
+
+/* which mirror a merged message came from */
+.msg .head .src {
+  color: var(--accent-2);
+  font-weight: 700;
+}
+
+.popover.theme {
+  left: auto;
+  right: 12px;
+  width: 324px;
+}
+
+.popover input[type="search"] {
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--search-bg);
+  border: 0;
+  border-radius: 6px;
+  padding: 5px 7px;
+  color: var(--search-ink);
+  outline: none;
+  margin-bottom: 6px;
+}
+
+.popover ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.popover li button {
+  all: unset;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 4px 6px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.popover li button:hover {
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+.popover li button .code {
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.popover li.pinned {
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 2px;
+  margin-bottom: 2px;
+}
+
+.popover h4 {
+  margin: 0 0 8px;
+  font-size: 12px;
+  color: var(--accent);
+}
+
+.popover .row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 11px;
+  margin-bottom: 6px;
+}
+
+.popover .row input[type="text"] {
+  flex: 1;
+  min-width: 0;
+  background: var(--search-bg);
+  border: 0;
+  border-radius: 5px;
+  padding: 3px 5px;
+  color: var(--search-ink);
+}
+
+.popover .row select,
+.popover .row input[type="range"] {
+  flex: 1;
+  min-width: 0;
+  accent-color: var(--accent);
+}
+
+/* Подсказки профиля (лимит ника, «картинка только с аккаунтом») были окрашены `--star` —
+   янтарём со звезды. В светлых скинах это жёлтый текст по белому стеклу, нечитаемый;
+   смысл не в предупреждении цветом, а в самом тексте, поэтому обычный цвет чернил. */
+.popover .warn {
+  font-size: 10px;
+  color: var(--ink);
+  margin: 0 0 6px;
+}
+
+.popover .actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+}
+
+.popover .actions a {
+  color: var(--link);
+  font-size: 11px;
+}
+
+/* ---------- skin picker ---------- */
+.theme-sub {
+  margin: 10px 0 5px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+.skin-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 5px;
+}
+
+.skin-card {
+  cursor: pointer;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 3px;
+  background: var(--panel-alt);
+  text-align: center;
+}
+
+.skin-card .sw {
+  height: 26px;
+  border-radius: 5px;
+  display: block;
+}
+
+.skin-card .sn {
+  font-size: 8px;
+  color: var(--muted);
+  display: block;
+  margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.skin-card[aria-pressed="true"] {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.grad-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.swatch {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 2px solid var(--line);
+  cursor: pointer;
+  padding: 0;
+}
+
+.swatch:hover {
+  border-color: var(--accent);
+}
+
+.mini-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  color: var(--muted);
+  flex: 1;
+  min-width: 92px;
+}
+
+.mini-label input[type="range"] {
+  flex: 1;
+  min-width: 0;
+  accent-color: var(--accent);
+}
+
+.mini {
+  all: unset;
+  cursor: pointer;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-size: 11px;
+  background: var(--panel-alt);
+  color: var(--ink);
+}
+
+.mini.wide {
+  display: block;
+  text-align: center;
+  margin-top: 10px;
+}
+
+/* выбор сигнала: три кнопки в ряд, активная — в цвет скина */
+.tone-row {
+  display: flex;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.tone-row .tone {
+  flex: 1;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tone-row .tone[aria-pressed="true"] {
+  background: var(--accent);
+  border-color: var(--accent-2);
+  color: var(--accent-ink);
+  font-weight: 600;
+}
+
+.tone-row .tone:focus-visible,
+.mini:focus-visible {
+  outline: 2px solid var(--accent-2);
+  outline-offset: 1px;
+}
+
+.sub-note {
+  margin: 4px 0 0;
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.picker {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 8px;
+  padding: 6px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel-alt);
+}
+
+.picker canvas {
+  border-radius: 50%;
+  cursor: crosshair;
+}
+
+.picker-side {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: stretch;
+}
+
+.picker-side input[type="range"] {
+  writing-mode: vertical-lr;
+  direction: rtl;
+  width: 18px;
+  height: 96px;
+  accent-color: var(--accent);
+}
+
+.picker-side input[type="text"] {
+  width: 74px;
+  background: var(--search-bg);
+  color: var(--search-ink);
+  border: 0;
+  border-radius: 5px;
+  padding: 3px 5px;
+  font-size: 11px;
+}
+
+.file-row input[type="file"] {
+  font-size: 10px;
+  color: var(--ink);
+  flex: 1;
+  min-width: 0;
+}
+
+.file-row input::file-selector-button {
+  background: var(--panel-alt);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  padding: 3px 6px;
+  cursor: pointer;
+  font-size: 10px;
+}
+
+/* ---------- small screen: drawers float over the chat ----------
+   Driven by a class instead of a media query: inside the overlay the iframe
+   narrows whenever a drawer is hidden, and that must not switch the layout.
+   chat.js sets it from the real host viewport width. */
+html.drawers-float .cols {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+html.drawers-float .chat {
+  grid-column: 1;
+}
+
+html.drawers-float .fx,
+html.drawers-float .lenta {
+  position: absolute;
+  grid-column: auto;
+  top: 0;
+  bottom: 0;
+  z-index: 6;
+  background: color-mix(in srgb, var(--panel) 96%, #000);
+}
+
+html.drawers-float .fx {
+  left: 0;
+  border-right: 1px solid var(--accent);
+}
+
+html.drawers-float .lenta {
+  right: 0;
+  border-left: 1px solid var(--accent);
+}
+
+html.drawers-float .search {
+  flex-basis: 110px;
+}
+
+/* ---------- special skin: Frutiger Aero glass ----------
+   The skin sets data-glass="1" on <html>; everything below only restyles
+   surfaces, never the text colours, so readability is kept by the tokens. */
+html[data-glass="1"] {
+  --radius: 18px;
+}
+
+/* Размытие держим на трёх крупных неподвижных поверхностях и на всплывашках — и ни на
+   одной больше. `backdrop-filter` внутри iframe'а размывает только то, что нарисовано
+   под элементом в этом же документе (наши градиенты .bg), а стоит он отдельный слой
+   композитора: сто пузырей в ленте = сто слоёв, которые перерисовываются каждый кадр
+   скролла. Именно это и грузило GPU на 100% при Frutiger Aero.
+   Даже трёх поверхностей хватает, чтобы на слабом видео просить десятые доли ядра за
+   каждый кадр, поэтому размытие снимаются галкой «Стекло» в панели 🎨: без неё скин
+   остаётся таким же — просто полупрозрачные слои вместо настоящих матовых. */
+html[data-glass="1"][data-blur="1"] .chat,
+html[data-glass="1"][data-blur="1"] .lenta,
+html[data-glass="1"][data-blur="1"] .fx,
+html[data-glass="1"][data-blur="1"] .popover,
+html[data-glass="1"][data-blur="1"] .notice {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+html[data-glass="1"] .bubble,
+html[data-glass="1"] .fx-card,
+html[data-glass="1"] .skin-card,
+html[data-glass="1"] .lenta-list li,
+html[data-glass="1"] .popover {
+  border-color: rgba(255, 255, 255, 0.8);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 8px 24px rgba(10, 60, 100, 0.14);
+}
+
+html[data-glass="1"] .bubble::before {
+  border-right-color: rgba(255, 255, 255, 0.72);
+}
+
+html[data-glass="1"] .tool,
+html[data-glass="1"] .corner,
+html[data-glass="1"] .send,
+html[data-glass="1"] .mini,
+html[data-glass="1"] .views button,
+html[data-glass="1"] .lenta-tabs .tab,
+html[data-glass="1"] .lang-btn,
+html[data-glass="1"] .flag-btn,
+html[data-glass="1"] .search {
+  border-radius: 999px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 3px 10px rgba(10, 60, 100, 0.16);
+}
+
+html[data-glass="1"] .send,
+html[data-glass="1"] .corner[aria-pressed="true"],
+html[data-glass="1"] .views button[aria-pressed="true"],
+html[data-glass="1"] .lenta-tabs .tab[aria-pressed="true"] {
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0) 58%);
+}
+
+html[data-glass="1"] .ava {
+  border-radius: 50%;
+  border-color: rgba(255, 255, 255, 0.9);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 4px 14px rgba(10, 60, 100, 0.25);
+}
+
+html[data-glass="1"] .select,
+html[data-glass="1"] .popover .row input[type="text"] {
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-radius: 999px;
+}
+
+html[data-glass="1"] .popover {
+  border-radius: 20px;
+  background: color-mix(in srgb, #ffffff 62%, var(--panel));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 16px 40px rgba(10, 60, 100, 0.28);
+}
+
+html[data-glass="1"] .skin-card,
+html[data-glass="1"] .lenta-list li {
+  border-radius: 14px;
+}
+
+html[data-glass="1"] .skin-card .sw {
+  border-radius: 10px;
+}
+
+html[data-glass="1"] .score,
+html[data-glass="1"] .strip {
+  border-radius: 999px;
+}

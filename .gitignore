@@ -1,0 +1,6 @@
+# Архивы сборки живут в Releases, в истории им делать нечего
+*.zip
+
+__pycache__/
+*.pyc
+node_modules/

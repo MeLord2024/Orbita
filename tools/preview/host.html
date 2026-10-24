@@ -1,0 +1,29 @@
+<!doctype html>
+<!-- Dev-only: a fake web page that hosts the real content.js overlay, so the panel
+     geometry and dragging can be verified in a plain browser. Not shipped. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Orbita preview host</title>
+    <style>
+      body { margin: 0; padding: 24px; font: 14px/1.6 system-ui; background: #dce9f2; color: #123 }
+      article { max-width: 860px }
+      button { font: inherit; padding: 6px 14px; border-radius: 10px; border: 1px solid #689 }
+    </style>
+  </head>
+  <body>
+    <article>
+      <h1>Fake article page</h1>
+      <p id="mark">Marker paragraph, so a fixed overlay cannot be confused with page content.</p>
+      <button id="toggle" type="button">Toggle Orbita</button>
+    </article>
+    <script src="/shim.js"></script>
+    <script src="/content.js"></script>
+    <script>
+      const pageUrl = new URLSearchParams(location.search).get("url") || location.href;
+      document.getElementById("toggle").addEventListener("click", () => {
+        window.__orbitaHostSend({ type: "overlay:toggle", url: pageUrl, title: document.title });
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Orbita</title>
+    <link rel="stylesheet" href="chat.css" />
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="bg bg-aurora"></div>
+      <div class="bg bg-img"></div>
+      <div class="bg bg-grad"></div>
+
+      <div class="cols">
+        <aside class="fx" id="fx">
+          <h3 id="fxTitle">Анимации</h3>
+          <p class="fx-hint" id="fxHint"></p>
+          <div class="fx-grid" id="fxGrid"></div>
+          <p class="fx-soon" id="fxSoon"></p>
+        </aside>
+
+        <main class="chat">
+          <header class="top">
+            <div class="cluster row1">
+              <button id="fxToggle" class="corner" type="button">✦</button>
+              <label class="field">
+                <span class="field-label" id="lblTop">Top</span>
+                <select id="period" class="select"></select>
+              </label>
+              <button id="langBtn" class="lang-btn" type="button"></button>
+              <div class="search">
+                <span class="search-ico">🔍</span>
+                <input id="q" type="search" autocomplete="off" spellcheck="false" />
+                <button id="qClear" class="q-clear" type="button">✕</button>
+              </div>
+              <button id="uiLangBtn" class="flag-btn" type="button"></button>
+              <div class="tools">
+                <button id="themeBtn" class="tool" type="button">🎨</button>
+                <button id="profileBtn" class="tool" type="button">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.6a4 4 0 1 1 0 8 4 4 0 0 1 0-8Zm0 9.6c4.4 0 8 2.6 8 5.8v1.2H4v-1.2c0-3.2 3.6-5.8 8-5.8Z"/></svg>
+                </button>
+                <button id="mirrorBtn" class="tool" type="button">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.6 3.4h9A2.6 2.6 0 0 1 20.2 6v9a2.6 2.6 0 0 1-2.6 2.6h-9A2.6 2.6 0 0 1 6 15V6a2.6 2.6 0 0 1 2.6-2.6Zm.6 2A1.8 1.8 0 0 0 8 7.2v7.6A1.8 1.8 0 0 0 9.8 16.6h7.6a1.8 1.8 0 0 0 1.8-1.8V7.2A1.8 1.8 0 0 0 17.4 5.4Z"/><path d="M4.8 6.6A1.6 1.6 0 0 0 3.2 8.2v9.1a2.5 2.5 0 0 0 2.5 2.5h8.3a1.6 1.6 0 0 0 0-3.2H6.4v-8.4a1.6 1.6 0 0 0-1.6-1.6Z"/></svg>
+                </button>
+                <button id="closeBtn" class="tool" type="button">✕</button>
+                <button id="lentaToggle" class="corner" type="button">⛓</button>
+              </div>
+            </div>
+            <div class="cluster row2">
+              <nav class="views" id="views"></nav>
+              <span class="clients" id="clients"></span>
+            </div>
+          </header>
+
+          <div class="feed" id="feed"></div>
+          <div class="notice" id="notice" hidden></div>
+
+          <form class="composer" id="composer" autocomplete="off">
+            <div class="who" id="who">
+              <span class="ava" id="whoAva"></span>
+              <span class="who-name" id="whoName">Аноним</span>
+            </div>
+            <div class="composer-main">
+              <div class="quote-line" id="quoteLine" hidden></div>
+              <textarea id="text" rows="2" maxlength="2000"></textarea>
+              <div class="composer-foot">
+                <span class="quota" id="quota"></span>
+                <span class="hint" id="composerHint"></span>
+                <button class="send" id="send" type="submit">➤</button>
+              </div>
+            </div>
+          </form>
+        </main>
+
+        <aside class="lenta" id="lenta">
+          <nav class="lenta-tabs" id="lentaTabs" aria-label="Лента ссылок">
+            <button id="lentaTabGlobal" class="tab" type="button" aria-pressed="true"></button>
+            <button id="lentaTabMine" class="tab" type="button" aria-pressed="false"></button>
+            <button id="lentaTabAnswers" class="tab" type="button" aria-pressed="false"></button>
+          </nav>
+          <div class="lenta-filters">
+            <label class="field">
+              <span class="field-label" id="lblHot">Hot</span>
+              <select id="lentaPeriod" class="select"></select>
+            </label>
+            <button id="lentaLangBtn" class="lang-btn" type="button"></button>
+          </div>
+          <p class="lenta-hint" id="lentaHint"></p>
+          <ol class="lenta-list" id="lentaList"></ol>
+        </aside>
+      </div>
+    </div>
+
+    <div class="popover langs" id="uiLangPop" hidden>
+      <h4 id="uiLangTitle"></h4>
+      <ul class="lang-flags" id="uiLangList"></ul>
+    </div>
+
+    <div class="popover" id="langPop" hidden>
+      <input id="langSearch" type="search" autocomplete="off" />
+      <ul id="langList"></ul>
+    </div>
+
+    <div class="popover profile" id="profilePop" hidden>
+      <h4 id="optIdentity">Профиль</h4>
+      <p class="pop-site" id="profileSite"></p>
+      <label class="row"><span id="optAnon"></span><input type="checkbox" id="anonChk" /></label>
+      <div class="field-block">
+        <div class="field-head">
+          <span id="optName"></span>
+          <span class="count" id="nameCount">0</span>
+        </div>
+        <input class="big-input" type="text" id="nameInput" maxlength="67" spellcheck="false" />
+      </div>
+      <p class="warn" id="nameWarn"></p>
+      <button class="mini wide" id="siteReset" type="button"></button>
+      <div class="row file-row">
+        <span id="optAvatar"></span>
+        <input type="file" id="avatarFile" accept="image/*" disabled />
+      </div>
+      <p class="warn" id="avatarLock"></p>
+      <label class="row"><span id="optFilter"></span><input type="checkbox" id="filterChk" /></label>
+      <label class="row"><span id="optShowHidden"></span><input type="checkbox" id="hiddenChk" /></label>
+      <label class="row"><span id="optUiLang"></span><select id="uiLangSel"></select></label>
+      <div class="row actions">
+        <a id="rulesLink" href="rules.html" target="_blank" rel="noopener"></a>
+        <a id="optionsLink" href="options.html" target="_blank" rel="noopener"></a>
+      </div>
+    </div>
+
+    <div class="popover mirror" id="mirrorPop" hidden>
+      <h4 id="mirrorTitle"></h4>
+      <p class="pop-site" id="mirrorHome"></p>
+      <p class="mirror-hint" id="mirrorHint"></p>
+      <div class="mirror-add">
+        <input class="big-input" type="text" id="mirrorInput" spellcheck="false" autocomplete="off" />
+        <button class="mini" id="mirrorAdd" type="button">+</button>
+      </div>
+      <p class="warn" id="mirrorErr" hidden></p>
+      <ul class="mirror-list" id="mirrorList"></ul>
+    </div>
+
+    <div class="popover theme" id="themePop" hidden>
+      <h4 id="themeTitle"></h4>
+      <p class="theme-sub" id="lblSkins"></p>
+      <div class="skin-grid" id="skinGrid"></div>
+      <p class="theme-sub" id="lblSpecial"></p>
+      <div class="skin-grid" id="specialGrid"></div>
+
+      <p class="theme-sub" id="lblGrad"></p>
+      <div class="grad-row">
+        <button id="gradA" class="swatch" type="button" title="A"></button>
+        <button id="gradB" class="swatch" type="button" title="B"></button>
+        <label class="mini-label"><span id="lblAngle"></span><input type="range" id="gradAngle" min="0" max="360" step="5" /></label>
+        <label class="mini-label"><span id="lblGradAlpha"></span><input type="range" id="gradAlpha" min="0" max="100" step="1" /></label>
+      </div>
+      <div class="picker" id="picker" hidden>
+        <canvas id="wheel" width="170" height="170"></canvas>
+        <div class="picker-side">
+          <input type="range" id="lightness" min="0" max="100" step="1" />
+          <input type="text" id="hex" maxlength="7" spellcheck="false" />
+          <button id="pickerClose" class="mini" type="button">✕</button>
+        </div>
+      </div>
+
+      <p class="theme-sub" id="lblBg"></p>
+      <label class="row file-row"><input type="file" id="bgFile" accept="image/*" /><button id="bgClear" class="mini" type="button">✕</button></label>
+      <label class="row"><span id="lblBgFit"></span><select id="bgFit" class="select"></select></label>
+      <label class="row"><span id="lblBgAlpha"></span><input type="range" id="bgAlpha" min="0" max="100" step="1" /></label>
+      <label class="row"><span id="lblOpacity"></span><input type="range" id="opacity" min="40" max="100" step="1" /></label>
+      <label class="row"><span id="lblBlur"></span><input type="checkbox" id="glassBlur" /></label>
+
+      <p class="theme-sub" id="lblSound"></p>
+      <label class="row"><span id="lblSoundOn"></span><input type="checkbox" id="soundOn" /></label>
+      <div class="tone-row" id="toneRow"></div>
+      <label class="row file-row"><span id="lblSoundFile"></span><input type="file" id="soundFile" accept=".mp3,audio/mpeg" /><button id="soundClear" class="mini" type="button">✕</button></label>
+      <p class="sub-note" id="soundNote"></p>
+      <label class="row"><span id="lblVolume"></span><input type="range" id="volume" min="0" max="100" step="5" /></label>
+      <button id="soundTest" class="mini wide" type="button"></button>
+
+      <button id="themeReset" class="mini wide" type="button"></button>
+    </div>
+
+    <script type="module" src="chat.js"></script>
+  </body>
+</html>
