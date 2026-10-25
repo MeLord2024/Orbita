@@ -4,6 +4,7 @@ import { LANG_META, flagSvg, langName } from "./flags.js";
 import { SKINS, SPECIAL_SKINS, DEFAULT_THEME, skinById, applyTheme, normalizeTheme, avatarArt } from "./themes.js";
 import { normalizeUrl } from "./sanitize.js";
 import { fxArt } from "./fx.js";
+import { createScene } from "./scene.js";
 import { play as playSound, unlock as unlockSound, SOUND_TONES } from "./sound.js";
 
 const params = new URLSearchParams(location.search);
@@ -113,6 +114,21 @@ const state = {
   soundFloor: 0,
   customSound: "",
 };
+
+/* Живой фон на canvas. Сцена включается только у стеклянного скина; ползунки
+   «Пузыри» и «Солнце» задают, что рисовать, а скорость — максимум из них. */
+const scene = createScene(document.getElementById("bgScene"));
+scene.load("bg/aero.jpg");
+
+function paintScene() {
+  const skin = skinById(state.theme.skin);
+  const live = state.theme.live || {};
+  scene.configure({
+    active: !!skin.glass,
+    bubbles: Number(live.bubbles) || 0,
+    sun: Number(live.sun) || 0,
+  });
+}
 
 const DEFAULT_SOUND = { on: true, tone: "chime", volume: 0.6 };
 // тот же потолок, что в store.js: 3 MB исходника в base64 весят ~4 MB
@@ -799,6 +815,7 @@ function useTheme(next) {
      бы при каждом выборе скина */
   state.theme = normalizeTheme({ ...(state.theme || {}), ...next });
   applyTheme(document.documentElement, state.theme);
+  paintScene();
   paintThemeControls();
   saveTheme();
 }
@@ -951,6 +968,7 @@ function applyPickedColor() {
   else g.from = hex;
   state.theme.gradient = g;
   applyTheme(document.documentElement, state.theme);
+  paintScene();
   paintSwatches();
   saveTheme();
 }
@@ -1745,11 +1763,13 @@ function bindEvents() {
     state.theme.gradient.angle = Number(e.target.value);
     state.theme.gradient.custom = true;
     applyTheme(document.documentElement, state.theme);
+  paintScene();
     saveTheme();
   });
   $("gradAlpha").addEventListener("input", (e) => {
     state.theme.gradient.alpha = Number(e.target.value) / 100;
     applyTheme(document.documentElement, state.theme);
+  paintScene();
     saveTheme();
   });
   $("pickerClose").addEventListener("click", () => {
@@ -1781,6 +1801,7 @@ function bindEvents() {
     if (picker.target === "b") state.theme.gradient.to = hex;
     else state.theme.gradient.from = hex;
     applyTheme(document.documentElement, state.theme);
+  paintScene();
     paintSwatches();
     saveTheme();
   });
@@ -1796,6 +1817,7 @@ function bindEvents() {
   $("bgFit").addEventListener("change", (e) => {
     state.theme.background.fit = e.target.value;
     applyTheme(document.documentElement, state.theme);
+  paintScene();
     saveTheme();
   });
   /* Звук живёт в настройках, а не в теме: панель 🎨 только рядом с ним лежит,
@@ -1826,11 +1848,13 @@ function bindEvents() {
   $("bgAlpha").addEventListener("input", (e) => {
     state.theme.background.alpha = Number(e.target.value) / 100;
     applyTheme(document.documentElement, state.theme);
+  paintScene();
     saveTheme();
   });
   $("glassBlur").addEventListener("change", (e) => {
     state.theme.blur = e.target.checked;
     applyTheme(document.documentElement, state.theme);
+  paintScene();
     saveTheme();
   });
   /* Живой фон: три независимых ползунка, 0 = эффект выключен, 100 = максимальная
@@ -1841,12 +1865,14 @@ function bindEvents() {
     $(id).addEventListener("input", (e) => {
       state.theme.live = { ...(state.theme.live || {}), [key]: Number(e.target.value) };
       applyTheme(document.documentElement, state.theme);
+  paintScene();
       saveTheme();
     });
   });
   $("panelAlpha").addEventListener("input", (e) => {
     state.theme.panelAlpha = Number(e.target.value);
     applyTheme(document.documentElement, state.theme);
+  paintScene();
     saveTheme();
   });
   $("themeReset").addEventListener("click", () => {
@@ -2024,6 +2050,7 @@ async function init() {
   state.collapsed = collapsedRaw && typeof collapsedRaw === "object" ? collapsedRaw : {};
   state.theme = normalizeTheme(themeRaw);
   applyTheme(document.documentElement, state.theme);
+  paintScene();
   await Promise.all([loadSettings(), loadIdentity()]);
   UI_LANGS.forEach((code) => $("uiLangSel").add(new Option(langName(code) || code.toUpperCase(), code)));
   $("uiLangSel").value = state.settings.uiLang || "ru";
