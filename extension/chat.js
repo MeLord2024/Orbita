@@ -301,18 +301,27 @@ function renderHeader() {
   flagBtn.innerHTML = flagSvg(uiLang);
   flagBtn.appendChild(el("b", null, uiLang.toUpperCase()));
   flagBtn.setAttribute("aria-pressed", String(!$("uiLangPop").hidden));
+  /* Кнопки «Все/Важные/Мои/Топ» строим один раз и дальше только переключаем
+     aria-pressed: пересборка replaceChildren() создавала новые элементы, и
+     CSS-переход цвета не успевал начаться — кнопка «щёлкала» цветом. */
   const views = $("views");
-  views.replaceChildren();
-  VIEWS.forEach((v) => {
-    const b = el("button", null, t(`view.${v}`));
-    b.type = "button";
-    b.dataset.view = v;
-    b.setAttribute("aria-pressed", String(state.view === v));
-    b.addEventListener("click", () => {
-      state.view = v;
-      refresh();
+  const built = [...views.querySelectorAll("button[data-view]")];
+  const sameSet = built.length === VIEWS.length && VIEWS.every((v, i) => built[i].dataset.view === v);
+  if (!sameSet) {
+    views.replaceChildren();
+    VIEWS.forEach((v) => {
+      const b = el("button", null, t(`view.${v}`));
+      b.type = "button";
+      b.dataset.view = v;
+      b.addEventListener("click", () => {
+        state.view = v;
+        refresh();
+      });
+      views.appendChild(b);
     });
-    views.appendChild(b);
+  }
+  [...views.children].forEach((b) => {
+    b.setAttribute("aria-pressed", String(state.view === b.dataset.view));
   });
   const clients = $("clients");
   clients.replaceChildren(el("b", null, String(state.clients)), el("span", null, ` ${t("header.clients")}`));
