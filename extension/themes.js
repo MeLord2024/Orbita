@@ -213,6 +213,9 @@ export const GLASS_PEOPLE = [
   ["#ffe6a8", "#ff3d6e", "#ffb36b"], ["#e6d4ff", "#6a2cff", "#b79bff"], ["#b8fff8", "#00a2b8", "#7fe9e0"],
   ["#ffd9a8", "#ff7a00", "#ffc46b"], ["#cdf3ff", "#0284c7", "#92d9f7"], ["#ffc2f0", "#a21caf", "#f18ad8"],
   ["#d9ffd0", "#3b8f00", "#a9ee74"], ["#ffe0f0", "#d81b60", "#ffa6c9"], ["#cfe4ff", "#2447c9", "#9db8ff"],
+  ["#fff3b0", "#e0a000", "#ffe07a"], ["#d8fff2", "#0891b2", "#8df0dc"], ["#ffd6c2", "#e03e00", "#ffa07a"],
+  ["#e9d9ff", "#7c3aed", "#c4a7ff"], ["#d4ffbe", "#15803d", "#9ae86a"], ["#c2f4ff", "#0369a1", "#7fd8f2"],
+  ["#ffe1b3", "#b45309", "#ffc078"], ["#ffd0dd", "#be123c", "#ff93ad"],
 ];
 
 export function avatarArt(seed) {
