@@ -975,18 +975,52 @@ html.fx-drag-shield .msg.fx-target {
   background: color-mix(in srgb, var(--accent) 26%, transparent);
 }
 
+/* Панель справа от сообщения: 👍 и ⚑ сверху, сумма посередине, 👎 и ⊟ снизу.
+   Раскладка сеткой, чтобы кнопки не разъезжались, когда у лайка появляется число. */
 .votes {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: minmax(34px, auto) 26px;
+  gap: 3px 5px;
   align-items: center;
-  gap: 2px;
-  min-width: 46px;
+  justify-items: center;
+  min-width: 0;
 }
 
-.votes .row {
-  display: flex;
+.votes .vbtn.up { grid-area: 1 / 1; }
+.votes .vbtn.report { grid-area: 1 / 2; }
+.votes .score { grid-area: 2 / 1; }
+.votes .vbtn.del { grid-area: 2 / 2; }
+.votes .vbtn.down { grid-area: 3 / 1; }
+.votes .vbtn.hide { grid-area: 3 / 2; }
+
+/* счётчик внутри голоса: круг превращается в овал, как у «важного» */
+.votes .vbtn.has {
+  display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
+  padding-right: 7px;
+}
+
+.vote-num {
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* «важное» — в шапке пузыря, справа; «ответить» — в его подвале, тоже справа */
+.bubble .head .vbtn.star {
+  margin-left: auto;
+  align-self: center;
+}
+
+.bubble-foot {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 2px;
+}
+
+.bubble-foot .vbtn.reply {
+  font-size: 14px;
 }
 
 .vbtn {
@@ -2547,6 +2581,35 @@ html[data-glass="1"] .bubble::before {
   top: 16px;
   border-width: 7px;
   border-right-color: rgba(255, 255, 255, 0.95);
+}
+
+html[data-glass="1"] .bubble .vbtn {
+  font-size: 15px;
+  line-height: 1;
+  padding: 1px 5px;
+  border-radius: 999px;
+  color: #0b5c8e;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(206, 240, 255, 0.6));
+  box-shadow: inset 0 1px 0 #fff;
+}
+
+html[data-glass="1"] .bubble .vbtn.star {
+  font-size: 13px;
+  padding: 1px 6px;
+}
+
+html[data-glass="1"] .bubble .vbtn.star.has {
+  padding-right: 8px;
+}
+
+html[data-glass="1"] .bubble .vbtn.star[aria-pressed="true"] {
+  background: linear-gradient(180deg, #fff8e0, rgba(255, 214, 120, 0.6));
+  color: #f0a500;
+  text-shadow: 0 0 8px rgba(255, 190, 60, 0.9);
+}
+
+html[data-glass="1"] .bubble .bubble-foot .vbtn {
+  font-size: 13px;
 }
 
 html[data-glass="1"] .bubble .txt {

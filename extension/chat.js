@@ -624,21 +624,40 @@ function reportButton(msg, reported) {
   return rep;
 }
 
+/* Голоса: обе кнопки ведут себя как «важное» — пока счётчик нулевой, это круг,
+   появилось число — овал с цифрой. Большое поле суммы остаётся между ними. */
 function voteRow(msg, mine, scoreVal) {
-  const upRow = el("div", "row");
-  const up = el("button", "vbtn up", "👍");
+  const frag = document.createDocumentFragment();
+  const upCount = (msg.up || []).length;
+  const downCount = (msg.down || []).length;
+  const up = el("button", `vbtn up${upCount ? " has" : ""}`, "👍");
   up.type = "button";
   up.title = "+1";
   up.setAttribute("aria-pressed", String(mine === "up"));
+  if (upCount) up.appendChild(el("span", "vote-num", String(upCount)));
   up.addEventListener("click", () => send("vote", { msgId: msg.id, dir: "up" }));
-  const down = el("button", "vbtn down", "👎");
+  const down = el("button", `vbtn down${downCount ? " has" : ""}`, "👎");
   down.type = "button";
   down.title = "-1";
   down.setAttribute("aria-pressed", String(mine === "down"));
+  if (downCount) down.appendChild(el("span", "vote-num", String(downCount)));
   down.addEventListener("click", () => send("vote", { msgId: msg.id, dir: "down" }));
   const scoreBox = el("span", `score${scoreVal < 0 ? " neg" : ""}`, String(scoreVal));
-  upRow.append(up, scoreBox, down);
-  return upRow;
+  frag.append(up, scoreBox, down);
+  return frag;
+}
+
+function replyButton(msg) {
+  const reply = el("button", "vbtn reply", "↩");
+  reply.type = "button";
+  reply.title = t("msg.reply");
+  reply.addEventListener("click", () => {
+    // id родителя обязателен: без него ответ не найдётся в разделе «Ответы»
+    state.quote = { text: msg.text, id: msg.id };
+    renderComposer();
+    $("text").focus();
+  });
+  return reply;
 }
 
 function avatarBox(msg) {
@@ -737,6 +756,9 @@ function messageNode(msg) {
   }
   row.appendChild(ava);
 
+  const star = starButton(msg, starred);
+  const reply = replyButton(msg);
+
   if (collapsed) {
     const strip = el("div", "strip");
     strip.dataset.label = `${t("msg.hidden_by_user")} · ${msg.author.anon ? t("composer.anon") : msg.author.name || t("composer.anon")} · ${timeAgo(msg.ts)}`;
@@ -746,29 +768,28 @@ function messageNode(msg) {
   } else if (hidden) {
     row.appendChild(hiddenBubble(msg, reason));
   } else {
-    row.appendChild(textBubble(msg));
+    /* «Важное» живёт в правом верхнем углу самого сообщения, «ответить» — в правом
+       нижнем: панель справа больше не обрастает иконками и держит только голоса. */
+    const bubble = textBubble(msg);
+    const head = bubble.querySelector(".head");
+    if (head) head.appendChild(star);
+    const foot = el("div", "bubble-foot");
+    foot.appendChild(reply);
+    bubble.appendChild(foot);
+    row.appendChild(bubble);
   }
 
-  // hide and expand share one slot, so the button never jumps sideways
+  /* Панель голосов: 👍 и ⚑ в одной строке, под ними сумма, ниже 👎 и ⊟.
+     Раскладку задают grid-области в chat.css, порядок вставки — только для чтения с экрана. */
   const votes = el("div", "votes");
-  const sideRow = el("div", "row");
-  const reply = el("button", "vbtn", "↩");
-  reply.type = "button";
-  reply.title = t("msg.reply");
-  reply.addEventListener("click", () => {
-    // id родителя обязателен: без него ответ не найдётся в разделе «Ответы»
-    state.quote = { text: msg.text, id: msg.id };
-    renderComposer();
-    $("text").focus();
-  });
+  votes.append(voteRow(msg, mine, scoreVal));
+  votes.append(reportButton(msg, reported));
+  if (msg.author && isMine(msg.author.id)) votes.appendChild(deleteButton(msg));
   const toggle = el("button", "vbtn hide", collapsed ? "⊡" : "⊟");
   toggle.type = "button";
   toggle.title = collapsed ? t("msg.expand") : t("msg.hide");
   toggle.addEventListener("click", () => toggleCollapsed(msg.id));
-  if (collapsed) reply.style.visibility = "hidden";
-  sideRow.append(starButton(msg, starred), reply, reportButton(msg, reported), toggle);
-  if (msg.author && isMine(msg.author.id)) sideRow.appendChild(deleteButton(msg));
-  votes.append(voteRow(msg, mine, scoreVal), sideRow);
+  votes.appendChild(toggle);
   row.appendChild(votes);
 
   /* Состояние эффекта рисуется классом, а не разовым анимационным триггером:
