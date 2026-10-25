@@ -459,6 +459,7 @@
       id: "preview",
       // absolute URLs, so the real content.js overlay can run inside the preview
       getURL: (p) => new URL(String(p || "").replace(/^\//, ""), location.origin + "/").href,
+      getManifest: () => ({ version: "dev" }),
       sendMessage: async (msg) => respond(msg),
       onMessage: { addListener: (fn) => listeners.push(fn) },
     },

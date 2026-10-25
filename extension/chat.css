@@ -659,6 +659,17 @@ html[data-plant="1"] .bg-leaf-br::after {
   color: var(--muted);
 }
 
+.fx-meta {
+  margin: 6px 0 0;
+  line-height: 1.4;
+}
+
+.fx-meta a {
+  color: var(--link);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 .fx-soon {
   margin-top: 10px;
   border-top: 1px dashed var(--line);
@@ -3187,12 +3198,6 @@ html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .corner {
   transition: box-shadow 0.35s ease, filter 0.2s ease, transform 0.12s ease;
 }
 
-/* глянец уже нарисован в картинке */
-html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .top .tools > button::after,
-html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .top .cluster > button::after {
-  display: none;
-}
-
 /* звезда в шапке: арт + её собственная звёздочка поверх */
 html[data-buttons="a"] #fxToggle,
 html[data-buttons="c"] #fxToggle,
@@ -3212,11 +3217,17 @@ html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .lang-btn {
   background: none;
   border-color: transparent;
   box-shadow: none;
-  color: #fff;
-  text-shadow: 0 1px 2px rgba(0, 30, 60, 0.5);
+  color: var(--ink);
   text-align: center;
   justify-content: center;
-  transition: box-shadow 0.35s ease, color 0.35s ease, transform 0.12s ease;
+  transition: box-shadow 0.35s ease, color 0.35s ease, border-color 0.35s ease, transform 0.12s ease;
+}
+
+/* у кнопок языка текст белый в любом состоянии — так его видно на арте */
+html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .lang-btn,
+html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .flag-btn {
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 30, 60, 0.5);
 }
 
 html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .views button::after,
@@ -3234,15 +3245,14 @@ html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .lang-btn::a
 
 /* включённое состояние — внутренняя тень токеном скина */
 html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .views button[aria-pressed="true"],
-html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .lenta-tabs .tab[aria-pressed="true"],
-html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .flag-btn[aria-pressed="true"],
-html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .lang-btn[aria-pressed="true"] {
-  /* гасим CSS-градиент включённой кнопки: арт уже нарисован, сверху только тень */
+html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .lenta-tabs .tab[aria-pressed="true"] {
+  /* включённая — светится белым, как в прежнем оформлении; заливку не трогаем,
+     иначе арт «сереет» и кнопка выглядит погасшей */
   background: none;
-  border-color: transparent;
+  border-color: #fff;
   color: #fff;
   text-shadow: 0 1px 2px rgba(0, 30, 60, 0.55);
-  box-shadow: inset 0 0 0 100px rgba(23, 168, 221, 0.62);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.85), 0 0 16px rgba(255, 255, 255, 0.7);
 }
 
 html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .tool[aria-pressed="true"],
@@ -3251,7 +3261,7 @@ html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .corner[aria
   background-image: var(--btn-round);
   background-size: 100% 100%;
   border-color: transparent;
-  box-shadow: inset 0 0 0 100px rgba(23, 168, 221, 0.5);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.85), 0 0 14px rgba(255, 255, 255, 0.7);
 }
 
 html[data-buttons="a"] #fxToggle[aria-pressed="true"],

@@ -282,6 +282,25 @@ function applyLocale() {
   $("fxTitle").textContent = t("fx.title");
   $("fxHint").textContent = t("fx.hint");
   $("fxSoon").textContent = t("fx.soon");
+  /* Под подписью — версия сборки и ссылка на репозиторий: по ней всегда видно
+     последнюю версию, не открывая chrome://extensions. */
+  const fxMeta = $("fxMeta");
+  if (fxMeta) {
+    let version = "";
+    try {
+      version = chrome.runtime.getManifest().version || "";
+    } catch {
+      version = "";
+    }
+    const repo = el("a", null, "github.com/MeLord2024/Orbita");
+    repo.href = "https://github.com/MeLord2024/Orbita";
+    repo.target = "_blank";
+    repo.rel = "noopener noreferrer";
+    fxMeta.replaceChildren(
+      el("span", null, `${version ? `${t("fx.version")} ${version} · ` : ""}${t("fx.latest")} `),
+      repo
+    );
+  }
   $("lentaTabs").setAttribute("aria-label", t("lenta.title"));
   $("lentaHint").textContent = t("lenta.hint");
   $("lblTop").textContent = t("view.top");
