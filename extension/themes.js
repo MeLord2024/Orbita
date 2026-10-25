@@ -173,7 +173,9 @@ const AURORA =
    (alpha 0) — иначе он закрашивает сцену, и «живой» фон не видно вовсе. */
 export const DEFAULT_THEME = {
   skin: "frutiger",
-  blur: true,
+  /* размытие под панелями — самый дорогой эффект на видеокарте, поэтому по
+     умолчанию выключено; включается галкой «Матовое стекло» в 🎨 */
+  blur: false,
   live: { bubbles: 60, sun: 60, plants: 60 },
   panelAlpha: 10,
   gradient: { ...SPECIAL_SKINS[0].gradient, custom: false },
@@ -204,42 +206,14 @@ function hash(str) {
   return Math.abs(h);
 }
 
-/* Стеклянный человечек из референса: голова-шар и купол плеч, залитые
-   градиентом с бликом. Рисуем вектором в data-URL, поэтому на 24 варианта
-   не нужен ни один файл, а размер иконки любой. Цвет выбирает тот же хэш,
-   что и раньше, — человек остаётся «своим» и после обновления. */
-export const GLASS_PEOPLE = [
-  ["#ffd3e6", "#ff2f7e", "#ff9ecb"], ["#c8e6ff", "#1b6bff", "#8fd0ff"], ["#dcff9a", "#149e3f", "#b6f36a"],
-  ["#ffe6a8", "#ff3d6e", "#ffb36b"], ["#e6d4ff", "#6a2cff", "#b79bff"], ["#b8fff8", "#00a2b8", "#7fe9e0"],
-  ["#ffd9a8", "#ff7a00", "#ffc46b"], ["#cdf3ff", "#0284c7", "#92d9f7"], ["#ffc2f0", "#a21caf", "#f18ad8"],
-  ["#d9ffd0", "#3b8f00", "#a9ee74"], ["#ffe0f0", "#d81b60", "#ffa6c9"], ["#cfe4ff", "#2447c9", "#9db8ff"],
-  ["#fff3b0", "#e0a000", "#ffe07a"], ["#d8fff2", "#0891b2", "#8df0dc"], ["#ffd6c2", "#e03e00", "#ffa07a"],
-  ["#e9d9ff", "#7c3aed", "#c4a7ff"], ["#d4ffbe", "#15803d", "#9ae86a"], ["#c2f4ff", "#0369a1", "#7fd8f2"],
-  ["#ffe1b3", "#b45309", "#ffc078"], ["#ffd0dd", "#be123c", "#ff93ad"],
-];
+/* Стеклянные человечки из листа пользователя: 25 PNG в extension/avatars.
+   Цвет выбирает тот же хэш, что и раньше, поэтому человек не меняется между
+   перерисовками ленты и комнатами, но остаётся разным у разных людей. */
+export const AVATAR_FILES = 25;
 
 export function avatarArt(seed) {
-  const [light, deep, mid] = GLASS_PEOPLE[hash(seed || "anon") % GLASS_PEOPLE.length];
-  const svg =
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">` +
-    `<defs>` +
-    `<linearGradient id="b" x1="0" y1="0" x2="0.45" y2="1">` +
-    `<stop offset="0" stop-color="${light}"/><stop offset="0.52" stop-color="${mid}"/>` +
-    `<stop offset="1" stop-color="${deep}"/></linearGradient>` +
-    `<radialGradient id="s" cx="0.34" cy="0.24" r="0.55">` +
-    `<stop offset="0" stop-color="#fff" stop-opacity="0.95"/>` +
-    `<stop offset="0.45" stop-color="#fff" stop-opacity="0.25"/>` +
-    `<stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>` +
-    `</defs>` +
-    `<path d="M7 57c0-14 11-22 25-22s25 8 25 22c0 2-2 3-4 3H11c-2 0-4-1-4-3Z" fill="url(#b)"/>` +
-    `<circle cx="32" cy="21" r="13.5" fill="url(#b)"/>` +
-    `<path d="M7 57c0-14 11-22 25-22s25 8 25 22c0 2-2 3-4 3H11c-2 0-4-1-4-3Z" fill="url(#s)"/>` +
-    `<circle cx="32" cy="21" r="13.5" fill="url(#s)"/>` +
-    `<path d="M14 51c3-7 10-11 18-11s15 4 18 11c-6 3-12 4-18 4s-12-1-18-4Z" fill="#fff" opacity="0.28"/>` +
-    `<ellipse cx="26.5" cy="15.5" rx="4.8" ry="3.4" fill="#fff" opacity="0.92"/>` +
-    `<circle cx="32" cy="21" r="12.9" fill="none" stroke="#fff" stroke-opacity="0.5" stroke-width="1.3"/>` +
-    `</svg>`;
-  return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+  const n = (hash(seed || "anon") % AVATAR_FILES) + 1;
+  return `url("avatars/av${String(n).padStart(2, "0")}.png")`;
 }
 
 function hexToRgba(hex, alpha) {
