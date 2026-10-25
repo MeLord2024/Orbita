@@ -385,6 +385,22 @@ ok("no second shield today", () => assert.equal(noShield.error, "quota"));
 ok("a refused shield leaves the fire burning", () => assert.equal(burned1.message.effect.type, "flame"));
 ok("an unknown effect is refused", () => assert.equal(unknownFx.error, "bad_effect"));
 ok("fx quota reports both tokens", () => assert.equal(fxAfter.flame.left + fxAfter.shield.left, 0));
+// fire horns and fire like are separate daily tokens, three charges each
+const rockFx = await store.applyEffect(ids[1], "rock");
+const likeFx = await store.applyEffect(ids[2], "like");
+const rockUnderShield = await store.applyEffect(ids[0], "rock");
+const fxAll = await store.fxQuota();
+ok("fire horns land on the message", () => assert.equal(rockFx.message.effect.type, "rock"));
+ok("fire horns spend one of three charges", () => assert.equal(rockFx.quota.rock.left, 2));
+ok("fire like lands on the message", () => assert.equal(likeFx.message.effect.type, "like"));
+ok("fire like spends one of three charges", () => assert.equal(likeFx.quota.like.left, 2));
+ok("a shield blocks the new effects too", () => assert.equal(rockUnderShield.error, "busy_shield"));
+ok("fx quota reports all four tokens", () => {
+  assert.equal(fxAll.flame.left, 0);
+  assert.equal(fxAll.shield.left, 0);
+  assert.equal(fxAll.rock.left, 2);
+  assert.equal(fxAll.like.left, 2);
+});
 
 // remote merge
 const merged = await store.mergeRemote([

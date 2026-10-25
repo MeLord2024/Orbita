@@ -21,9 +21,9 @@ export function liveEffect(msg) {
   if (!e || !e.ts) return null;
   return Date.now() - Number(e.ts) < FX_TTL ? e : null;
 }
-/* Заряды на сутки, на устройство: огня много не бывает, но и не бесконечно,
-   а щит — редкий ответ на него, иначе «защитить» можно было бы весь чат. */
-export const FX_QUOTA = { flame: 3, shield: 1 };
+/* Заряды на сутки, на устройство: огня, рогов и лайка — по три, а щит — редкий
+   ответ на огонь, иначе «защитить» можно было бы весь чат. */
+export const FX_QUOTA = { flame: 3, shield: 1, rock: 3, like: 3 };
 export const REPORT_HIDE_AT = 3;
 // сообщество само решает, что не стоит читать: 10 минусов прячут комментарий
 export const DOWNVOTE_HIDE_AT = 10;
@@ -526,7 +526,7 @@ export async function report(msgId) {
    Заряд списывается только когда что-то реально изменилось — нельзя сжечь щит
    «в никуда» или поджечь то, что уже пылает. Сообщение под щитом огня не боится:
    защитник тушит пожар и сразу закрывает комментарий, поэтому второй огнеметчик
-   сюда уже не пройдёт. Эффект живой и не сгорает сам: его снимает только щит. */
+   сюда уже не пройдёт. Эффект живёт 12 часов; раньше срока его снимает новое нанесение или щит. */
 export async function applyEffect(msgId, type) {
   if (!Object.prototype.hasOwnProperty.call(FX_QUOTA, type)) return { error: "bad_effect" };
   const id = await getIdentity();

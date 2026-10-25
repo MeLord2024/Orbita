@@ -49,11 +49,13 @@ addEventListener("message", (ev) => {
   if (d.action === "goto" && d.msg) jumpToMessage(String(d.msg));
 });
 
-/* Два рабочих значка тянутся мышкой на сообщение; остальные — витрина «скоро».
+/* Четыре рабочих значка тянутся мышкой на сообщение; остальные — витрина «скоро».
    max совпадает с FX_QUOTA в store.js: карточка показывает остаток заряда. */
 const EFFECTS = [
   { id: "flame", art: "flame", name: "fx.flame", desc: "fx.flame.desc", max: 3, locked: false },
   { id: "shield", art: "shield", name: "fx.shield", desc: "fx.shield.desc", max: 1, locked: false },
+  { id: "rock", name: "fx.rock", desc: "fx.rock.desc", max: 3, locked: false },
+  { id: "like", name: "fx.like", desc: "fx.like.desc", max: 3, locked: false },
   { id: "meteor", emo: "☄️", name: "fx.meteor", desc: "fx.locked", locked: true },
   { id: "storm", emo: "⛈️", name: "fx.storm", desc: "fx.locked", locked: true },
   { id: "void", emo: "🕳️", name: "fx.void", desc: "fx.locked", locked: true },
@@ -644,7 +646,7 @@ async function applyFx(type, msgId) {
   setTimeout(() => {
     if (state.hit && state.hit.msgId === msgId) state.hit = null;
   }, 1600);
-  flash(t(type === "shield" ? "fx.guarded" : "fx.flamed"));
+  flash(t(type === "shield" ? "fx.guarded" : type === "flame" ? "fx.flamed" : "fx.applied"));
   await refresh();
   renderFx();
 }
@@ -948,7 +950,7 @@ function messageNode(msg) {
      лента пересобирается при каждой синхронизации, и огонь должен продолжать
      гореть после перерисовки, а не вспыхивать заново на пару секунд. */
   const etype = fxType(msg.effect);
-  if (etype) row.classList.add(etype === "flame" ? "fx-flame" : "fx-shield");
+  if (etype) row.classList.add(`fx-${etype}`);
   // Fireball 2.0: decorative layers live INSIDE the affected bubble.
   // No global canvas, no effects attached to neighbouring rows or the feed.
   if (etype === "flame" && !collapsed) {
@@ -956,7 +958,7 @@ function messageNode(msg) {
     if (target) {
       const fire = el("div", "fireball-v2");
       fire.setAttribute("aria-hidden", "true");
-      for (let i = 0; i < 9; i++) {
+      for (let i = 0; i < 11; i++) {
         const tongue = el("i", "fire-tongue");
         tongue.style.setProperty("--n", String(i));
         tongue.style.setProperty("--delay", `${-((i * 0.37) % 2.7).toFixed(2)}s`);
@@ -969,6 +971,7 @@ function messageNode(msg) {
         fire.appendChild(ember);
       }
       fire.appendChild(el("i", "fire-heat"));
+      fire.appendChild(el("i", "fire-glow"));
       if (state.hit && state.hit.msgId === msg.id && state.hit.type === "flame" && Date.now() - state.hit.at < 1500) {
         fire.appendChild(el("i", "fireball-impact"));
         fire.appendChild(el("i", "fireball-shock"));
@@ -976,8 +979,28 @@ function messageNode(msg) {
       target.prepend(fire);
     }
   }
+  if ((etype === "rock" || etype === "like" || etype === "shield") && !collapsed) {
+    const target = row.querySelector(".bubble");
+    if (target) {
+      const layer = el("div", `orbita-fx-layer orbita-${etype}`);
+      layer.setAttribute("aria-hidden", "true");
+      if (etype === "rock") {
+        for (let i = 0; i < 3; i++) {
+          const hand = el("span", "orbita-rock-hand");
+          hand.style.setProperty("--index", i);
+          layer.appendChild(hand);
+        }
+      } else if (etype === "like") {
+        layer.appendChild(el("span", "orbita-like-hand"));
+      } else {
+        layer.appendChild(el("span", "orbita-shield-mark", "⬡"));
+        layer.appendChild(el("span", "orbita-shield-shimmer"));
+      }
+      target.prepend(layer);
+    }
+  }
   if (state.hit && state.hit.msgId === msg.id && Date.now() - state.hit.at < 1500) {
-    row.classList.add("fx-hit", state.hit.type === "flame" ? "fx-hit-flame" : "fx-hit-shield");
+    row.classList.add("fx-hit", `fx-hit-${state.hit.type}`);
     if (state.hit.quenched) row.classList.add("fx-quench");
   }
   return row;

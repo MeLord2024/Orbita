@@ -1609,7 +1609,12 @@ html.fx-drag-shield .msg.fx-target {
 }
 
 .msg.fx-hit-shield::after {
-  color: var(--gold);
+  color: #74e8ff;
+}
+
+.msg.fx-hit-rock::after,
+.msg.fx-hit-like::after {
+  color: var(--flame);
 }
 
 .msg.fx-quench::before {
@@ -3430,107 +3435,176 @@ html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .flag-btn b 
    All particles are clipped INSIDE the target bubble. Nothing
    reaches another message, including impact and halo effects.
    ============================================================= */
+/* FIREBALL 3 — compact, turbulent, layered fire contained inside ONE bubble. */
 .msg.fx-flame { isolation: isolate; }
-.msg.fx-flame .bubble {
-  isolation: isolate;
-  border: 1px solid rgba(255,112,16,.95);
-  background: linear-gradient(180deg, color-mix(in srgb, var(--bubble) 94%, #ffca74), color-mix(in srgb, var(--bubble) 85%, #f88a30));
-  box-shadow: inset 0 0 0 1px rgba(255,228,144,.8), inset 0 -5px 10px rgba(242,72,0,.20), 0 0 5px rgba(255,100,0,.45);
-}
-/* Disable previous wide, overflowing fire sprites. */
+.msg.fx-flame .bubble { isolation: isolate; overflow: hidden; border: 1px solid #ff8b20;
+  box-shadow: inset 0 0 0 1px #ffe8a0, inset 0 -8px 16px #ff5b003d, 0 0 5px #ff7b0066; }
 .msg.fx-flame .bubble::after, .msg.fx-flame .ava::after { content: none !important; animation: none !important; }
 .msg.fx-hit-flame::after { content: none !important; }
 .msg.fx-hit-flame { animation: none !important; }
-.msg.fx-flame .ava { box-shadow: 0 0 0 2px #ff9d28, 0 0 8px rgba(255,107,0,.55); }
-.fireball-v2 {
-  position: absolute; inset: 0; border-radius: inherit; overflow: hidden;
-  pointer-events: none; z-index: 0; contain: paint; isolation: isolate;
+.msg.fx-flame .ava { box-shadow: 0 0 0 2px #ff9d28, 0 0 7px #ff6b0080; }
+.fireball-v2 { position:absolute; inset:0; border-radius:inherit; overflow:hidden; pointer-events:none;
+  z-index:0; isolation:isolate; contain:paint; }
+.msg.fx-flame .bubble > :not(.fireball-v2) { position:relative; z-index:1; }
+.fireball-v2 .fire-heat { position:absolute; inset:auto 0 0; height:26px;
+  background:linear-gradient(0deg,#ff62008c 0%,#ffb32b40 48%,transparent 100%);
+  animation:orbitaFireHeat .31s steps(3,end) infinite alternate; animation-play-state:paused; }
+.fireball-v2 .fire-glow { position:absolute; inset:auto 0 0; height:5px;
+  background:linear-gradient(90deg,#ff3c00,#fff1a1 12%,#ff7800 25%,#ffe868 44%,#ff4e00 63%,#ffe47b 85%,#f40);
+  opacity:.83; filter:blur(2px); animation:orbitaFireHeat .22s steps(2,end) infinite alternate; animation-play-state:paused; }
+.fireball-v2 .fire-tongue { --x:calc(var(--n) * 6.65%); position:absolute; left:var(--x); bottom:-11px;
+  width:clamp(13px,7.8%,28px); height:calc(26px + mod(var(--n) * 13, 19) * 1px);
+  border-radius:60% 35% 45% 40%; transform-origin:50% 100%; opacity:.9;
+  clip-path:polygon(0 100%,5% 72%,19% 56%,32% 37%,48% 0,60% 29%,75% 43%,91% 66%,100% 100%);
+  background:radial-gradient(ellipse at 49% 92%,#fffcd4 0 12%,#ffe93c 25%,#ffad00 45%,#ff4a00 71%,#dd1800 92%);
+  filter:drop-shadow(0 0 3px #ff7600);
+  animation:orbitaFireTurbulence calc(.38s + var(--n) * .023s) cubic-bezier(.45,.02,.55,.98) var(--delay) infinite alternate;
+  animation-play-state:paused; }
+.fireball-v2 .fire-tongue:nth-child(3n) { height:23px; opacity:.75; }
+.fireball-v2 .fire-tongue:nth-child(4n + 2) { height:43px; width:22px; }
+.fireball-v2 .fire-tongue:nth-child(5n + 1) { height:35px; width:27px; }
+.fireball-v2 .fire-ember { position:absolute; bottom:6px; left:calc(4% + var(--n) * 8.1%);
+  width:3px; height:4px; border-radius:50%; background:#fff8b5; box-shadow:0 0 4px 1px #ff9000;
+  animation:orbitaFireSparks calc(.55s + var(--n) * .079s) linear var(--delay) infinite;
+  animation-play-state:paused; }
+.msg.live.fx-flame .fire-tongue, .msg.live.fx-flame .fire-ember,
+.msg.live.fx-flame .fire-heat, .msg.live.fx-flame .fire-glow { animation-play-state:running; }
+@keyframes orbitaFireTurbulence {
+  0% { transform:translate3d(-4px,6px,0) rotate(-18deg) scale(.79,.62); opacity:.67; }
+  27% { transform:translate3d(3px,-2px,0) rotate(11deg) scale(1.13,.93); opacity:.98; }
+  52% { transform:translate3d(-2px,-7px,0) rotate(-9deg) scale(.84,1.18); opacity:.86; }
+  77% { transform:translate3d(4px,1px,0) rotate(17deg) scale(1.04,.81); opacity:1; }
+  100% { transform:translate3d(-3px,-5px,0) rotate(-12deg) scale(.87,1.14); opacity:.8; }
 }
-.msg.fx-flame .bubble > :not(.fireball-v2) { position: relative; z-index: 1; }
-.fireball-v2 .fire-heat {
-  position: absolute; left: 0; right: 0; bottom: 0; height: 19px;
-  background: linear-gradient(0deg, rgba(255,83,0,.46), rgba(255,186,0,.13) 62%, transparent);
-  pointer-events: none;
-}
-.fireball-v2 .fire-tongue {
-  --x: calc((var(--n) * 11%));
-  position: absolute; bottom: -7px; left: var(--x);
-  width: clamp(12px, 9%, 32px); height: 34px;
-  transform-origin: 50% 100%; opacity: .82;
-  border-radius: 55% 55% 35% 35%;
-  clip-path: polygon(7% 100%, 3% 73%, 22% 58%, 28% 39%, 49% 3%, 57% 30%, 80% 44%, 91% 70%, 100% 100%);
-  background: radial-gradient(ellipse at 52% 84%, #fff9c1 0%, #ffed56 19%, #ff9e13 44%, #ff4308 72%, rgba(203,15,0,.1) 100%);
-  /* длинный цикл вместо alternate: язык успевает уйти влево, вернуться и качнуться вправо */
-  animation: orbitaFireTongue calc(1.15s + var(--n) * .09s) ease-in-out var(--delay) infinite;
-  animation-play-state: paused;
-  will-change: transform, opacity;
-}
-/* светлая сердцевина отстаёт от внешнего языка — получается змеиный изгиб,
-   а не просто качание прямоугольника */
-.fireball-v2 .fire-tongue::before {
-  content: "";
-  position: absolute; left: 18%; bottom: 0; width: 64%; height: 72%;
-  transform-origin: 50% 100%;
-  clip-path: polygon(10% 100%, 0 72%, 26% 52%, 36% 26%, 52% 0, 62% 32%, 82% 48%, 100% 100%);
-  background: radial-gradient(ellipse at 50% 82%, #fffef0 0%, #fff49a 26%, #ffd32e 54%, #ff8a00 82%, rgba(255,90,0,.1) 100%);
-  animation: orbitaFireCore calc(.82s + var(--n) * .065s) ease-in-out var(--delay) infinite alternate;
-  animation-play-state: paused;
-  opacity: .92;
-  pointer-events: none;
-}
-.fireball-v2 .fire-tongue:nth-child(3n) { height: 25px; width: 19px; opacity: .74; }
-.fireball-v2 .fire-tongue:nth-child(3n + 1) { height: 39px; }
-.fireball-v2 .fire-ember {
-  position: absolute; bottom: 4px; left: calc(8% + var(--n) * 13%);
-  width: 3px; height: 3px; border-radius: 50%;
-  background: #fff4a2; box-shadow: 0 0 3px 1px #ff9b0c;
-  animation: orbitaEmber calc(1.3s + var(--n) * .17s) linear var(--delay) infinite;
-  animation-play-state: paused;
-}
-.msg.live.fx-flame .fire-tongue,
-.msg.live.fx-flame .fire-tongue::before,
-.msg.live.fx-flame .fire-ember { animation-play-state: running; }
-@keyframes orbitaFireTongue {
-  0% { transform: translate3d(-7px,3px,0) rotate(-12deg) skewX(5deg) scaleY(.68); opacity: .62; }
-  24% { transform: translate3d(-2px,-1px,0) rotate(-2deg) skewX(-2deg) scaleY(.94); opacity: .9; }
-  52% { transform: translate3d(6px,-5px,0) rotate(11deg) skewX(4deg) scaleY(1.14); opacity: 1; }
-  76% { transform: translate3d(1px,-1px,0) rotate(2deg) skewX(-3deg) scaleY(.9); opacity: .84; }
-  100% { transform: translate3d(-7px,3px,0) rotate(-12deg) skewX(5deg) scaleY(.68); opacity: .82; }
-}
-@keyframes orbitaFireCore {
-  0% { transform: translateX(5px) rotate(9deg) scaleY(.8); opacity: .7; }
-  100% { transform: translateX(-6px) rotate(-10deg) scaleY(1.08); opacity: 1; }
-}
-@keyframes orbitaEmber {
-  0% { transform: translate3d(0,0,0) scale(.6); opacity: 0; }
-  16% { opacity: .95; }
-  50% { transform: translate3d(-6px,-16px,0) scale(.8); opacity: .9; }
-  100% { transform: translate3d(8px,-34px,0) scale(.3); opacity: 0; }
-}
-.fireball-impact {
-  position: absolute; left: 50%; top: 50%; width: 48px; height: 48px;
-  margin: -24px; border-radius: 50%;
-  background: radial-gradient(circle, #fffef0 0 12%, #ffe65a 22%, #ff8d00 44%, rgba(246,48,0,.8) 58%, transparent 74%);
-  animation: orbitaFireballImpact .65s cubic-bezier(.15,.7,.2,1) both;
-}
-.fireball-shock {
-  position: absolute; left: 50%; top: 50%; width: 40px; height: 40px;
-  margin: -20px; border-radius: 50%; border: 3px solid rgba(255,242,155,.95);
-  box-shadow: 0 0 8px #ff7b00, inset 0 0 6px #ff7b00;
-  animation: orbitaFireballShock .8s ease-out both;
-}
-@keyframes orbitaFireballImpact {
-  0% { transform: translate3d(-95px,-20px,0) scale(.24); opacity: .15; }
-  50% { transform: translate3d(-10px,0,0) scale(.85); opacity: 1; }
-  75% { transform: translate3d(0,0,0) scale(1.25); opacity: 1; }
-  100% { transform: translate3d(0,0,0) scale(1.9); opacity: 0; }
-}
-@keyframes orbitaFireballShock {
-  0%, 38% { transform: scale(.1); opacity: 0; }
-  48% { opacity: 1; }
-  100% { transform: scale(3); opacity: 0; }
-}
+@keyframes orbitaFireHeat { from {opacity:.57;transform:scaleY(.8)} to {opacity:1;transform:scaleY(1.12)} }
+@keyframes orbitaFireSparks { 0% {transform:translate3d(0,0,0) scale(.5);opacity:0}
+  12% {opacity:1} 48% {transform:translate3d(5px,-15px,0) scale(1);opacity:.95}
+  100% {transform:translate3d(-7px,-37px,0) scale(.15);opacity:0} }
+.fireball-impact {position:absolute;left:50%;top:50%;width:40px;height:40px;margin:-20px;border-radius:50%;
+ background:radial-gradient(circle,#fff 0 9%,#fffca0 16%,#ffcc17 30%,#ff5800 56%,transparent 75%);
+ animation:orbitaFireballImpact .58s cubic-bezier(.15,.7,.2,1) both;}
+.fireball-shock {position:absolute;left:50%;top:50%;width:32px;height:32px;margin:-16px;
+ border-radius:50%;border:2px solid #ffed9c;box-shadow:0 0 7px #ff7200;
+ animation:orbitaFireballShock .7s ease-out both;}
+@keyframes orbitaFireballImpact {0%{transform:translate3d(-65px,-13px,0) scale(.2);opacity:0}
+ 35%{transform:translate3d(-12px,0,0) scale(.75);opacity:1}
+ 60%{transform:translate3d(0,0,0) scale(1.15);opacity:1}
+ 100%{transform:scale(1.8);opacity:0}}
+@keyframes orbitaFireballShock {0%,35%{transform:scale(.15);opacity:0}
+ 48%{opacity:1}100%{transform:scale(3.2);opacity:0}}
 @media (prefers-reduced-motion: reduce) {
-  .fireball-v2 i, .fireball-v2 .fire-tongue::before { animation: none !important; }
+  .fireball-v2 i { animation: none !important; }
   .fireball-impact, .fireball-shock { display: none; }
+}
+
+/* Orbita FX Flash Edition — frame-stepped animation controlled by --fx-frame. */
+.msg.fx-flame .bubble { border-color:#ff8c22; }
+.fireball-v2 .fire-tongue { height:35px; width:clamp(13px,5%,23px); filter:none;
+  animation-duration:calc(var(--fx-frame, .08333s) * 17 + var(--n) * var(--fx-frame, .08333s));
+  animation-timing-function:steps(7,end); }
+.fireball-v2 .fire-tongue:nth-child(3n) {height:28px}
+.fireball-v2 .fire-tongue:nth-child(4n + 2) {height:40px;width:20px}
+.fireball-v2 .fire-ember {animation-duration:calc(var(--fx-frame,.08333s) * 24 + var(--n) * var(--fx-frame,.08333s));animation-timing-function:steps(12,end)}
+.fireball-v2 .fire-heat {animation-duration:calc(var(--fx-frame,.08333s) * 9)}
+.fireball-v2 .fire-glow {animation-duration:calc(var(--fx-frame,.08333s) * 7);filter:none}
+/* all effects strictly clipped by the targeted message bubble */
+.msg.fx-rock .bubble,.msg.fx-like .bubble,.msg.fx-shield .bubble {isolation:isolate;overflow:hidden}
+.orbita-fx-layer {position:absolute;inset:0;border-radius:inherit;overflow:hidden;pointer-events:none;z-index:0;contain:paint}
+.msg.fx-rock .bubble > :not(.orbita-fx-layer),.msg.fx-like .bubble > :not(.orbita-fx-layer),.msg.fx-shield .bubble > :not(.orbita-fx-layer) {position:relative;z-index:1}
+.orbita-rock-hand {position:absolute;bottom:0;left:calc(12% + var(--index)*35%);font-size:clamp(27px, min(5vw, 9vh), 58px);line-height:1;opacity:0;
+  transform-origin:50% 70%;filter:sepia(1) saturate(5) hue-rotate(-20deg) drop-shadow(0 0 3px #ff5d00);
+  animation:orbitaRock 6s steps(18,end) calc(var(--index)*1s) infinite;animation-play-state:paused}
+@keyframes orbitaRock {0%,3%{transform:translateY(85%) scale(.7) rotate(-12deg);opacity:0}6%,15%{opacity:.92}22%{transform:translateY(-35%) scale(1.08) rotate(8deg);opacity:.9}32%,100%{transform:translateY(-110%) scale(.8) rotate(12deg);opacity:0}}
+.orbita-like-hand {position:absolute;left:0;bottom:0;font-size:clamp(28px,min(5vw,9vh),58px);line-height:1;filter:sepia(1) saturate(5) hue-rotate(-20deg) drop-shadow(0 0 3px #ff7300);
+ transform-origin:50% 50%;animation:orbitaLike 12s steps(36,end) infinite;animation-play-state:paused}
+@keyframes orbitaLike {0%,25%{left:2%;transform:scaleX(-1)}49.9%{left:calc(100% - 60px);transform:scaleX(-1)}50%,75%{left:calc(100% - 60px);transform:scaleX(1)}99.9%{left:2%;transform:scaleX(1)}100%{left:2%;transform:scaleX(-1)}}
+.msg.fx-shield .bubble {border:2px solid #74e8ff!important;background-image:linear-gradient(155deg,#d5fbff70,#478cff20 55%,#ddfcff55)!important;
+ box-shadow:inset 0 0 0 1px #ffffffcc,inset 0 0 17px #31c8ff77,0 0 12px #3cbbffb0!important}
+.msg.fx-shield .ava {box-shadow:0 0 0 2px #a9f9ff,0 0 10px #34baff!important}
+.orbita-shield-mark {position:absolute;right:9px;top:50%;font-size:clamp(34px,7vh,65px);color:#70ddff;opacity:.23;
+ transform:translateY(-50%);text-shadow:0 0 7px #3abfff;animation:orbitaShield 4s steps(16,end) infinite;animation-play-state:paused}
+.orbita-shield-shimmer {position:absolute;inset:0;background:linear-gradient(105deg,transparent 20%,#e8ffff33 43%,#fff9 50%,#e8ffff33 57%,transparent 80%);
+ transform:translateX(-125%);animation:orbitaShimmer 6s steps(24,end) infinite;animation-play-state:paused}
+@keyframes orbitaShield {0%,100%{opacity:.15;transform:translateY(-50%) scale(.95)}50%{opacity:.38;transform:translateY(-50%) scale(1.05)}}
+@keyframes orbitaShimmer {0%,28%{transform:translateX(-125%)}65%,100%{transform:translateX(125%)}}
+.msg.live .orbita-rock-hand,.msg.live .orbita-like-hand,.msg.live .orbita-shield-mark,.msg.live .orbita-shield-shimmer {animation-play-state:running}
+[data-fx="rock"] {--fx-icon:url("icons/fx-rock.svg")}
+[data-fx="like"] {--fx-icon:url("icons/fx-like.svg")}
+@media(prefers-reduced-motion:reduce){.orbita-fx-layer *{animation:none!important}.orbita-rock-hand,.orbita-like-hand{opacity:.5!important;transform:none!important}}
+
+/* Flash Effects v5 — artwork from user's hand illustrations; transparent sprites. */
+[data-fx="rock"] {--fx-icon:url("icons/fx-rock-icon.png")}
+[data-fx="like"] {--fx-icon:url("icons/fx-like-icon.png")}
+.orbita-rock-hand,.orbita-like-hand {
+  display:block; background-size:contain; background-repeat:no-repeat;
+  background-position:center; font-size:0; line-height:normal;
+  filter:drop-shadow(0 0 4px #ff7200b0);
+  will-change:transform,opacity;
+}
+.orbita-rock-hand {
+  width:clamp(36px,12%,72px);height:100%;max-height:105px;
+  left:calc(9% + var(--index)*35%);bottom:0;
+  background-image:url("icons/fx-rock-art.png");
+  animation:orbitaRockArt 6s steps(var(--fx-steps,20),end) calc(var(--index)*1s) infinite;
+  animation-play-state:paused;
+}
+.orbita-like-hand {
+  width:clamp(40px,12%,76px);height:100%;max-height:105px;
+  left:0;bottom:0;background-image:url("icons/fx-like-art.png");
+  animation:orbitaLikeArt 12s steps(var(--fx-steps,20),end) infinite;
+  animation-play-state:paused;
+}
+/* The slider changes animation frame count, not the requested 3-second travel/pause choreography. */
+@keyframes orbitaRockArt {
+  0%,2% {transform:translate3d(0,65%,0) scale(.8) rotate(-7deg);opacity:0}
+  8% {transform:translate3d(0,15%,0) scale(.96) rotate(3deg);opacity:.92}
+  17% {transform:translate3d(0,-10%,0) scale(1.02) rotate(-3deg);opacity:1}
+  30% {transform:translate3d(0,-46%,0) scale(.94) rotate(5deg);opacity:.9}
+  42%,100% {transform:translate3d(0,-75%,0) scale(.85) rotate(-5deg);opacity:0}
+}
+@keyframes orbitaLikeArt {
+  0%,24.9% {transform:translate3d(0,0,0) scaleX(-1) rotate(-3deg);opacity:.94}
+  49.9% {transform:translate3d(0,0,0) scaleX(-1) rotate(3deg);opacity:1}
+  50%,74.9% {transform:translate3d(0,0,0) scaleX(1) rotate(-3deg);opacity:.96}
+  100% {transform:translate3d(0,0,0) scaleX(1) rotate(3deg);opacity:.94}
+}
+/* Percentage-based travel using a full-width track avoids assumptions about bubble width. */
+.orbita-like-hand {left:2%;}
+.orbita-like-hand::after,.orbita-rock-hand::after {
+  content:"";position:absolute;inset:8% 4%;pointer-events:none;
+  background:radial-gradient(ellipse at 50% 65%,#ffda2d50,transparent 65%);
+  mix-blend-mode:screen;animation:orbitaEmberPulse 1.4s steps(var(--fx-steps,20),end) infinite;
+}
+@keyframes orbitaEmberPulse {0%,100%{opacity:.4;transform:scale(.93)}50%{opacity:1;transform:scale(1.07)}}
+.msg.live .orbita-rock-hand::after,.msg.live .orbita-like-hand::after{animation-play-state:running}
+.msg:not(.live) .orbita-rock-hand::after,.msg:not(.live) .orbita-like-hand::after{animation-play-state:paused}
+@media(prefers-reduced-motion:reduce){.orbita-rock-hand,.orbita-like-hand{animation:none!important;transform:none!important;opacity:.5!important}}
+
+@keyframes orbitaLikeArt {
+  0%,24.9% {left:2%;transform:scaleX(-1) rotate(-3deg);opacity:.94}
+  49.9% {left:calc(98% - clamp(40px,12%,76px));transform:scaleX(-1) rotate(3deg);opacity:1}
+  50%,74.9% {left:calc(98% - clamp(40px,12%,76px));transform:scaleX(1) rotate(-3deg);opacity:.96}
+  100% {left:2%;transform:scaleX(1) rotate(3deg);opacity:.94}
+}
+
+/* v5 minimal correction: smooth gestures; rock artwork 1.7x; fire locked at 20 FPS. */
+.orbita-rock-hand {
+  width:clamp(62px,20.4%,122px);
+  height:170%; max-height:179px;
+  bottom:-35%;
+  left:calc(3% + var(--index)*32%);
+  animation:orbitaRockArt 6s linear calc(var(--index)*1s) infinite;
+}
+.orbita-like-hand {
+  animation:orbitaLikeArt 12s linear infinite;
+}
+.orbita-rock-hand::after,.orbita-like-hand::after {
+  animation-timing-function:linear;
+}
+@keyframes orbitaLikeArt {
+  0%,25% {left:2%;transform:scaleX(-1);opacity:.94}
+  49.95% {left:calc(98% - clamp(40px,12%,76px));transform:scaleX(-1);opacity:1}
+  50%,75% {left:calc(98% - clamp(40px,12%,76px));transform:scaleX(1);opacity:.96}
+  99.95% {left:2%;transform:scaleX(1);opacity:.94}
+  100% {left:2%;transform:scaleX(-1);opacity:.94}
 }

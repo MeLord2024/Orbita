@@ -149,7 +149,7 @@
   };
 
   // те же заряды и запреты, что в store.js, чтобы drag можно было пощупать в превью
-  const FX_MAX = { flame: 3, shield: 1 };
+  const FX_MAX = { flame: 3, shield: 1, rock: 3, like: 3 };
   const STAR_MAX = 10;
   const starLedger = {}; // сообщение → когда: снятая звезда возвращает свой заряд
   const starQuota = () => {
@@ -159,7 +159,7 @@
   /* Заряды эффектов переживают перезагрузку стенда — как в боевом сторе, где они
      лежат в chrome.storage. kv объявлен ниже, поэтому читаем его лениво. */
   const fxUsed = () => {
-    if (!kv["orbita.fx"]) kv["orbita.fx"] = { flame: 0, shield: 0 };
+    if (!kv["orbita.fx"]) kv["orbita.fx"] = { flame: 0, shield: 0, rock: 0, like: 0 };
     return kv["orbita.fx"];
   };
   const saveFx = () => {
@@ -175,6 +175,8 @@
       windowMs: 864e5,
       flame: { used: u.flame, left: Math.max(0, FX_MAX.flame - u.flame), max: FX_MAX.flame },
       shield: { used: u.shield, left: Math.max(0, FX_MAX.shield - u.shield), max: FX_MAX.shield },
+      rock: { used: u.rock, left: Math.max(0, FX_MAX.rock - u.rock), max: FX_MAX.rock },
+      like: { used: u.like, left: Math.max(0, FX_MAX.like - u.like), max: FX_MAX.like },
     };
   };
 
