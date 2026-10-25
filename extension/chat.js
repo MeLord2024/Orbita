@@ -1826,14 +1826,26 @@ async function loadSettings() {
 /* ---------- bindings ---------- */
 
 /* Белый «?» и карточка — одно целое: кнопка остаётся на месте, карточка
-   разворачивается над ней. inert не даёт табам уходить в свёрнутый текст. */
+   разворачивается над ней. inert не даёт табам уходить в свёрнутый текст.
+   Открытая карточка живёт 15 секунд и закрывается сама. */
+let fxInfoTimer = 0;
+
 function setFxInfo(open) {
   const foot = $("fxFoot");
   if (!foot) return;
+  clearTimeout(fxInfoTimer);
+  fxInfoTimer = 0;
   foot.dataset.open = open ? "1" : "0";
   $("fxHelp").setAttribute("aria-expanded", String(open));
-  if (open) $("fxInfo").removeAttribute("inert");
-  else $("fxInfo").setAttribute("inert", "");
+  if (open) {
+    $("fxInfo").removeAttribute("inert");
+    fxInfoTimer = setTimeout(() => {
+      if ($("fxInfo").contains(document.activeElement)) $("fxHelp").focus();
+      setFxInfo(false);
+    }, 15000);
+  } else {
+    $("fxInfo").setAttribute("inert", "");
+  }
 }
 
 function closePopovers(except) {
