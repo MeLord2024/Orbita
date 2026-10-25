@@ -834,6 +834,10 @@ html[data-plant="1"] .bg-leaf-br::after {
   transform: translate(-50%, -50%);
   pointer-events: none;
   filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.45));
+  background-image: var(--fx-icon, none);
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  background-position: center;
 }
 
 .fx-ghost .fx-art {
@@ -951,6 +955,10 @@ html.fx-drag-shield .msg.fx-target {
   z-index: 4;
   pointer-events: none;
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6));
+  background-image: var(--fx-icon, none);
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  background-position: center;
 }
 
 .ava .fx-tag .fx-art {
@@ -2419,7 +2427,6 @@ html[data-glass="1"] .fx-soon {
 }
 
 .fx-card:hover,
-.fx-card:focus-within,
 .fx-card[aria-pressed="true"] {
   width: var(--fx-expand, 216px);
   z-index: 9;
@@ -2458,12 +2465,12 @@ html[data-glass="1"] .fx-soon {
   pointer-events: none;
 }
 
-.fx-card[data-fx="flame"] .emo { --fx-icon: url("icons/fx-flame.png"); }
-.fx-card[data-fx="shield"] .emo { --fx-icon: url("icons/fx-shield.png"); }
-.fx-card[data-fx="meteor"] .emo { --fx-icon: url("icons/fx-meteor.png"); }
-.fx-card[data-fx="storm"] .emo { --fx-icon: url("icons/fx-storm.png"); }
-.fx-card[data-fx="void"] .emo { --fx-icon: url("icons/fx-void.png"); }
-.fx-card[data-fx="crown"] .emo { --fx-icon: url("icons/fx-crown.png"); }
+[data-fx="flame"] { --fx-icon: url("icons/fx-flame.png"); }
+[data-fx="shield"] { --fx-icon: url("icons/fx-shield.png"); }
+[data-fx="meteor"] { --fx-icon: url("icons/fx-meteor.png"); }
+[data-fx="storm"] { --fx-icon: url("icons/fx-storm.png"); }
+[data-fx="void"] { --fx-icon: url("icons/fx-void.png"); }
+[data-fx="crown"] { --fx-icon: url("icons/fx-crown.png"); }
 
 .fx-card .fx-art {
   width: 40px;
@@ -2499,7 +2506,6 @@ html[data-glass="1"] .fx-soon {
 }
 
 .fx-card:hover .nm,
-.fx-card:focus-within .nm,
 .fx-card[aria-pressed="true"] .nm {
   max-width: 120px;
   opacity: 1;
@@ -2507,7 +2513,6 @@ html[data-glass="1"] .fx-soon {
 }
 
 .fx-card:hover .ds,
-.fx-card:focus-within .ds,
 .fx-card[aria-pressed="true"] .ds {
   max-width: 120px;
   opacity: 1;
@@ -2536,7 +2541,6 @@ html[data-glass="1"] .fx-soon {
 }
 
 .fx-card:hover .fx-left,
-.fx-card:focus-within .fx-left,
 .fx-card[aria-pressed="true"] .fx-left {
   left: auto;
   right: 8px;
@@ -2577,7 +2581,6 @@ html[data-glass="1"] .fx-card .emo {
 }
 
 html[data-glass="1"] .fx-card:hover,
-html[data-glass="1"] .fx-card:focus-within,
 html[data-glass="1"] .fx-card[aria-pressed="true"] {
   /* раскрытая плитка должна наглухо закрыть соседнюю, а не просвечивать */
   background: linear-gradient(165deg, #ffffff 0%, #eaf9ff 44%, #cfeafb 100%);

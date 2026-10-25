@@ -3,7 +3,6 @@ import { makeT, UI_LANGS } from "./locales.js";
 import { LANG_META, flagSvg, langName } from "./flags.js";
 import { SKINS, SPECIAL_SKINS, DEFAULT_THEME, skinById, applyTheme, normalizeTheme, avatarArt } from "./themes.js";
 import { normalizeUrl } from "./sanitize.js";
-import { fxArt } from "./fx.js";
 import { createScene } from "./scene.js";
 import { play as playSound, unlock as unlockSound, SOUND_TONES } from "./sound.js";
 
@@ -16,13 +15,6 @@ const el = (tag, cls, text) => {
   return node;
 };
 const send = (cmd, payload = {}) => chrome.runtime.sendMessage({ cmd, ...payload });
-
-/* SVG-значки вставляем через innerHTML: это константа из fx.js, а не текст из чата */
-const artNode = (svg) => {
-  const box = el("span", "art");
-  box.innerHTML = svg;
-  return box;
-};
 
 const THEME_KEY = "orbita.theme";
 const COLLAPSED_KEY = "orbita.collapsed";
@@ -454,9 +446,9 @@ function renderFx() {
   EFFECTS.forEach((fx) => {
     const card = el("div", `fx-card${fx.locked ? " locked" : ""}`);
     card.dataset.fx = fx.id;
+    /* Медальон рисует CSS по data-fx (PNG из extension/icons): старый вектор и
+       эмодзи внутри больше не нужны ни одному скину. */
     const box = el("span", "emo");
-    if (fx.locked) box.textContent = fx.emo;
-    else box.appendChild(artNode(fxArt(fx.art)));
     card.append(box, el("span", "nm", t(fx.name)), el("span", "ds", t(fx.desc)));
     if (fx.locked) {
       card.title = t("fx.locked");
@@ -511,7 +503,7 @@ function startFxDrag(ev, card, fx) {
     moved = true;
     root.classList.add("fx-dragging", `fx-drag-${fx.id}`);
     ghost = el("div", `fx-ghost fx-ghost-${fx.id}`);
-    ghost.appendChild(artNode(fxArt(fx.art)));
+    ghost.dataset.fx = fx.id;
     ghost.style.left = `${x}px`;
     ghost.style.top = `${y}px`;
     document.body.appendChild(ghost);
@@ -572,10 +564,8 @@ function bindFxCard(card, fx) {
     }
     startFxDrag(ev, card, fx);
   });
-  card.addEventListener("click", () => {
-    if (fxLeft(fx) <= 0) return;
-    armFx(fx.id);
-  });
+  /* С клавиатуры карточку по-прежнему можно «взять»: мышью анимации работают
+     только перетаскиванием, клик ничего не оставляет включённым. */
   card.addEventListener("keydown", (ev) => {
     if (ev.key !== "Enter" && ev.key !== " ") return;
     ev.preventDefault();
@@ -783,7 +773,7 @@ function avatarBox(msg) {
   if (etype) {
     const meta = fxById(etype);
     const tag = el("i", `fx-tag fx-tag-${etype}`);
-    tag.appendChild(artNode(fxArt(etype)));
+    tag.dataset.fx = etype;
     tag.title = `${msg.effect.by} · ${meta ? t(meta.name) : etype}`;
     ava.appendChild(tag);
   }
