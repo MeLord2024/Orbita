@@ -1069,6 +1069,7 @@ html.fx-drag-shield .msg.fx-target {
   gap: 3px 5px;
   align-items: center;
   justify-items: center;
+  align-self: center;
   min-width: 0;
 }
 
@@ -1079,11 +1080,35 @@ html.fx-drag-shield .msg.fx-target {
 .votes .vbtn.del { grid-area: 3 / 2; }
 
 /* счётчик внутри голоса: круг превращается в овал, как у «важного» */
+/* Счётчик у голоса растёт ВВЕРХ (лайк) или ВНИЗ (дизлайк): ширина кнопки не
+   меняется, поэтому сообщение не дёргается, а высота свободна — в коротком
+   сообщении под кнопками и так оставалось место. */
 .votes .vbtn.has {
+  box-sizing: border-box;
   display: inline-flex;
+  flex-direction: column;
   align-items: center;
-  gap: 2px;
-  padding-right: 7px;
+  justify-content: center;
+  gap: 0;
+  width: 30px;
+  padding: 3px 0;
+  transition: height 0.2s ease, background-color 0.35s ease, color 0.35s ease,
+    box-shadow 0.35s ease, border-color 0.35s ease;
+}
+
+.votes .vbtn.up.has {
+  flex-direction: column-reverse;
+  height: 42px;
+}
+
+.votes .vbtn.down.has {
+  flex-direction: column;
+  height: 42px;
+}
+
+.votes .vbtn.has .vote-num {
+  font-size: 10px;
+  line-height: 1;
 }
 
 .vote-num {
@@ -3192,7 +3217,9 @@ html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .lang-btn::b
   border: 15px solid transparent;
   border-image: var(--btn-pill) 30 fill / 15px / 0 stretch;
   pointer-events: none;
-  z-index: 0;
+  /* отрицательный z-index: иначе картинка ложится ПОВЕРХ текста — у текстовых
+     узлов нет своего z-index, и они рисуются раньше позиционированных псевдо */
+  z-index: -2;
 }
 
 /* включённое состояние — плёнка поверх арта */
@@ -3210,7 +3237,7 @@ html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .corner::aft
   opacity: 0;
   transition: opacity 0.35s ease;
   pointer-events: none;
-  z-index: 0;
+  z-index: -1;
 }
 
 html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .tool::after,
@@ -3224,7 +3251,30 @@ html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .lenta-tabs 
 html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .flag-btn[aria-pressed="true"]::after,
 html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .tool[aria-pressed="true"]::after,
 html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .corner[aria-pressed="true"]::after {
-  opacity: 0.45;
+  opacity: 0.62;
+}
+
+/* на синей плёнке тёмные буквы тонут — включаем белые, как у активной вкладки */
+html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .views button[aria-pressed="true"],
+html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .lenta-tabs .tab[aria-pressed="true"],
+html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .flag-btn[aria-pressed="true"],
+html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .lang-btn[aria-pressed="true"] {
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 40, 80, 0.55);
+}
+
+html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .flag-btn b,
+html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .lang-btn b {
+  color: #0b5c8e;
+}
+
+html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .flag-btn[aria-pressed="true"] b {
+  color: #fff;
+}
+
+/* силуэты в круглых кнопках: тёмно-синий, иначе на светлом арте их не видно */
+html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .tool svg {
+  fill: #0b5c8e;
 }
 
 /* текст и иконки — над плёнкой */
