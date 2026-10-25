@@ -949,6 +949,33 @@ function messageNode(msg) {
      гореть после перерисовки, а не вспыхивать заново на пару секунд. */
   const etype = fxType(msg.effect);
   if (etype) row.classList.add(etype === "flame" ? "fx-flame" : "fx-shield");
+  // Fireball 2.0: decorative layers live INSIDE the affected bubble.
+  // No global canvas, no effects attached to neighbouring rows or the feed.
+  if (etype === "flame" && !collapsed) {
+    const target = row.querySelector(".bubble");
+    if (target) {
+      const fire = el("div", "fireball-v2");
+      fire.setAttribute("aria-hidden", "true");
+      for (let i = 0; i < 9; i++) {
+        const tongue = el("i", "fire-tongue");
+        tongue.style.setProperty("--n", String(i));
+        tongue.style.setProperty("--delay", `${-((i * 0.37) % 2.7).toFixed(2)}s`);
+        fire.appendChild(tongue);
+      }
+      for (let i = 0; i < 7; i++) {
+        const ember = el("i", "fire-ember");
+        ember.style.setProperty("--n", String(i));
+        ember.style.setProperty("--delay", `${-((i * 0.49) % 2.9).toFixed(2)}s`);
+        fire.appendChild(ember);
+      }
+      fire.appendChild(el("i", "fire-heat"));
+      if (state.hit && state.hit.msgId === msg.id && state.hit.type === "flame" && Date.now() - state.hit.at < 1500) {
+        fire.appendChild(el("i", "fireball-impact"));
+        fire.appendChild(el("i", "fireball-shock"));
+      }
+      target.prepend(fire);
+    }
+  }
   if (state.hit && state.hit.msgId === msg.id && Date.now() - state.hit.at < 1500) {
     row.classList.add("fx-hit", state.hit.type === "flame" ? "fx-hit-flame" : "fx-hit-shield");
     if (state.hit.quenched) row.classList.add("fx-quench");

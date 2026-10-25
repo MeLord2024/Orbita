@@ -3423,3 +3423,114 @@ html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .flag-btn b 
   font-weight: 600;
   letter-spacing: 0;
 }
+
+
+/* ==============================================================
+   ORBITA FIREBALL 2.0 — isolated per-message cinematic fire
+   All particles are clipped INSIDE the target bubble. Nothing
+   reaches another message, including impact and halo effects.
+   ============================================================= */
+.msg.fx-flame { isolation: isolate; }
+.msg.fx-flame .bubble {
+  isolation: isolate;
+  border: 1px solid rgba(255,112,16,.95);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--bubble) 94%, #ffca74), color-mix(in srgb, var(--bubble) 85%, #f88a30));
+  box-shadow: inset 0 0 0 1px rgba(255,228,144,.8), inset 0 -5px 10px rgba(242,72,0,.20), 0 0 5px rgba(255,100,0,.45);
+}
+/* Disable previous wide, overflowing fire sprites. */
+.msg.fx-flame .bubble::after, .msg.fx-flame .ava::after { content: none !important; animation: none !important; }
+.msg.fx-hit-flame::after { content: none !important; }
+.msg.fx-hit-flame { animation: none !important; }
+.msg.fx-flame .ava { box-shadow: 0 0 0 2px #ff9d28, 0 0 8px rgba(255,107,0,.55); }
+.fireball-v2 {
+  position: absolute; inset: 0; border-radius: inherit; overflow: hidden;
+  pointer-events: none; z-index: 0; contain: paint; isolation: isolate;
+}
+.msg.fx-flame .bubble > :not(.fireball-v2) { position: relative; z-index: 1; }
+.fireball-v2 .fire-heat {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 19px;
+  background: linear-gradient(0deg, rgba(255,83,0,.46), rgba(255,186,0,.13) 62%, transparent);
+  pointer-events: none;
+}
+.fireball-v2 .fire-tongue {
+  --x: calc((var(--n) * 11%));
+  position: absolute; bottom: -7px; left: var(--x);
+  width: clamp(12px, 9%, 32px); height: 34px;
+  transform-origin: 50% 100%; opacity: .82;
+  border-radius: 55% 55% 35% 35%;
+  clip-path: polygon(7% 100%, 3% 73%, 22% 58%, 28% 39%, 49% 3%, 57% 30%, 80% 44%, 91% 70%, 100% 100%);
+  background: radial-gradient(ellipse at 52% 84%, #fff9c1 0%, #ffed56 19%, #ff9e13 44%, #ff4308 72%, rgba(203,15,0,.1) 100%);
+  /* длинный цикл вместо alternate: язык успевает уйти влево, вернуться и качнуться вправо */
+  animation: orbitaFireTongue calc(1.15s + var(--n) * .09s) ease-in-out var(--delay) infinite;
+  animation-play-state: paused;
+  will-change: transform, opacity;
+}
+/* светлая сердцевина отстаёт от внешнего языка — получается змеиный изгиб,
+   а не просто качание прямоугольника */
+.fireball-v2 .fire-tongue::before {
+  content: "";
+  position: absolute; left: 18%; bottom: 0; width: 64%; height: 72%;
+  transform-origin: 50% 100%;
+  clip-path: polygon(10% 100%, 0 72%, 26% 52%, 36% 26%, 52% 0, 62% 32%, 82% 48%, 100% 100%);
+  background: radial-gradient(ellipse at 50% 82%, #fffef0 0%, #fff49a 26%, #ffd32e 54%, #ff8a00 82%, rgba(255,90,0,.1) 100%);
+  animation: orbitaFireCore calc(.82s + var(--n) * .065s) ease-in-out var(--delay) infinite alternate;
+  animation-play-state: paused;
+  opacity: .92;
+  pointer-events: none;
+}
+.fireball-v2 .fire-tongue:nth-child(3n) { height: 25px; width: 19px; opacity: .74; }
+.fireball-v2 .fire-tongue:nth-child(3n + 1) { height: 39px; }
+.fireball-v2 .fire-ember {
+  position: absolute; bottom: 4px; left: calc(8% + var(--n) * 13%);
+  width: 3px; height: 3px; border-radius: 50%;
+  background: #fff4a2; box-shadow: 0 0 3px 1px #ff9b0c;
+  animation: orbitaEmber calc(1.3s + var(--n) * .17s) linear var(--delay) infinite;
+  animation-play-state: paused;
+}
+.msg.live.fx-flame .fire-tongue,
+.msg.live.fx-flame .fire-tongue::before,
+.msg.live.fx-flame .fire-ember { animation-play-state: running; }
+@keyframes orbitaFireTongue {
+  0% { transform: translate3d(-7px,3px,0) rotate(-12deg) skewX(5deg) scaleY(.68); opacity: .62; }
+  24% { transform: translate3d(-2px,-1px,0) rotate(-2deg) skewX(-2deg) scaleY(.94); opacity: .9; }
+  52% { transform: translate3d(6px,-5px,0) rotate(11deg) skewX(4deg) scaleY(1.14); opacity: 1; }
+  76% { transform: translate3d(1px,-1px,0) rotate(2deg) skewX(-3deg) scaleY(.9); opacity: .84; }
+  100% { transform: translate3d(-7px,3px,0) rotate(-12deg) skewX(5deg) scaleY(.68); opacity: .82; }
+}
+@keyframes orbitaFireCore {
+  0% { transform: translateX(5px) rotate(9deg) scaleY(.8); opacity: .7; }
+  100% { transform: translateX(-6px) rotate(-10deg) scaleY(1.08); opacity: 1; }
+}
+@keyframes orbitaEmber {
+  0% { transform: translate3d(0,0,0) scale(.6); opacity: 0; }
+  16% { opacity: .95; }
+  50% { transform: translate3d(-6px,-16px,0) scale(.8); opacity: .9; }
+  100% { transform: translate3d(8px,-34px,0) scale(.3); opacity: 0; }
+}
+.fireball-impact {
+  position: absolute; left: 50%; top: 50%; width: 48px; height: 48px;
+  margin: -24px; border-radius: 50%;
+  background: radial-gradient(circle, #fffef0 0 12%, #ffe65a 22%, #ff8d00 44%, rgba(246,48,0,.8) 58%, transparent 74%);
+  animation: orbitaFireballImpact .65s cubic-bezier(.15,.7,.2,1) both;
+}
+.fireball-shock {
+  position: absolute; left: 50%; top: 50%; width: 40px; height: 40px;
+  margin: -20px; border-radius: 50%; border: 3px solid rgba(255,242,155,.95);
+  box-shadow: 0 0 8px #ff7b00, inset 0 0 6px #ff7b00;
+  animation: orbitaFireballShock .8s ease-out both;
+}
+@keyframes orbitaFireballImpact {
+  0% { transform: translate3d(-95px,-20px,0) scale(.24); opacity: .15; }
+  50% { transform: translate3d(-10px,0,0) scale(.85); opacity: 1; }
+  75% { transform: translate3d(0,0,0) scale(1.25); opacity: 1; }
+  100% { transform: translate3d(0,0,0) scale(1.9); opacity: 0; }
+}
+@keyframes orbitaFireballShock {
+  0%, 38% { transform: scale(.1); opacity: 0; }
+  48% { opacity: 1; }
+  100% { transform: scale(3); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fireball-v2 i, .fireball-v2 .fire-tongue::before { animation: none !important; }
+  .fireball-impact, .fireball-shock { display: none; }
+}
