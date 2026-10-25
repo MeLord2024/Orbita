@@ -151,7 +151,7 @@ export const SPECIAL_SKINS = [
          under them, navy for the medallions in the animations drawer. */
       aqua: "#8fe6ff", deep: "rgba(8, 66, 112, 0.3)", medal: "#0f4a72", medal2: "#071e33",
     },
-    gradient: { from: "#cdf3ff", to: "#1a6fc4", angle: 155, alpha: 0.45 },
+    gradient: { from: "#cdf3ff", to: "#1a6fc4", angle: 155, alpha: 0 },
   },
 ];
 
@@ -169,31 +169,27 @@ const AURORA =
   "radial-gradient(circle at 11% 87%, rgba(255,255,255,0) 19px, rgba(255,255,255,.5) 20px, rgba(255,255,255,0) 23px)," +
   "linear-gradient(180deg, rgba(214,246,255,.96) 0%, rgba(151,226,255,.92) 32%, rgba(92,185,235,.9) 62%, rgba(38,150,212,.92) 100%)";
 
+/* По умолчанию ставим Aero: это то, за чем приходят. Градиент при этом прозрачный
+   (alpha 0) — иначе он закрашивает сцену, и «живой» фон не видно вовсе. */
 export const DEFAULT_THEME = {
-  skin: "azure",
+  skin: "frutiger",
   blur: true,
-  liveSpeed: "normal",
-  gradient: { ...SKINS[0].gradient, custom: false },
+  live: { bubbles: 60, sun: 60, plants: 60 },
+  panelAlpha: 10,
+  gradient: { ...SPECIAL_SKINS[0].gradient, custom: false },
   background: { data: "", fit: "cover", alpha: 0.35 },
 };
 
-// «Живой фон»: множитель длительности анимаций (меньше — быстрее). off — стенд.
-const LIVE_SPEED = { off: 0, slow: 1.7, normal: 1, fast: 0.62 };
+export const LIVE_KEYS = ["bubbles", "sun", "plants"];
+/* короткие имена атрибутов на <html>: data-bub / data-sun / data-plant */
+const LIVE_ATTR = { bubbles: "bub", sun: "sun", plants: "plant" };
 
-// Simple glassy avatar gradients — one per author id, so anons look different
-// from message to message but stay stable while scrolling.
-export const AVATARS = [
-  ["#7ee8fa", "#1f6fd0"], ["#a1ffce", "#12a4a0"], ["#fbc2eb", "#a18cd1"], ["#ffecd2", "#fcb69f"],
-  ["#84fab0", "#2bb673"], ["#a6c0fe", "#4a6cf7"], ["#fdd0a2", "#ff6a88"], ["#96fbc4", "#38c7c3"],
-  ["#d299c2", "#4b6cb7"], ["#8fd3f4", "#2f7ff2"], ["#f6d365", "#da748c"], ["#c1dfc4", "#267871"],
-  ["#e0c3fc", "#6a5cff"], ["#91eae4", "#30b0c7"], ["#ff9a9e", "#f6b54e"], ["#9be7f4", "#1f8fe0"],
-  ["#fbc7d4", "#959eca"], ["#b8f5e8", "#16a34a"], ["#ffe29f", "#ffa99f"], ["#8ee4af", "#135e8a"],
-  ["#cac6ff", "#4c5470"], ["#8fd3f4", "#84fab0"], ["#fddb92", "#d1fdff"], ["#a1c4fd", "#c2e9fb"],
-  ["#f09ff8", "#7367f0"], ["#74ebd5", "#5bb6e0"], ["#fff1eb", "#acc6ee"], ["#ffd1ff", "#c98bd4"],
-  ["#9890e3", "#4b6cb7"], ["#84fec4", "#20bfa0"], ["#ffb199", "#ff0844"], ["#a8edea", "#2c9cd8"],
-  ["#fbd3e9", "#bb370d"], ["#92fe9d", "#1a6f4b"], ["#ffedbc", "#f79d00"], ["#8ec5fc", "#4b6cb7"],
-  ["#f5c6d2", "#9796f0"], ["#99f2c8", "#38b77c"], ["#e8cbf7", "#5b86e5"], ["#7de2fc", "#1176bb"],
-];
+/* 0 — эффект выключен, 100 — максимум. Множитель длительности: на максимуме
+   анимация втрое быстрее «обычной», у самого нуля — в 1.7 раза медленнее. */
+function liveK(value) {
+  const v = Math.max(0, Math.min(100, Number(value) || 0));
+  return 1.7 - (v / 100) * 1.25;
+}
 
 export function skinById(id) {
   return ALL_SKINS.find((s) => s.id === id) || SKINS[0];
@@ -208,9 +204,39 @@ function hash(str) {
   return Math.abs(h);
 }
 
-export function avatarGradient(seed) {
-  const [a, b] = AVATARS[hash(seed || "anon") % AVATARS.length];
-  return `linear-gradient(135deg, ${a}, ${b})`;
+/* Стеклянный человечек из референса: голова-шар и купол плеч, залитые
+   градиентом с бликом. Рисуем вектором в data-URL, поэтому на 24 варианта
+   не нужен ни один файл, а размер иконки любой. Цвет выбирает тот же хэш,
+   что и раньше, — человек остаётся «своим» и после обновления. */
+export const GLASS_PEOPLE = [
+  ["#ffd3e6", "#ff2f7e", "#ff9ecb"], ["#c8e6ff", "#1b6bff", "#8fd0ff"], ["#dcff9a", "#149e3f", "#b6f36a"],
+  ["#ffe6a8", "#ff3d6e", "#ffb36b"], ["#e6d4ff", "#6a2cff", "#b79bff"], ["#b8fff8", "#00a2b8", "#7fe9e0"],
+  ["#ffd9a8", "#ff7a00", "#ffc46b"], ["#cdf3ff", "#0284c7", "#92d9f7"], ["#ffc2f0", "#a21caf", "#f18ad8"],
+  ["#d9ffd0", "#3b8f00", "#a9ee74"], ["#ffe0f0", "#d81b60", "#ffa6c9"], ["#cfe4ff", "#2447c9", "#9db8ff"],
+];
+
+export function avatarArt(seed) {
+  const [light, deep, mid] = GLASS_PEOPLE[hash(seed || "anon") % GLASS_PEOPLE.length];
+  const svg =
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">` +
+    `<defs>` +
+    `<linearGradient id="b" x1="0" y1="0" x2="0.45" y2="1">` +
+    `<stop offset="0" stop-color="${light}"/><stop offset="0.52" stop-color="${mid}"/>` +
+    `<stop offset="1" stop-color="${deep}"/></linearGradient>` +
+    `<radialGradient id="s" cx="0.34" cy="0.24" r="0.55">` +
+    `<stop offset="0" stop-color="#fff" stop-opacity="0.95"/>` +
+    `<stop offset="0.45" stop-color="#fff" stop-opacity="0.25"/>` +
+    `<stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>` +
+    `</defs>` +
+    `<path d="M7 57c0-14 11-22 25-22s25 8 25 22c0 2-2 3-4 3H11c-2 0-4-1-4-3Z" fill="url(#b)"/>` +
+    `<circle cx="32" cy="21" r="13.5" fill="url(#b)"/>` +
+    `<path d="M7 57c0-14 11-22 25-22s25 8 25 22c0 2-2 3-4 3H11c-2 0-4-1-4-3Z" fill="url(#s)"/>` +
+    `<circle cx="32" cy="21" r="13.5" fill="url(#s)"/>` +
+    `<path d="M14 51c3-7 10-11 18-11s15 4 18 11c-6 3-12 4-18 4s-12-1-18-4Z" fill="#fff" opacity="0.28"/>` +
+    `<ellipse cx="26.5" cy="15.5" rx="4.8" ry="3.4" fill="#fff" opacity="0.92"/>` +
+    `<circle cx="32" cy="21" r="12.9" fill="none" stroke="#fff" stroke-opacity="0.5" stroke-width="1.3"/>` +
+    `</svg>`;
+  return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
 }
 
 function hexToRgba(hex, alpha) {
@@ -251,14 +277,19 @@ export function applyTheme(root, theme) {
   set("--aurora", skin.aurora ? AURORA : "none");
   set("--scene", skin.scene ? `url("${skin.scene}")` : "none");
   set("--grass", skin.grass ? `url("${skin.grass}")` : "none");
-  set("--live-k", String(LIVE_SPEED[theme.liveSpeed] ?? 1));
+  const live = theme.live || {};
+  for (const key of LIVE_KEYS) {
+    const value = Number(live[key]) || 0;
+    set(`--k-${key}`, String(liveK(value)));
+    root.dataset[LIVE_ATTR[key]] = skin.glass && value > 0 ? "1" : "0";
+  }
+  set("--panel-a", String(Math.max(0, Math.min(100, Number(theme.panelAlpha) || 0)) / 100));
   set("--bg-image", theme.background.data ? `url(${theme.background.data})` : "none");
   set("--bg-size", theme.background.fit === "tile" ? "auto" : theme.background.fit);
   set("--bg-repeat", theme.background.fit === "tile" ? "repeat" : "no-repeat");
   set("--bg-alpha", String(theme.background.data ? theme.background.alpha : 0));
   root.dataset.skin = skin.id;
   root.dataset.glass = skin.glass ? "1" : "0";
-  root.dataset.live = skin.glass && theme.liveSpeed !== "off" ? "1" : "0";
   root.dataset.blur = theme.blur === false ? "0" : "1";
   root.dataset.mode = skin.mode;
 }
@@ -267,9 +298,26 @@ export function normalizeTheme(raw) {
   const base = structuredClone(DEFAULT_THEME);
   if (!raw || typeof raw !== "object") return base;
   if (ALL_SKINS.some((s) => s.id === raw.skin)) base.skin = raw.skin;
+  /* старые сборки держали один общий «живой фон» строкой (off/slow/normal/fast):
+     переводим в три ползунка, чтобы выбор не потерялся */
+  if (raw.live && typeof raw.live === "object") {
+    for (const key of LIVE_KEYS) {
+      const v = Number(raw.live[key]);
+      if (Number.isFinite(v)) base.live[key] = Math.max(0, Math.min(100, Math.round(v)));
+    }
+  } else if (raw.liveSpeed) {
+    const v = raw.liveSpeed === "off" ? 0 : raw.liveSpeed === "slow" ? 35 : raw.liveSpeed === "fast" ? 90 : 60;
+    for (const key of LIVE_KEYS) base.live[key] = v;
+  }
+  if (Number.isFinite(Number(raw.panelAlpha))) {
+    base.panelAlpha = Math.max(0, Math.min(100, Math.round(Number(raw.panelAlpha))));
+  }
   if (typeof raw.blur === "boolean") base.blur = raw.blur;
-  if (Object.prototype.hasOwnProperty.call(LIVE_SPEED, raw.liveSpeed)) base.liveSpeed = raw.liveSpeed;
   Object.assign(base.gradient, raw.gradient || {});
+  /* градиент, который человек не крутил сам, принадлежит скину: у Aero он
+     прозрачный, иначе после обновления у всех остался бы старый 80%-синий,
+     которым сцену не видно */
+  if (!base.gradient.custom) Object.assign(base.gradient, skinById(base.skin).gradient);
   Object.assign(base.background, raw.background || {});
   if (base.background.fit === "repeat") base.background.fit = "tile";
   if (!["cover", "contain", "tile", "center", "repeat-x", "repeat-y"].includes(base.background.fit)) {

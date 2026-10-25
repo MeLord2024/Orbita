@@ -26,6 +26,8 @@
   --deep: rgba(8, 66, 112, 0.3);
   --medal: #0f4a72;
   --medal-2: #071e33;
+  /* плотность стеклянных панелей (0 — прозрачные, 1 — плотные), ставит themes.js */
+  --panel-a: 0.1;
   --grad: none;
   --grad-alpha: 0.18;
   --aurora: none;
@@ -120,17 +122,23 @@ html.standalone .wrap {
 }
 
 /* ---------- живой фон ----------
-   Всё движение — только transform и opacity: браузер выносит такие слои на
-   композитор, и кадры не перерисовывают ни пузыри чата, ни картинку сцены.
-   Скорость задаёт `--live-k` (множитель длительности) из панели 🎨, а
-   `data-live="0"` останавливает всё и прячет декор. */
+   Три независимых эффекта — пузыри, солнце, растения. Каждый включается своим
+   ползунком (`data-bub` / `data-sun` / `data-plant` на <html>) и получает
+   множитель длительности `--k-<эффект>`: 0 — выключен, 100 — максимум.
+   Движение только `transform` и `opacity`. Сцену мы намеренно НЕ масштабируем:
+   анимация scale у картинки 1600×914 заставляет пересэмплировать её каждый
+   кадр — это и была самая дорогая часть прошлой версии. */
 .bg-grass {
   background-image: var(--grass);
-  background-size: cover;
-  background-position: center 100%;
+  background-size: 100% auto;
+  background-position: center bottom;
   background-repeat: no-repeat;
   mix-blend-mode: multiply;
-  opacity: 0.92;
+  /* мягкая кромка сверху: без маски срез травы шёл бы ровной горизонтальной
+     линией поперёк окна и читался как баг вёрстки */
+  -webkit-mask-image: linear-gradient(to top, #000 58%, rgba(0, 0, 0, 0.35) 84%, transparent 100%);
+  mask-image: linear-gradient(to top, #000 58%, rgba(0, 0, 0, 0.35) 84%, transparent 100%);
+  opacity: 0.62;
   z-index: 3;
   transform-origin: 50% 100%;
   will-change: transform;
@@ -141,38 +149,82 @@ html.standalone .wrap {
   overflow: hidden;
 }
 
-html[data-live="1"] .bg-scene {
-  animation: sceneDrift calc(52s * var(--live-k, 1)) ease-in-out infinite alternate;
-}
-
-html[data-live="1"] .bg-grass {
-  animation: grassSway calc(11s * var(--live-k, 1)) ease-in-out infinite alternate;
-}
-
-html[data-live="0"] .bg-live {
-  display: none;
-}
-
-@keyframes sceneDrift {
-  from {
-    transform: scale(1.02) translate3d(0, 0, 0);
-  }
-  to {
-    transform: scale(1.075) translate3d(-0.6%, -1.1%, 0);
-  }
+html[data-plant="1"] .bg-grass {
+  animation: grassSway calc(12s * var(--k-plants, 1)) ease-in-out infinite alternate;
 }
 
 @keyframes grassSway {
   from {
-    transform: scale(1.04) rotate(-0.32deg) translate3d(0, 0.4%, 0);
+    transform: rotate(-0.35deg) scale(1.01);
   }
   to {
-    transform: scale(1.07) rotate(0.32deg) translate3d(-0.4%, -0.6%, 0);
+    transform: rotate(0.35deg) scale(1.015);
+  }
+}
+
+/* Солнце над чатом: светящееся ядро вверху по центру и два мягких «луча» —
+   горизонтальный и наклонный. Шевелятся только прозрачностью: ни фильтров,
+   ни масок, ни вращения — самый дешёвый вид анимации, который есть. */
+.bg-live .sun {
+  position: absolute;
+  top: -150px;
+  left: 50%;
+  width: 560px;
+  height: 380px;
+  margin-left: -280px;
+  pointer-events: none;
+  background: radial-gradient(circle at 50% 46%, rgba(255, 255, 255, 0.95) 0%, rgba(255, 250, 222, 0.72) 12%, rgba(255, 246, 200, 0.32) 26%, rgba(255, 246, 200, 0) 55%);
+}
+
+.bg-live .sun::before,
+.bg-live .sun::after {
+  content: "";
+  position: absolute;
+  left: -18%;
+  right: -18%;
+  top: 42%;
+  height: 26%;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.6) 50%, rgba(255, 255, 255, 0) 100%);
+  opacity: 0.55;
+}
+
+.bg-live .sun::after {
+  transform: rotate(-48deg) scaleY(0.7);
+  opacity: 0.35;
+}
+
+html[data-sun="1"] .bg-live .sun {
+  animation: sunPulse calc(7s * var(--k-sun, 1)) ease-in-out infinite alternate;
+}
+
+html[data-sun="1"] .bg-live .sun::before {
+  animation: sunStreak calc(9s * var(--k-sun, 1)) ease-in-out infinite alternate;
+}
+
+html[data-sun="1"] .bg-live .sun::after {
+  animation: sunStreak calc(13s * var(--k-sun, 1)) ease-in-out infinite alternate-reverse;
+}
+
+@keyframes sunPulse {
+  from {
+    opacity: 0.62;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes sunStreak {
+  from {
+    opacity: 0.22;
+  }
+  to {
+    opacity: 0.7;
   }
 }
 
 /* стеклянная сфера: тело — радиальные блики, внутри медленно вращается
-   конический отсвет. Один элемент, одна анимация, ноль перерисовок текста. */
+   конический отсвет. Один элемент, одна анимация на transform. */
 .bg-live .orb {
   position: absolute;
   border-radius: 50%;
@@ -198,11 +250,10 @@ html[data-live="0"] .bg-live {
     rgba(255, 255, 255, 0) 86%
   );
   filter: blur(5px);
-  animation: orbSpin calc(17s * var(--live-k, 1)) linear infinite;
 }
 
-html[data-live="0"] .bg-live .orb::before {
-  animation: none;
+html[data-bub="1"] .bg-live .orb::before {
+  animation: orbSpin calc(17s * var(--k-bubbles, 1)) linear infinite;
 }
 
 .orb-big {
@@ -225,58 +276,33 @@ html[data-live="0"] .bg-live .orb::before {
   }
 }
 
-/* световые «полосы» — два длинных размытых блика, медленно проходящих по сцене */
-.bg-live .glint {
-  position: absolute;
-  top: -60%;
-  width: 22%;
-  height: 220%;
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.5) 50%, rgba(255, 255, 255, 0) 100%);
-  filter: blur(22px);
-  transform: rotate(16deg);
-  animation: glintSweep calc(13s * var(--live-k, 1)) ease-in-out infinite;
-}
-
-.bg-live .g1 {
-  left: -30%;
-}
-
-.bg-live .g2 {
-  left: -30%;
-  width: 14%;
-  animation-duration: calc(19s * var(--live-k, 1));
-  animation-delay: calc(-7s * var(--live-k, 1));
-  opacity: 0.7;
-}
-
-@keyframes glintSweep {
-  0% {
-    transform: translate3d(0, 0, 0) rotate(16deg);
-  }
-  55%,
-  100% {
-    transform: translate3d(560%, 0, 0) rotate(16deg);
-  }
-}
-
-/* пузыри поднимаются снизу вверх; разные размеры, задержки и траектории */
+/* пузыри поднимаются снизу вверх: разные размеры, задержки и траектории */
 .bg-live .bub {
   position: absolute;
   bottom: -70px;
   border-radius: 50%;
   background: radial-gradient(circle at 34% 30%, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.18) 32%, rgba(190, 240, 255, 0.1) 60%, rgba(255, 255, 255, 0.55) 100%);
   box-shadow: inset 0 0 14px rgba(255, 255, 255, 0.85), 0 0 12px rgba(180, 240, 255, 0.4);
-  animation: bubRise linear infinite;
   opacity: 0;
 }
 
-.bub.b1 { left: 7%; width: 26px; height: 26px; animation-duration: calc(19s * var(--live-k, 1)); animation-delay: calc(-3s * var(--live-k, 1)); }
-.bub.b2 { left: 19%; width: 14px; height: 14px; animation-duration: calc(15s * var(--live-k, 1)); animation-delay: calc(-9s * var(--live-k, 1)); }
-.bub.b3 { left: 33%; width: 34px; height: 34px; animation-duration: calc(24s * var(--live-k, 1)); animation-delay: calc(-14s * var(--live-k, 1)); }
-.bub.b4 { left: 58%; width: 18px; height: 18px; animation-duration: calc(17s * var(--live-k, 1)); animation-delay: calc(-5s * var(--live-k, 1)); }
-.bub.b5 { left: 74%; width: 28px; height: 28px; animation-duration: calc(21s * var(--live-k, 1)); animation-delay: calc(-11s * var(--live-k, 1)); }
-.bub.b6 { left: 88%; width: 12px; height: 12px; animation-duration: calc(14s * var(--live-k, 1)); animation-delay: calc(-2s * var(--live-k, 1)); }
-.bub.b7 { left: 47%; width: 10px; height: 10px; animation-duration: calc(12s * var(--live-k, 1)); animation-delay: calc(-6s * var(--live-k, 1)); }
+html[data-bub="0"] .bg-live .bub {
+  display: none;
+}
+
+html[data-bub="1"] .bg-live .bub {
+  animation-name: bubRise;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+.bub.b1 { left: 7%; width: 26px; height: 26px; animation-duration: calc(19s * var(--k-bubbles, 1)); animation-delay: calc(-3s * var(--k-bubbles, 1)); }
+.bub.b2 { left: 19%; width: 14px; height: 14px; animation-duration: calc(15s * var(--k-bubbles, 1)); animation-delay: calc(-9s * var(--k-bubbles, 1)); }
+.bub.b3 { left: 33%; width: 34px; height: 34px; animation-duration: calc(24s * var(--k-bubbles, 1)); animation-delay: calc(-14s * var(--k-bubbles, 1)); }
+.bub.b4 { left: 58%; width: 18px; height: 18px; animation-duration: calc(17s * var(--k-bubbles, 1)); animation-delay: calc(-5s * var(--k-bubbles, 1)); }
+.bub.b5 { left: 74%; width: 28px; height: 28px; animation-duration: calc(21s * var(--k-bubbles, 1)); animation-delay: calc(-11s * var(--k-bubbles, 1)); }
+.bub.b6 { left: 88%; width: 12px; height: 12px; animation-duration: calc(14s * var(--k-bubbles, 1)); animation-delay: calc(-2s * var(--k-bubbles, 1)); }
+.bub.b7 { left: 47%; width: 10px; height: 10px; animation-duration: calc(12s * var(--k-bubbles, 1)); animation-delay: calc(-6s * var(--k-bubbles, 1)); }
 
 @keyframes bubRise {
   0% {
@@ -296,11 +322,12 @@ html[data-live="0"] .bg-live .orb::before {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html[data-live="1"] .bg-scene,
-  html[data-live="1"] .bg-grass,
-  .bg-live .orb::before,
-  .bg-live .glint,
-  .bg-live .bub {
+  html[data-plant="1"] .bg-grass,
+  html[data-sun="1"] .bg-live .sun,
+  html[data-sun="1"] .bg-live .sun::before,
+  html[data-sun="1"] .bg-live .sun::after,
+  html[data-bub="1"] .bg-live .orb::before,
+  html[data-bub="1"] .bg-live .bub {
     animation: none;
   }
 }
@@ -2269,9 +2296,10 @@ html[data-glass="1"] .wrap::after {
 /* ---------- шапка и подвал: отдельные плавающие стеклянные карточки ---------- */
 html[data-glass="1"] .top {
   margin: 8px 8px 0;
-  padding: 8px;
+  padding: 6px 8px;
   border: 2px solid rgba(255, 255, 255, 0.9);
   border-radius: 22px;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(214, 243, 255, 0.52));
   box-shadow:
     inset 0 2px 0 rgba(255, 255, 255, 0.95),
@@ -2284,6 +2312,7 @@ html[data-glass="1"] .composer {
   padding: 10px 12px;
   border: 2px solid rgba(255, 255, 255, 0.9);
   border-radius: 22px;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.75);
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0.9));
   box-shadow:
     inset 0 2px 0 #fff,
@@ -2291,17 +2320,25 @@ html[data-glass="1"] .composer {
 }
 
 /* ---------- боковые панели: стеклянные карточки с отступом от края ---------- */
+/* Плотность панелей — ползунок «Плотность» в 🎨, по умолчанию 10 %: почти прозрачное
+   стекло, сквозь которое видно живую сцену. 0 — панель исчезает совсем, 100 — плотное
+   молочное стекло. Белый ореол у текста нужен из-за низкой плотности: под подписью
+   может оказаться тёмная листва, и без него мелкий шрифт пропадает. */
 html[data-glass="1"] .fx,
 html[data-glass="1"] .lenta {
   margin: 8px 0 8px 8px;
   padding: 10px;
-  border: 2px solid rgba(255, 255, 255, 0.9);
+  border: 2px solid rgba(255, 255, 255, calc(0.35 + var(--panel-a, 0.1) * 0.6));
   border-radius: 22px;
-  background: linear-gradient(180deg, rgba(238, 252, 255, 0.9), rgba(196, 235, 252, 0.78));
+  background:
+    linear-gradient(180deg,
+      rgba(244, 253, 255, calc(var(--panel-a, 0.1) * 1.6)),
+      rgba(198, 236, 252, calc(var(--panel-a, 0.1) * 1.25)));
   box-shadow:
-    inset 0 2px 0 rgba(255, 255, 255, 0.95),
+    inset 0 2px 0 rgba(255, 255, 255, calc(0.3 + var(--panel-a, 0.1) * 0.65)),
     inset 0 -10px 22px -16px rgba(20, 110, 170, 0.5),
     0 12px 26px -16px var(--deep);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8), 0 0 8px rgba(255, 255, 255, 0.55);
 }
 
 html[data-glass="1"] .lenta {
@@ -2488,7 +2525,11 @@ html[data-glass="1"] .bubble {
   padding: 9px 14px 10px;
   border: 2px solid rgba(255, 255, 255, 0.95);
   border-radius: 22px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.97) 0%, rgba(255, 255, 255, 0.86) 34%, rgba(212, 240, 255, 0.84) 100%);
+  /* верхняя белая полоса — тот самый «мокрый» блик на пузыре; вторая —
+     сама стеклянная заливка от белого к воде */
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0, rgba(255, 255, 255, 0.55) 7px, rgba(255, 255, 255, 0) 22px),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.94) 0%, rgba(255, 255, 255, 0.78) 32%, rgba(206, 238, 255, 0.74) 100%);
   box-shadow:
     inset 0 2px 0 rgba(255, 255, 255, 0.98),
     inset 0 -10px 18px -14px rgba(24, 110, 170, 0.55),
@@ -2527,7 +2568,7 @@ html[data-glass="1"] .tools {
 }
 
 html[data-glass="1"] .cluster {
-  gap: 5px;
+  gap: 4px;
 }
 
 html[data-glass="1"] .tool,
@@ -2626,7 +2667,7 @@ html[data-glass="1"] .send:hover {
 /* ---------- поля ввода ---------- */
 html[data-glass="1"] .search {
   height: 30px;
-  min-width: 118px;
+  min-width: 100px;
   border-radius: 999px;
   border: 2px solid rgba(255, 255, 255, 0.97);
   background: linear-gradient(180deg, #ffffff, rgba(238, 251, 255, 0.94));

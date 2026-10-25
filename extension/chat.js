@@ -1,7 +1,7 @@
 import { PRIMARY_CODES, searchLangs } from "./langs.js";
 import { makeT, UI_LANGS } from "./locales.js";
 import { LANG_META, flagSvg, langName } from "./flags.js";
-import { SKINS, SPECIAL_SKINS, DEFAULT_THEME, skinById, applyTheme, normalizeTheme, avatarGradient } from "./themes.js";
+import { SKINS, SPECIAL_SKINS, DEFAULT_THEME, skinById, applyTheme, normalizeTheme, avatarArt } from "./themes.js";
 import { normalizeUrl } from "./sanitize.js";
 import { fxArt } from "./fx.js";
 import { play as playSound, unlock as unlockSound, SOUND_TONES } from "./sound.js";
@@ -200,15 +200,11 @@ function applyLocale() {
   $("lblSpecial").textContent = t("theme.special");
   $("lblOpacity").textContent = t("theme.opacity");
   $("lblBlur").textContent = t("theme.blur");
+  $("lblPanel").textContent = t("theme.panel");
   $("lblLive").textContent = t("theme.live");
-  $("liveSpeed").replaceChildren(
-    ...["off", "slow", "normal", "fast"].map((k) => {
-      const o = document.createElement("option");
-      o.value = k;
-      o.textContent = t(`theme.live.${k}`);
-      return o;
-    })
-  );
+  $("lblBubbles").textContent = t("theme.live.bubbles");
+  $("lblSun").textContent = t("theme.live.sun");
+  $("lblPlants").textContent = t("theme.live.plants");
   $("lblGrad").textContent = t("theme.gradient");
   $("lblAngle").textContent = t("theme.angle");
   $("lblGradAlpha").textContent = t("theme.alpha");
@@ -496,20 +492,20 @@ function timeAgo(ts) {
   return `${d.getDate()}.${String(d.getMonth() + 1).padStart(2, "0")}`;
 }
 
-/* glass avatar: a stable random gradient per author id, plus an optional
-   uploaded picture (registered accounts only) and a nickname initial */
+/* Стеклянный человечек: цвет выбирается хэшем id, поэтому человек выглядит
+   одинаково во всех комнатах и не меняется между перерисовками ленты.
+   Загруженная картинка (только у зарегистрированных) перекрывает человечка. */
 function paintAvatar(node, author) {
-  node.style.background = avatarGradient(author.id || "anon");
+  node.style.backgroundImage = avatarArt(author.id || "anon");
+  node.style.backgroundSize = "100% 100%";
+  node.style.backgroundRepeat = "no-repeat";
   const pic = String(author.avatar || "");
   if (pic.startsWith("data:image/")) {
     const img = el("img");
     img.src = pic;
     img.alt = "";
     node.appendChild(img);
-    return;
   }
-  const letter = String(author.name || "").trim().slice(0, 1).toUpperCase();
-  if (letter) node.appendChild(el("span", "letter", letter));
 }
 
 function renderComposer() {
@@ -817,8 +813,16 @@ function paintThemeControls() {
   $("bgAlpha").value = String(Math.round(state.theme.background.alpha * 100));
   $("glassBlur").checked = state.theme.blur !== false;
   $("glassBlur").closest(".row").hidden = !skinById(state.theme.skin).glass;
-  $("liveSpeed").value = state.theme.liveSpeed || "normal";
-  $("liveSpeed").closest(".row").hidden = !skinById(state.theme.skin).glass;
+  // ползунки живого фона и плотности панелей — только у стеклянного скина
+  const glassy = skinById(state.theme.skin).glass;
+  ["panelAlpha", "liveBubbles", "liveSun", "livePlants"].forEach((id) => {
+    $(id).closest(".row").hidden = !glassy;
+  });
+  $("lblLive").hidden = !glassy;
+  $("panelAlpha").value = String(state.theme.panelAlpha ?? 10);
+  $("liveBubbles").value = String(state.theme.live?.bubbles ?? 60);
+  $("liveSun").value = String(state.theme.live?.sun ?? 60);
+  $("livePlants").value = String(state.theme.live?.plants ?? 60);
   renderSkins();
 }
 
@@ -1829,8 +1833,19 @@ function bindEvents() {
     applyTheme(document.documentElement, state.theme);
     saveTheme();
   });
-  $("liveSpeed").addEventListener("change", (e) => {
-    state.theme.liveSpeed = e.target.value;
+  /* Живой фон: три независимых ползунка, 0 = эффект выключен, 100 = максимальная
+     скорость. Пишем в тему и сразу перекрашиваем — applyTheme разложит значения
+     в --k-bub/--k-sun/--k-plant и data-bub/sun/plant на <html>.
+     Сохранение отложено на 350 мс, поэтому взмах ползунком не пишет в storage. */
+  [["liveBubbles", "bubbles"], ["liveSun", "sun"], ["livePlants", "plants"]].forEach(([id, key]) => {
+    $(id).addEventListener("input", (e) => {
+      state.theme.live = { ...(state.theme.live || {}), [key]: Number(e.target.value) };
+      applyTheme(document.documentElement, state.theme);
+      saveTheme();
+    });
+  });
+  $("panelAlpha").addEventListener("input", (e) => {
+    state.theme.panelAlpha = Number(e.target.value);
     applyTheme(document.documentElement, state.theme);
     saveTheme();
   });

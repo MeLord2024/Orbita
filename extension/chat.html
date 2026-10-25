@@ -14,10 +14,9 @@
       <div class="bg bg-grad"></div>
       <div class="bg bg-grass"></div>
       <div class="bg bg-live" aria-hidden="true">
+        <span class="sun"></span>
         <span class="orb orb-big"></span>
         <span class="orb orb-small"></span>
-        <span class="glint g1"></span>
-        <span class="glint g2"></span>
         <span class="bub b1"></span>
         <span class="bub b2"></span>
         <span class="bub b3"></span>
@@ -185,7 +184,11 @@
       <label class="row"><span id="lblBgAlpha"></span><input type="range" id="bgAlpha" min="0" max="100" step="1" /></label>
       <label class="row"><span id="lblOpacity"></span><input type="range" id="opacity" min="40" max="100" step="1" /></label>
       <label class="row"><span id="lblBlur"></span><input type="checkbox" id="glassBlur" /></label>
-      <label class="row"><span id="lblLive"></span><select id="liveSpeed" class="select"></select></label>
+      <label class="row"><span id="lblPanel"></span><input type="range" id="panelAlpha" min="0" max="100" step="1" /></label>
+      <p class="theme-sub" id="lblLive"></p>
+      <label class="row"><span id="lblBubbles"></span><input type="range" id="liveBubbles" min="0" max="100" step="5" /></label>
+      <label class="row"><span id="lblSun"></span><input type="range" id="liveSun" min="0" max="100" step="5" /></label>
+      <label class="row"><span id="lblPlants"></span><input type="range" id="livePlants" min="0" max="100" step="5" /></label>
 
       <p class="theme-sub" id="lblSound"></p>
       <label class="row"><span id="lblSoundOn"></span><input type="checkbox" id="soundOn" /></label>

@@ -4,7 +4,7 @@
 
   const EXT_ORIGIN = new URL(chrome.runtime.getURL("/")).origin;
   const GEOM_KEY = "orbita.geom";
-  const DEFAULT_GEOM = { w: 1180, h: 680, x: null, y: null, opacity: 0.9 };
+  const DEFAULT_GEOM = { w: 1180, h: 680, x: null, y: null, opacity: 1 };
 
   let host = null;
   let shadow = null;
