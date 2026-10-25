@@ -11,6 +11,16 @@ const RATE_MAX = 5;
 const STAR_WINDOW = 864e5;
 const STAR_MAX = 10;
 const FX_WINDOW = 864e5;
+/* Заряды считаются за сутки, а сам эффект живёт на сообщении 12 часов: щит
+   «защищает» полсуток, потом тихо сходит и комментарий можно атаковать снова. */
+export const FX_TTL = 12 * 36e5;
+
+/* Живой эффект: просроченный щит или огонь не считаем наложенным. */
+export function liveEffect(msg) {
+  const e = msg && msg.effect;
+  if (!e || !e.ts) return null;
+  return Date.now() - Number(e.ts) < FX_TTL ? e : null;
+}
 /* Заряды на сутки, на устройство: огня много не бывает, но и не бесконечно,
    а щит — редкий ответ на него, иначе «защитить» можно было бы весь чат. */
 export const FX_QUOTA = { flame: 3, shield: 1 };
@@ -525,7 +535,7 @@ export async function applyEffect(msgId, type) {
     if (!msg) return { error: "not_found" };
     const now = Date.now();
     const quota = () => currentFxQuota(st, id.deviceId);
-    const prev = msg.effect ? msg.effect.type : null;
+    const prev = liveEffect(msg) ? msg.effect.type : null;
     if (type === "flame") {
       if (prev === "flame") return { error: "busy_flame", quota: quota() };
       if (prev === "shield") return { error: "protected", quota: quota() };
@@ -620,6 +630,8 @@ export async function feed({ url, lang, view = "all", period = "recent", sort = 
     // скрытые сообщения остаются в списке: рисовать их полоской или текстом решает интерфейс
     // значок «↩ N» и оповещение об ответе считаются по replyTo; на сервере v0.2 его нет,
     // поэтому там родителя добираем по тексту цитаты — индекс строим только по этой комнате
+    /* просроченные анимации не отдаём наружу: иначе щит «висит» вечно */
+    list = list.map((m) => (m.effect && !liveEffect(m) ? { ...m, effect: null } : m));
     const byQuote = list.some((m) => !m.replyTo && m.quote)
       ? quoteIndex(st, id, new Set(list.map((m) => m.ch)))
       : null;

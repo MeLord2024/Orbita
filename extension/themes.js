@@ -177,7 +177,7 @@ export const DEFAULT_THEME = {
   blur: false,
   live: { bubbles: 60, sun: 60, plants: 60 },
   sphereSpeed: 60,
-  buttons: "std",
+  buttons: "a",
   panelAlpha: 10,
   gradient: { ...SPECIAL_SKINS[0].gradient, custom: false },
   background: { data: "", fit: "cover", alpha: 0.35 },

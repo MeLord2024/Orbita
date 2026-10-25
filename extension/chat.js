@@ -1,4 +1,4 @@
-import { PRIMARY_CODES, searchLangs } from "./langs.js";
+import { PRIMARY_CODES, searchLangs, langName as langTitle } from "./langs.js";
 import { makeT, UI_LANGS } from "./locales.js";
 import { LANG_META, flagSvg, langName } from "./flags.js";
 import { SKINS, SPECIAL_SKINS, DEFAULT_THEME, skinById, applyTheme, normalizeTheme, avatarArt } from "./themes.js";
@@ -393,13 +393,17 @@ function renderHeader() {
         ? "lenta.hint_mine"
         : "lenta.hint"
   );
+  /* В кнопке — полное самоназвание языка («العربية», а не «ar»): код в три
+     символа ничего не говорит, особенно на нелатинских языках. */
   const langBtn = $("langBtn");
-  langBtn.replaceChildren(el("b", null, state.lang));
+  const langLabel = el("b", null, langTitle(state.lang));
+  langLabel.dir = "auto";
+  langBtn.replaceChildren(langLabel);
   langBtn.title = t("header.lang");
   const lentaLangBtn = $("lentaLangBtn");
-  lentaLangBtn.replaceChildren(
-    el("b", null, state.lentaLang === "*" ? t("lang.all") : state.lentaLang)
-  );
+  const lentaLabel = el("b", null, state.lentaLang === "*" ? t("lang.all") : langTitle(state.lentaLang));
+  lentaLabel.dir = "auto";
+  lentaLangBtn.replaceChildren(lentaLabel);
   lentaLangBtn.title = t("header.lang");
   const uiLang = (state.settings && state.settings.uiLang) || "ru";
   const flagBtn = $("uiLangBtn");

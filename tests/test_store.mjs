@@ -414,6 +414,29 @@ ok("registered account keeps a picture avatar", () => assert.equal(regPic.avatar
 const rawText = await store.setIdentity({ avatar: "javascript:alert(1)" });
 ok("non-image avatar string rejected", () => assert.equal(rawText.avatar, ""));
 
+// a shield lives 12 hours, then the message is free again
+await store.tx((st) => {
+  st.rates = {};
+  st.fx = {};
+});
+const fxRoom = "https://fx-ttl.example/p";
+const fxPost = await store.postMessage({ url: fxRoom, title: "t", lang: "ru", text: "ttl post" });
+ok("ttl test post created", () => assert.ok(fxPost.message, JSON.stringify(fxPost)));
+const ttlShield = await store.applyEffect(fxPost.message.id, "shield");
+ok("the shield lands on a fresh message", () => assert.ok(!ttlShield.error));
+const ttlBusy = await store.applyEffect(fxPost.message.id, "flame");
+ok("a fresh shield blocks fire", () => assert.equal(ttlBusy.error, "protected"));
+await store.tx((st) => {
+  st.messages[fxPost.message.id].effect.ts = Date.now() - 13 * 36e5;
+});
+const agedFeed = await store.feed({ url: fxRoom, lang: "ru", view: "all", period: "all" });
+ok("an effect older than 12 hours is gone", () => {
+  const row = agedFeed.find((m) => m.id === fxPost.message.id);
+  assert.equal(row.effect, null);
+});
+const reAttacked = await store.applyEffect(fxPost.message.id, "flame");
+ok("after 12 hours the message can be attacked again", () => assert.ok(!reAttacked.error));
+
 // one page over http and https is one room: a browser keeps whichever scheme the
 // person typed, and the two windows used to end up in different chats
 await store.tx((st) => { st.rates = {}; });

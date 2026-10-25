@@ -496,9 +496,11 @@ html[data-plant="1"] .bg-leaf-br::after {
   border: 1px solid var(--line);
   border-radius: 999px;
   padding: 2px 8px;
-  min-width: 150px;
-  flex: 1 1 150px;
-  max-width: 260px;
+  min-width: 120px;
+  /* вдвое короче прежнего: в шапке и так тесно, а длинная строка поиска
+     отнимала место у кнопок */
+  flex: 1 1 110px;
+  max-width: 150px;
 }
 
 .search input {
@@ -1090,20 +1092,22 @@ html.fx-drag-shield .msg.fx-target {
   align-items: center;
   justify-content: center;
   gap: 0;
-  width: 30px;
-  padding: 3px 0;
+  width: 26px;
+  padding: 2px 0;
   transition: height 0.2s ease, background-color 0.35s ease, color 0.35s ease,
     box-shadow 0.35s ease, border-color 0.35s ease;
 }
 
 .votes .vbtn.up.has {
   flex-direction: column-reverse;
-  height: 42px;
+  height: 38px;
 }
 
 .votes .vbtn.down.has {
   flex-direction: column;
-  height: 42px;
+  height: 38px;
+  gap: 2px;
+  padding-bottom: 3px;
 }
 
 .votes .vbtn.has .vote-num {
@@ -2982,10 +2986,10 @@ html[data-glass="1"] .votes {
 
 html[data-glass="1"] .votes .vbtn {
   transition: background-color 0.35s ease, color 0.35s ease, box-shadow 0.35s ease,
-    border-color 0.35s ease, transform 0.12s ease;
-  font-size: 19px;
+    border-color 0.35s ease, transform 0.12s ease, height 0.2s ease;
+  font-size: 15px;
   line-height: 1;
-  padding: 3px 5px;
+  padding: 2px 4px;
   border-radius: 999px;
   color: #0b5c8e;
   border: 1px solid rgba(255, 255, 255, 0.95);
@@ -3032,8 +3036,11 @@ html[data-glass="1"] .bubble .vbtn.star[aria-pressed="true"] .star-num {
 }
 
 html[data-glass="1"] .votes .vbtn.report[aria-pressed="true"] {
-  background: linear-gradient(180deg, #fff, rgba(206, 240, 255, 0.9));
-  border-color: var(--accent);
+  background-color: rgba(255, 150, 140, 0.45);
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0));
+  border-color: rgba(255, 178, 168, 0.95);
+  color: #a8322a;
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.9), 0 0 12px -3px rgba(255, 120, 110, 0.65);
 }
 
 /* скроллбары панелей такие же, как в ленте чата: белая стеклянная полоска,
@@ -3148,11 +3155,12 @@ html[data-glass="1"] .feed::-webkit-scrollbar-thumb {
 }
 
 /* ---------- пресеты кнопок: стандарт / стекло A / C / D ----------
-   Картинки — вырезанные PNG. Круглые кнопки используют арт 1:1 (он квадратный,
-   поэтому не растягивается), «пилюли» — nine-slice через border-image: углы
-   фиксированные, середина тянется, поэтому «Все» и «Мои сообщения» одинаковые
-   по форме при разной ширине. Включённое состояние — не вторая картинка, а
-   синяя плёнка поверх арта, её прозрачность и анимируется (0.35 с). */
+   Картинки — вырезанные PNG. Круглые кнопки используют квадратный арт 1:1,
+   «пилюли» — nine-slice через border-image на ::after: углы фиксированы, середина
+   тянется. ВАЖНО: ::before у кнопок шапки занят невидимой зоной нажатия (v0.3.5),
+   поэтому арт висит на ::after, а включённое состояние — не плёнка-псевдоэлемент,
+   а внутренняя тень нужного цвета: она тоже анимируется, но не отнимает ни один
+   псевдоэлемент. */
 html[data-buttons="a"] {
   --btn-round: url("icons/btn-a-round.png");
   --btn-pill: url("icons/btn-a-pill.png");
@@ -3168,6 +3176,7 @@ html[data-buttons="d"] {
   --btn-pill: url("icons/btn-d-pill.png");
 }
 
+/* круглые кнопки: арт ровно по кнопке */
 html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .tool,
 html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .corner {
   background-image: var(--btn-round);
@@ -3175,14 +3184,13 @@ html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .corner {
   background-color: transparent;
   border-color: transparent;
   box-shadow: none;
+  transition: box-shadow 0.35s ease, filter 0.2s ease, transform 0.12s ease;
 }
 
 /* глянец уже нарисован в картинке */
 html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .top .tools > button::after,
 html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .top .cluster > button::after {
-  background: none;
-  height: 0;
-  top: 0;
+  display: none;
 }
 
 /* звезда в шапке: арт + её собственная звёздочка поверх */
@@ -3204,93 +3212,77 @@ html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .lang-btn {
   background: none;
   border-color: transparent;
   box-shadow: none;
-  color: var(--ink);
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 30, 60, 0.5);
+  text-align: center;
+  justify-content: center;
+  transition: box-shadow 0.35s ease, color 0.35s ease, transform 0.12s ease;
 }
 
-html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .views button::before,
-html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .lenta-tabs .tab::before,
-html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .flag-btn::before,
-html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .lang-btn::before {
+html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .views button::after,
+html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .lenta-tabs .tab::after,
+html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .flag-btn::after,
+html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .lang-btn::after {
   content: "";
   position: absolute;
   inset: 0;
   border: 15px solid transparent;
   border-image: var(--btn-pill) 30 fill / 15px / 0 stretch;
   pointer-events: none;
-  /* отрицательный z-index: иначе картинка ложится ПОВЕРХ текста — у текстовых
-     узлов нет своего z-index, и они рисуются раньше позиционированных псевдо */
-  z-index: -2;
-}
-
-/* включённое состояние — плёнка поверх арта */
-html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .views button::after,
-html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .lenta-tabs .tab::after,
-html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .flag-btn::after,
-html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .lang-btn::after,
-html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .tool::after,
-html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .corner::after {
-  content: "";
-  position: absolute;
-  inset: 4px;
-  border-radius: 999px;
-  background: var(--accent);
-  opacity: 0;
-  transition: opacity 0.35s ease;
-  pointer-events: none;
   z-index: -1;
 }
 
-html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .tool::after,
-html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .corner::after {
-  inset: 3px;
-  border-radius: 50%;
-}
-
-html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .views button[aria-pressed="true"]::after,
-html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .lenta-tabs .tab[aria-pressed="true"]::after,
-html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .flag-btn[aria-pressed="true"]::after,
-html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .tool[aria-pressed="true"]::after,
-html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .corner[aria-pressed="true"]::after {
-  opacity: 0.62;
-}
-
-/* на синей плёнке тёмные буквы тонут — включаем белые, как у активной вкладки */
+/* включённое состояние — внутренняя тень токеном скина */
 html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .views button[aria-pressed="true"],
 html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .lenta-tabs .tab[aria-pressed="true"],
 html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .flag-btn[aria-pressed="true"],
 html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .lang-btn[aria-pressed="true"] {
+  /* гасим CSS-градиент включённой кнопки: арт уже нарисован, сверху только тень */
+  background: none;
+  border-color: transparent;
   color: #fff;
-  text-shadow: 0 1px 2px rgba(0, 40, 80, 0.55);
+  text-shadow: 0 1px 2px rgba(0, 30, 60, 0.55);
+  box-shadow: inset 0 0 0 100px rgba(23, 168, 221, 0.62);
 }
 
+html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .tool[aria-pressed="true"],
+html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .corner[aria-pressed="true"] {
+  background-color: transparent;
+  background-image: var(--btn-round);
+  background-size: 100% 100%;
+  border-color: transparent;
+  box-shadow: inset 0 0 0 100px rgba(23, 168, 221, 0.5);
+}
+
+html[data-buttons="a"] #fxToggle[aria-pressed="true"],
+html[data-buttons="c"] #fxToggle[aria-pressed="true"],
+html[data-buttons="d"] #fxToggle[aria-pressed="true"] {
+  background-image: url("icons/star.png"), var(--btn-round);
+  background-size: 78% 78%, 100% 100%;
+}
+
+/* иконки и подписи всегда читаемы */
 html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .flag-btn b,
 html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .lang-btn b {
-  color: #0b5c8e;
-}
-
-html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .flag-btn[aria-pressed="true"] b {
   color: #fff;
 }
 
-/* силуэты в круглых кнопках: тёмно-синий, иначе на светлом арте их не видно */
 html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .tool svg {
-  fill: #0b5c8e;
+  fill: #eaf8ff;
+  filter: drop-shadow(0 1px 1px rgba(0, 30, 60, 0.55));
 }
 
-/* текст и иконки — над плёнкой */
-html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .views button,
-html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .lenta-tabs .tab,
-html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .flag-btn,
+/* язык в шапке и правой панели: полное название по центру, не «ar» */
 html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .lang-btn,
-html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .tool,
-html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .corner {
-  isolation: isolate;
+html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .flag-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
 }
 
-html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .views button > *,
-html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .lenta-tabs .tab > *,
-html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .flag-btn > *,
-html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .lang-btn > * {
-  position: relative;
-  z-index: 1;
+html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .lang-btn b,
+html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .flag-btn b {
+  font-weight: 600;
+  letter-spacing: 0;
 }
