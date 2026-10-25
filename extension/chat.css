@@ -142,6 +142,12 @@ html.standalone .wrap {
   will-change: transform;
 }
 
+/* листва и шар — часть Aero-сцены; у простых скинов их быть не должно */
+html:not([data-glass="1"]) .bg-leaf,
+html:not([data-glass="1"]) .bg-sphere {
+  display: none;
+}
+
 /* Стеклянный шар в правом нижнем углу: лежит ПОД слоем листьев, поэтому снизу
    его прикрывают непрозрачные листики, как на референсе. Квадратный элемент
    ровно по картинке — так блик внутри совпадает с шаром, а не с пустым боксом. */
@@ -2359,11 +2365,12 @@ html[data-glass="1"] .fx-soon {
 }
 
 /* ---------- карточки анимаций: плитки 2 в ряд, текст по наведению ----------
-   Свёрнутая плитка — только медальон и счётчик заряда под ним. Наведение
-   раскрывает плитку на всю ширину панели поверх соседней: слева — вправо,
-   справа — влево (justify-self: end у чётных). Высота ряда фиксирована, чтобы
-   раскрытие не двигало нижние ряды. */
-html[data-glass="1"] .fx-grid {
+   Раскладка общая для всех скинов: свёрнутая плитка — только медальон и счётчик
+   заряда под ним, наведение раскрывает её на ширину панели поверх соседней
+   (слева — вправо, справа — влево, `justify-self: end` у чётных). Высота ряда
+   фиксирована, чтобы раскрытие не двигало нижние ряды.
+   Оформление (стекло, тени, кольцо медальона) добавляет блок data-glass ниже. */
+.fx-grid {
   /* minmax(0, …) обязателен: с обычным 1fr раскрытая плитка тянет свою колонку
      за собой и вторая сжимается до 32 px — весь ряд прыгает */
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -2371,7 +2378,7 @@ html[data-glass="1"] .fx-grid {
   gap: 8px;
 }
 
-html[data-glass="1"] .fx-card {
+.fx-card {
   box-sizing: border-box;
   position: relative;
   z-index: 1;
@@ -2388,37 +2395,25 @@ html[data-glass="1"] .fx-card {
   padding: 8px 6px 22px;
   overflow: hidden;
   text-align: left;
-  border: 2px solid rgba(255, 255, 255, 0.92);
-  border-radius: 18px;
-  background: linear-gradient(165deg, rgba(255, 255, 255, 0.92) 0%, rgba(224, 247, 255, 0.72) 46%, rgba(178, 226, 248, 0.66) 100%);
-  box-shadow:
-    inset 0 2px 0 #fff,
-    inset 0 -10px 18px -14px rgba(24, 110, 170, 0.55),
-    0 8px 18px -12px var(--deep);
   transition: width 0.13s ease, padding 0.13s ease, column-gap 0.13s ease, grid-template-columns 0.13s ease;
 }
 
-html[data-glass="1"] .fx-card:nth-child(even) {
+.fx-card:nth-child(even) {
   justify-self: end;
 }
 
-html[data-glass="1"] .fx-card:hover,
-html[data-glass="1"] .fx-card:focus-within,
-html[data-glass="1"] .fx-card[aria-pressed="true"] {
+.fx-card:hover,
+.fx-card:focus-within,
+.fx-card[aria-pressed="true"] {
   width: var(--fx-expand, 216px);
   z-index: 9;
   grid-template-columns: 52px minmax(0, 1fr);
   column-gap: 10px;
   padding: 8px 10px;
-  /* раскрытая плитка должна наглухо закрыть соседнюю, а не просвечивать */
-  background: linear-gradient(165deg, #ffffff 0%, #eaf9ff 44%, #cfeafb 100%);
-  box-shadow:
-    inset 0 2px 0 #fff,
-    0 14px 28px -14px var(--deep),
-    0 0 0 1px rgba(255, 255, 255, 0.9);
 }
 
-html[data-glass="1"] .fx-card .emo {
+.fx-card .emo {
+  position: relative;
   grid-column: 1;
   grid-row: 1 / span 2;
   width: 52px;
@@ -2426,40 +2421,43 @@ html[data-glass="1"] .fx-card .emo {
   margin: 0;
   border-radius: 50%;
   font-size: 0;
-  background-size: 90% 90%;
-  background-repeat: no-repeat;
-  background-position: center;
-  background-image: radial-gradient(circle at 34% 24%, #ffffff 0%, #f2fdff 24%, #d9f3ff 50%, #a8dcf7 76%, #77c4ec 100%);
-  box-shadow:
-    0 0 0 3px rgba(255, 255, 255, 0.95),
-    0 0 0 4px rgba(146, 216, 246, 0.6),
-    inset 0 3px 8px rgba(255, 255, 255, 0.95),
-    inset 0 -12px 18px -12px rgba(18, 105, 165, 0.6),
-    0 8px 16px -8px var(--deep);
 }
 
-/* Значки анимаций — настоящие PNG из extension/icons (нарисованы в стиле Aero),
-   а не emoji и не вектор. Плашка медальона остаётся тенью-кольцом. */
-html[data-glass="1"] .fx-card .emo > * {
+/* Значки анимаций — настоящие PNG из extension/icons. Эмодзи и старый вектор
+   внутри медальона больше не нужны: картинка рисуется псевдоэлементом, чтобы
+   стеклянная подложка медальона осталась собственной. */
+.fx-card .emo > * {
   display: none;
 }
 
-html[data-glass="1"] .fx-card[data-fx="flame"] .emo { background-image: url("icons/fx-flame.png"); }
-html[data-glass="1"] .fx-card[data-fx="shield"] .emo { background-image: url("icons/fx-shield.png"); }
-html[data-glass="1"] .fx-card[data-fx="meteor"] .emo { background-image: url("icons/fx-meteor.png"); }
-html[data-glass="1"] .fx-card[data-fx="storm"] .emo { background-image: url("icons/fx-storm.png"); }
-html[data-glass="1"] .fx-card[data-fx="void"] .emo { background-image: url("icons/fx-void.png"); }
-html[data-glass="1"] .fx-card[data-fx="crown"] .emo { background-image: url("icons/fx-crown.png"); }
+.fx-card .emo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-image: var(--fx-icon, none);
+  background-size: 90% 90%;
+  background-repeat: no-repeat;
+  background-position: center;
+  pointer-events: none;
+}
 
-html[data-glass="1"] .fx-card .fx-art {
+.fx-card[data-fx="flame"] .emo { --fx-icon: url("icons/fx-flame.png"); }
+.fx-card[data-fx="shield"] .emo { --fx-icon: url("icons/fx-shield.png"); }
+.fx-card[data-fx="meteor"] .emo { --fx-icon: url("icons/fx-meteor.png"); }
+.fx-card[data-fx="storm"] .emo { --fx-icon: url("icons/fx-storm.png"); }
+.fx-card[data-fx="void"] .emo { --fx-icon: url("icons/fx-void.png"); }
+.fx-card[data-fx="crown"] .emo { --fx-icon: url("icons/fx-crown.png"); }
+
+.fx-card .fx-art {
   width: 40px;
   height: 40px;
 }
 
 /* название и описание живут в свёрнутой плитке нулевой шириной и раскрываются
    на месте: так ширина анимируется, а текст не «прыгает» из ниоткуда */
-html[data-glass="1"] .fx-card .nm,
-html[data-glass="1"] .fx-card .ds {
+.fx-card .nm,
+.fx-card .ds {
   max-width: 0;
   opacity: 0;
   overflow: hidden;
@@ -2467,7 +2465,7 @@ html[data-glass="1"] .fx-card .ds {
   transition: max-width 0.13s ease, opacity 0.1s ease;
 }
 
-html[data-glass="1"] .fx-card .nm {
+.fx-card .nm {
   grid-column: 2;
   grid-row: 1;
   margin: 0;
@@ -2476,7 +2474,7 @@ html[data-glass="1"] .fx-card .nm {
   color: var(--ink);
 }
 
-html[data-glass="1"] .fx-card .ds {
+.fx-card .ds {
   grid-column: 2;
   grid-row: 2;
   font-size: 11.5px;
@@ -2484,17 +2482,17 @@ html[data-glass="1"] .fx-card .ds {
   color: var(--ink);
 }
 
-html[data-glass="1"] .fx-card:hover .nm,
-html[data-glass="1"] .fx-card:focus-within .nm,
-html[data-glass="1"] .fx-card[aria-pressed="true"] .nm {
+.fx-card:hover .nm,
+.fx-card:focus-within .nm,
+.fx-card[aria-pressed="true"] .nm {
   max-width: 120px;
   opacity: 1;
   white-space: normal;
 }
 
-html[data-glass="1"] .fx-card:hover .ds,
-html[data-glass="1"] .fx-card:focus-within .ds,
-html[data-glass="1"] .fx-card[aria-pressed="true"] .ds {
+.fx-card:hover .ds,
+.fx-card:focus-within .ds,
+.fx-card[aria-pressed="true"] .ds {
   max-width: 120px;
   opacity: 1;
   white-space: normal;
@@ -2503,7 +2501,9 @@ html[data-glass="1"] .fx-card[aria-pressed="true"] .ds {
   -webkit-box-orient: vertical;
 }
 
-html[data-glass="1"] .fx-card .fx-left {
+/* остаток заряда сидит на углу медальона, как значок в игре: в карточке шириной
+   ~180 px справа от имени он отнимал бы у названия половину строки */
+.fx-card .fx-left {
   position: absolute;
   left: 50%;
   bottom: 5px;
@@ -2511,23 +2511,79 @@ html[data-glass="1"] .fx-card .fx-left {
   right: auto;
   transform: translateX(-50%);
   padding: 0 7px;
-  border: 1px solid rgba(255, 255, 255, 0.95);
+  border: 1px solid var(--line);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.9);
-  color: #0b5c8e;
+  background: var(--panel-alt);
+  color: var(--ink);
   font-size: 10px;
   font-weight: 700;
-  box-shadow: 0 2px 6px -3px var(--deep);
 }
 
-html[data-glass="1"] .fx-card:hover .fx-left,
-html[data-glass="1"] .fx-card:focus-within .fx-left,
-html[data-glass="1"] .fx-card[aria-pressed="true"] .fx-left {
+.fx-card:hover .fx-left,
+.fx-card:focus-within .fx-left,
+.fx-card[aria-pressed="true"] .fx-left {
   left: auto;
   right: 8px;
   bottom: auto;
   top: 6px;
   transform: none;
+}
+
+/* подсказка над плитками убрана: жест «зажать и перетащить» виден по курсору */
+.fx-hint {
+  display: none;
+}
+
+/* ---------- оформление плиток у стеклянного скина ---------- */
+html[data-glass="1"] .fx-card {
+  border: 2px solid rgba(255, 255, 255, 0.92);
+  border-radius: 20px;
+  background: linear-gradient(165deg, rgba(255, 255, 255, 0.92) 0%, rgba(224, 247, 255, 0.72) 46%, rgba(178, 226, 248, 0.66) 100%);
+  box-shadow:
+    inset 0 2px 0 #fff,
+    inset 0 -10px 18px -14px rgba(24, 110, 170, 0.55),
+    0 8px 18px -12px var(--deep);
+}
+
+html[data-glass="1"] .fx-card:active {
+  transform: translateY(1px);
+}
+
+html[data-glass="1"] .fx-card .emo {
+  background:
+    radial-gradient(circle at 34% 24%, #ffffff 0%, #f2fdff 24%, #d9f3ff 50%, #a8dcf7 76%, #77c4ec 100%);
+  box-shadow:
+    0 0 0 3px rgba(255, 255, 255, 0.95),
+    0 0 0 4px rgba(146, 216, 246, 0.6),
+    inset 0 3px 8px rgba(255, 255, 255, 0.95),
+    inset 0 -12px 18px -12px rgba(18, 105, 165, 0.6),
+    0 8px 16px -8px var(--deep);
+}
+
+html[data-glass="1"] .fx-card:hover,
+html[data-glass="1"] .fx-card:focus-within,
+html[data-glass="1"] .fx-card[aria-pressed="true"] {
+  /* раскрытая плитка должна наглухо закрыть соседнюю, а не просвечивать */
+  background: linear-gradient(165deg, #ffffff 0%, #eaf9ff 44%, #cfeafb 100%);
+  box-shadow:
+    inset 0 2px 0 #fff,
+    0 14px 28px -14px var(--deep),
+    0 0 0 1px rgba(255, 255, 255, 0.9);
+}
+
+html[data-glass="1"] .fx-card .fx-art {
+  width: 40px;
+  height: 40px;
+}
+
+html[data-glass="1"] .fx-card .fx-left {
+  padding: 1px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.9);
+  color: #0b5c8e;
+  font-size: 10px;
+  font-weight: 700;
+  box-shadow: 0 2px 6px -3px var(--deep);
 }
 
 /* включённый заряд светится цветом своего значка: огонь — янтарным, щит — голубым */
@@ -2564,11 +2620,6 @@ html[data-glass="1"] .fx-card.spent {
 
 html[data-glass="1"] .fx-card.spent .emo {
   filter: saturate(0.55) brightness(0.92);
-}
-
-/* подсказка над плитками убрана: жест «зажать и перетащить» виден по курсору */
-html[data-glass="1"] .fx-hint {
-  display: none;
 }
 
 /* 2px-я кромка не должна раздувать кнопки: без border-box круглая «капля»

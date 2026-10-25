@@ -30,7 +30,7 @@ Worker. Аккуратный читатель заметит: это не «ко
 
 Нужен браузер на Chromium (Chrome, Яндекс, Edge, Vivaldi) версии 88 и новее.
 
-1. Скачать `orbita-v0.4.11.zip` в [Releases](https://github.com/MeLord2024/Orbita/releases/latest).
+1. Скачать `orbita-v0.4.12.zip` в [Releases](https://github.com/MeLord2024/Orbita/releases/latest).
 2. Распаковать в любую папку, которую не будете удалять (расширение читается из неё при каждом запуске).
 3. `chrome://extensions` → включить **Режим разработчика** → **Загрузить распакованное расширение** →
    выбрать папку `extension`.

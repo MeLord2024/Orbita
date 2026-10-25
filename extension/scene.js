@@ -260,7 +260,6 @@ export function createScene(canvas) {
 
   function apply() {
     stop();
-    canvas.style.display = active ? "" : "none";
     if (!active) {
       ctx.clearRect(0, 0, w, h);
       return;
@@ -288,6 +287,10 @@ export function createScene(canvas) {
       bubblesOn = (next.bubbles || 0) > 0;
       sunTarget = (next.sun || 0) > 0 ? 1 : 0;
       speed = 0.35 + (Math.max(next.bubbles || 0, next.sun || 0) / 100) * 1.85;
+      /* Сначала показываем canvas, потом меряем: у display:none прямоугольник
+         нулевой, кеш сцены не строился, и первый клик по Frutiger давал пустой
+         фон — приходилось нажимать скин второй раз. */
+      canvas.style.display = active ? "" : "none";
       resize();
       if (!active || wasActive !== active) apply();
       else if (!running) start();
