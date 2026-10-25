@@ -2709,6 +2709,8 @@ html[data-glass="1"] .bubble::before {
 }
 
 html[data-glass="1"] .bubble .vbtn {
+  transition: background-color 0.35s ease, color 0.35s ease, box-shadow 0.35s ease,
+    border-color 0.35s ease, transform 0.12s ease;
   font-size: 15px;
   line-height: 1;
   padding: 1px 5px;
@@ -2729,7 +2731,8 @@ html[data-glass="1"] .bubble .vbtn.star.has {
 }
 
 html[data-glass="1"] .bubble .vbtn.star[aria-pressed="true"] {
-  background: linear-gradient(180deg, #fff8e0, rgba(255, 214, 120, 0.6));
+  background-color: rgba(255, 214, 120, 0.65);
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0));
   color: #f0a500;
   text-shadow: 0 0 8px rgba(255, 190, 60, 0.9);
 }
@@ -2953,6 +2956,8 @@ html[data-glass="1"] .votes {
 }
 
 html[data-glass="1"] .votes .vbtn {
+  transition: background-color 0.35s ease, color 0.35s ease, box-shadow 0.35s ease,
+    border-color 0.35s ease, transform 0.12s ease;
   font-size: 19px;
   line-height: 1;
   padding: 3px 5px;
@@ -2989,7 +2994,8 @@ html[data-glass="1"] .star-num {
 }
 
 html[data-glass="1"] .votes .vbtn.star[aria-pressed="true"] {
-  background: linear-gradient(180deg, #fff8e0, rgba(255, 214, 120, 0.55));
+  background-color: rgba(255, 214, 120, 0.6);
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0));
   border-color: #f0b429;
   color: #f0a500;
   text-shadow: 0 0 9px rgba(255, 190, 60, 0.95);
@@ -3114,4 +3120,127 @@ html[data-glass="1"] .skin-card .sw {
 html[data-glass="1"] .feed::-webkit-scrollbar-thumb {
   background: linear-gradient(180deg, #fff, rgba(172, 222, 245, 0.95));
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.9);
+}
+
+/* ---------- пресеты кнопок: стандарт / стекло A / C / D ----------
+   Картинки — вырезанные PNG. Круглые кнопки используют арт 1:1 (он квадратный,
+   поэтому не растягивается), «пилюли» — nine-slice через border-image: углы
+   фиксированные, середина тянется, поэтому «Все» и «Мои сообщения» одинаковые
+   по форме при разной ширине. Включённое состояние — не вторая картинка, а
+   синяя плёнка поверх арта, её прозрачность и анимируется (0.35 с). */
+html[data-buttons="a"] {
+  --btn-round: url("icons/btn-a-round.png");
+  --btn-pill: url("icons/btn-a-pill.png");
+}
+
+html[data-buttons="c"] {
+  --btn-round: url("icons/btn-c-round.png");
+  --btn-pill: url("icons/btn-c-pill.png");
+}
+
+html[data-buttons="d"] {
+  --btn-round: url("icons/btn-d-round.png");
+  --btn-pill: url("icons/btn-d-pill.png");
+}
+
+html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .tool,
+html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .corner {
+  background-image: var(--btn-round);
+  background-size: 100% 100%;
+  background-color: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+/* глянец уже нарисован в картинке */
+html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .top .tools > button::after,
+html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .top .cluster > button::after {
+  background: none;
+  height: 0;
+  top: 0;
+}
+
+/* звезда в шапке: арт + её собственная звёздочка поверх */
+html[data-buttons="a"] #fxToggle,
+html[data-buttons="c"] #fxToggle,
+html[data-buttons="d"] #fxToggle {
+  background-image: url("icons/star.png"), var(--btn-round);
+  background-size: 78% 78%, 100% 100%;
+  background-position: center, center;
+  background-repeat: no-repeat, no-repeat;
+}
+
+/* «пилюли» с текстом */
+html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .views button,
+html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .lenta-tabs .tab,
+html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .flag-btn,
+html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .lang-btn {
+  position: relative;
+  background: none;
+  border-color: transparent;
+  box-shadow: none;
+  color: var(--ink);
+}
+
+html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .views button::before,
+html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .lenta-tabs .tab::before,
+html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .flag-btn::before,
+html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .lang-btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 15px solid transparent;
+  border-image: var(--btn-pill) 30 fill / 15px / 0 stretch;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* включённое состояние — плёнка поверх арта */
+html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .views button::after,
+html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .lenta-tabs .tab::after,
+html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .flag-btn::after,
+html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .lang-btn::after,
+html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .tool::after,
+html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .corner::after {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border-radius: 999px;
+  background: var(--accent);
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+  z-index: 0;
+}
+
+html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .tool::after,
+html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .corner::after {
+  inset: 3px;
+  border-radius: 50%;
+}
+
+html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .views button[aria-pressed="true"]::after,
+html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .lenta-tabs .tab[aria-pressed="true"]::after,
+html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .flag-btn[aria-pressed="true"]::after,
+html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .tool[aria-pressed="true"]::after,
+html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .corner[aria-pressed="true"]::after {
+  opacity: 0.45;
+}
+
+/* текст и иконки — над плёнкой */
+html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .views button,
+html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .lenta-tabs .tab,
+html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .flag-btn,
+html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .lang-btn,
+html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .tool,
+html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .corner {
+  isolation: isolate;
+}
+
+html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .views button > *,
+html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .lenta-tabs .tab > *,
+html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .flag-btn > *,
+html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .lang-btn > * {
+  position: relative;
+  z-index: 1;
 }

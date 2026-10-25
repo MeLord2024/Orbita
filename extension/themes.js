@@ -177,6 +177,7 @@ export const DEFAULT_THEME = {
   blur: false,
   live: { bubbles: 60, sun: 60, plants: 60 },
   sphereSpeed: 60,
+  buttons: "std",
   panelAlpha: 10,
   gradient: { ...SPECIAL_SKINS[0].gradient, custom: false },
   background: { data: "", fit: "cover", alpha: 0.35 },
@@ -260,6 +261,7 @@ export function applyTheme(root, theme) {
     root.dataset[LIVE_ATTR[key]] = skin.glass && value > 0 ? "1" : "0";
   }
   set("--panel-a", String(Math.max(0, Math.min(100, Number(theme.panelAlpha) || 0)) / 100));
+  root.dataset.buttons = ["std", "a", "c", "d"].includes(theme.buttons) ? theme.buttons : "std";
   const sphere = Math.max(0, Math.min(100, Number(theme.sphereSpeed ?? 60)));
   set("--k-sphere", String(liveK(sphere)));
   root.dataset.sphere = skin.glass && sphere > 0 ? "1" : "0";
@@ -291,6 +293,7 @@ export function normalizeTheme(raw) {
   if (Number.isFinite(Number(raw.panelAlpha))) {
     base.panelAlpha = Math.max(0, Math.min(100, Math.round(Number(raw.panelAlpha))));
   }
+  if (["std", "a", "c", "d"].includes(raw.buttons)) base.buttons = raw.buttons;
   if (Number.isFinite(Number(raw.sphereSpeed))) {
     base.sphereSpeed = Math.max(0, Math.min(100, Math.round(Number(raw.sphereSpeed))));
   }
