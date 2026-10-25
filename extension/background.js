@@ -382,6 +382,11 @@ function webUrl(tab) {
 }
 
 async function toggleForTab(tab) {
+  const self = chrome.runtime.getURL("chat.html");
+  if ((tab.url || "").startsWith(self)) {
+    if (tab.id != null) chrome.tabs.remove(tab.id);
+    return;
+  }
   const url = webUrl(tab);
   if (!/^https?:/.test(url)) {
     openStandalone(tab, url);
@@ -409,10 +414,32 @@ chrome.commands.onCommand.addListener(async (command, maybeTab) => {
    доменов и сайтов, которые скрипт extensions не принимают. */
 const pendingOverlay = new Map();
 
-function openChatTab(url, title, lang, msg) {
+async function openChatTab(url, title, lang, msg) {
+  const base = chrome.runtime.getURL("chat.html");
+  /* Та же комната уже открыта вкладкой — переключаемся на неё: иначе каждое
+     нажатие иконки на «мёртвом» сайте плодило ещё одну вкладку чата. */
+  try {
+    const tabs = await chrome.tabs.query({ url: `${base}*` });
+    for (const t of tabs) {
+      let q;
+      try {
+        q = new URL(t.url).searchParams;
+      } catch {
+        continue;
+      }
+      if (q.get("url") !== url) continue;
+      if (msg && q.get("msg") !== msg) continue;
+      await chrome.tabs.update(t.id, { active: true });
+      if (t.windowId != null) await chrome.windows.update(t.windowId, { focused: true });
+      return t.id;
+    }
+  } catch {
+    /* без доступа к вкладкам просто создадим новую */
+  }
   const q = new URLSearchParams({ url, title: title || "", lang: lang || guessLang() });
   if (msg) q.set("msg", msg);
-  chrome.tabs.create({ url: chrome.runtime.getURL(`chat.html?${q}`) });
+  const created = await chrome.tabs.create({ url: `${base}?${q}` });
+  return created && created.id;
 }
 
 async function attachOverlay(tabId, info) {
@@ -665,11 +692,30 @@ async function isHiddenDomain(url) {
 }
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-  if (!msg || (!msg.cmd && msg.type !== "overlay:toggle")) return;
+  if (!msg || (!msg.cmd && msg.type !== "overlay:toggle" && msg.type !== "chat:close")) return;
   if (msg.type === "overlay:toggle") {
     toggleForTab(sender.tab || { id: sender.tabId, url: msg.url, title: msg.title });
     sendResponse({ ok: true });
     return;
+  }
+  /* Отдельная вкладка чата: у неё нет родительского окна, поэтому «✕» просит
+     фон закрыть вкладку — иначе кнопка не делала ничего. */
+  if (msg.type === "chat:close") {
+    /* sender.tab у страницы расширения есть не всегда — тогда закрываем активную
+       вкладку, если это действительно наш чат. */
+    (async () => {
+      let id = sender.tab ? sender.tab.id : null;
+      if (id == null) {
+        const [active] = await chrome.tabs.query({ active: true, currentWindow: true });
+        const base = chrome.runtime.getURL("chat.html");
+        if (active && (active.url || "").startsWith(base)) id = active.id;
+      }
+      if (id != null) await chrome.tabs.remove(id);
+    })().then(
+      () => sendResponse({ ok: true }),
+      () => sendResponse({ ok: false })
+    );
+    return true;
   }
   handle(msg, sender).then(
     (result) => sendResponse(result),

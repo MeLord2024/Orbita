@@ -2156,7 +2156,19 @@ function debouncedRefresh() {
 
 function close() {
   send("channel:close").catch(() => {});
-  parent.postMessage({ source: "orbita-chat", action: "close" }, "*");
+  if (EMBEDDED) {
+    parent.postMessage({ source: "orbita-chat", action: "close" }, "*");
+    return;
+  }
+  /* Во вкладке родителя нет — просим фон закрыть саму вкладку, и только если
+     сообщение не ушло, пробуем window.close(). */
+  try {
+    chrome.runtime.sendMessage({ type: "chat:close" }, () => {
+      if (chrome.runtime.lastError) window.close();
+    });
+  } catch {
+    window.close();
+  }
 }
 
 function hideSiteRow() {
