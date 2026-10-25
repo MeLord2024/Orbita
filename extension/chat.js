@@ -1472,7 +1472,13 @@ async function refresh() {
   state.clients = (presenceRes && presenceRes.clients) || 0;
   setGroup(presenceRes && presenceRes.group);
   if (quotaRes && quotaRes.quota) state.quota = quotaRes.quota;
+  /* Заряды на карточках рисует renderFx(), а он раньше вызывался только до ответа
+     quota:get — после перезагрузки страницы счётчики висели на «полном» запасе,
+     хотя заряд уже потрачен. Перерисовываем, только если квота правда изменилась,
+     чтобы не сбрасывать наведение и фокус каждые 40 секунд. */
+  const fxBefore = JSON.stringify(state.fx || null);
   if (quotaRes && quotaRes.fx) state.fx = quotaRes.fx;
+  if (JSON.stringify(state.fx || null) !== fxBefore) renderFx();
   // пустая комната: отпечаток совпадает и на старте, а заглушку «пока пусто» всё равно нужно поставить
   if (!sameFeed || !$("feed").childElementCount) renderFeed();
   renderLenta();

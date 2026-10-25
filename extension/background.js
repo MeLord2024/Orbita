@@ -403,7 +403,7 @@ async function toggleForTab(tab) {
 }
 chrome.action.onClicked.addListener((tab) => toggleForTab(tab));
 chrome.commands.onCommand.addListener(async (command, maybeTab) => {
-  if (command !== "toggle-overlay") return;
+  if (command !== "toggle-overlay" && command !== "toggle-overlay-alt") return;
   const tab = maybeTab || (await chrome.tabs.query({ active: true, currentWindow: true }))[0];
   if (tab) toggleForTab(tab);
 });

@@ -156,12 +156,27 @@
     const used = Object.keys(starLedger).length;
     return { used, left: Math.max(0, STAR_MAX - used), windowMs: 864e5 };
   };
-  const fxUsed = { flame: 0, shield: 0 };
-  const fxQuota = () => ({
-    windowMs: 864e5,
-    flame: { used: fxUsed.flame, left: Math.max(0, FX_MAX.flame - fxUsed.flame), max: FX_MAX.flame },
-    shield: { used: fxUsed.shield, left: Math.max(0, FX_MAX.shield - fxUsed.shield), max: FX_MAX.shield },
-  });
+  /* Заряды эффектов переживают перезагрузку стенда — как в боевом сторе, где они
+     лежат в chrome.storage. kv объявлен ниже, поэтому читаем его лениво. */
+  const fxUsed = () => {
+    if (!kv["orbita.fx"]) kv["orbita.fx"] = { flame: 0, shield: 0 };
+    return kv["orbita.fx"];
+  };
+  const saveFx = () => {
+    try {
+      localStorage.setItem("orbita.preview.kv", JSON.stringify(kv));
+    } catch {
+      /* квота стенда */
+    }
+  };
+  const fxQuota = () => {
+    const u = fxUsed();
+    return {
+      windowMs: 864e5,
+      flame: { used: u.flame, left: Math.max(0, FX_MAX.flame - u.flame), max: FX_MAX.flame },
+      shield: { used: u.shield, left: Math.max(0, FX_MAX.shield - u.shield), max: FX_MAX.shield },
+    };
+  };
 
   const norm = (u) => {
     try {
@@ -402,7 +417,8 @@
         if (msg.type === "flame" && prev === "shield") return { error: "protected", quota };
         if (msg.type === "shield" && prev === "shield") return { error: "busy_shield", quota };
         if (quota[msg.type].left <= 0) return { error: "quota", quota };
-        fxUsed[msg.type] += 1;
+        fxUsed()[msg.type] += 1;
+        saveFx();
         m.effect = { type: msg.type, by: "you", ts: Date.now() };
         return { message: m, quenched: prev === "flame", quota: fxQuota() };
       }
