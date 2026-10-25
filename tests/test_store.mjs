@@ -691,6 +691,22 @@ ok("the feed row carries the restored link too", () => {
   assert.equal(plain.replyTo, "", "несовпавшая цитата не должна придумывать родителя");
 });
 
+/* v0.4.22: «все языки» в шапке — чтение всех языковых комнат одного адреса */
+const ALL_LANGS = "https://all-langs.example/post";
+for (const [lang, text] of [["ru", "привет"], ["en", "hello"], ["de", "hallo"]]) {
+  await store.tx((st) => {
+    st.rates = {};
+  });
+  await store.postMessage({ url: ALL_LANGS, title: "t", lang, text });
+}
+const allFeed = await store.feed({ url: ALL_LANGS, lang: "*", view: "all", period: "all" });
+const enFeed = await store.feed({ url: ALL_LANGS, lang: "en", view: "all", period: "all" });
+ok("all languages reads every language room of the page", () => {
+  assert.equal(allFeed.length, 3);
+  assert.deepEqual(allFeed.map((m) => m.lang).sort(), ["de", "en", "ru"]);
+});
+ok("a concrete language still sees only its own room", () => assert.deepEqual(enFeed.map((m) => m.text), ["hello"]));
+
 await store.clearAll();
 const cleared = await store.stats();
 const keptIdentity = await store.getIdentity();

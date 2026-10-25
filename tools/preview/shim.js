@@ -320,7 +320,9 @@
         return { message: created };
       }
       case "feed:get": {
-        let list = messages.filter((m) => m.lang === msg.lang && homeOf(m.url) === homeOf(msg.url));
+        let list = messages.filter(
+          (m) => (msg.lang === "*" || m.lang === msg.lang) && homeOf(m.url) === homeOf(msg.url)
+        );
         if (msg.view === "important") list = list.filter((m) => m.stars.length);
         if (msg.view === "mine") list = list.filter((m) => m.author.id === ME);
         list = [...list].sort((a, b) =>

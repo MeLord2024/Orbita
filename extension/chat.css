@@ -419,6 +419,7 @@ html[data-plant="1"] .bg-leaf-br::after {
   display: flex;
   align-items: center;
   gap: 6px;
+  white-space: nowrap;
 }
 
 .lang-btn:hover,
@@ -444,6 +445,7 @@ html[data-plant="1"] .bg-leaf-br::after {
   padding: 3px 6px;
   font-size: 11px;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .flag-btn:hover,
@@ -617,6 +619,8 @@ html[data-plant="1"] .bg-leaf-br::after {
 }
 
 .fx {
+  display: flex;
+  flex-direction: column;
   padding: 8px;
   overflow-y: auto;
   background: var(--drawer);
@@ -676,7 +680,31 @@ html[data-plant="1"] .bg-leaf-br::after {
   padding-top: 8px;
 }
 
+/* подпись о сборке — подвал панели, а не строка сразу под карточками:
+   прижимаем к нижней кромке, чтобы её не приходилось искать после пустоты */
+.fx-foot {
+  flex: 0 0 auto;
+  margin-top: auto;
+  padding-top: 9px;
+  border-top: 1px solid var(--line);
+}
+
+.fx-foot .fx-soon {
+  margin: 0;
+  padding-top: 0;
+  border-top: 0;
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--ink);
+  opacity: 0.82;
+}
+
+.fx-foot .fx-soon + .fx-soon {
+  margin-top: 5px;
+}
+
 .fx-grid {
+  flex: 0 0 auto;
   display: grid;
   gap: 6px;
 }
@@ -2422,10 +2450,34 @@ html[data-glass="1"] .fx h3 {
 }
 
 html[data-glass="1"] .fx-hint,
-html[data-glass="1"] .lenta-hint,
-html[data-glass="1"] .fx-soon {
+html[data-glass="1"] .lenta-hint {
   font-size: 10.5px;
   line-height: 1.35;
+}
+
+/* футер панели на стекле: плотная белая плашка и тёмный текст — читается
+   на любом кадре аэро-фона, в том числе на светлом небе */
+html[data-glass="1"] .fx-foot {
+  margin-top: auto;
+  padding: 9px 8px 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(236, 250, 255, 0.88));
+  box-shadow: inset 0 1px 0 #fff, 0 6px 14px -10px var(--deep);
+}
+
+html[data-glass="1"] .fx-foot .fx-soon {
+  font-size: 11.5px;
+  line-height: 1.5;
+  font-weight: 600;
+  color: #0b4a6f;
+  opacity: 1;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.95);
+}
+
+html[data-glass="1"] .fx-foot .fx-meta a {
+  color: #005b90;
+  font-weight: 700;
 }
 
 /* ---------- карточки анимаций: плитки 2 в ряд, текст по наведению ----------
@@ -2828,9 +2880,12 @@ html[data-glass="1"] .corner {
     box-shadow 0.5s ease, text-shadow 0.5s ease, transform 0.12s ease;
 }
 
-/* мягкий верхний глянец: ровно то, что отличает «каплю» от плоского кружка */
+/* мягкий верхний глянец: ровно то, что отличает «каплю» от плоского кружка.
+   Только круглые кнопки: у языковых пилюль ::after занят девятислайсовым артом,
+   и этот блик обрезал его до полоски сверху — кнопка выглядела кривой. */
 html[data-glass="1"] .top .tools > button::after,
-html[data-glass="1"] .top .cluster > button::after,
+html[data-glass="1"] .top .cluster > .tool::after,
+html[data-glass="1"] .top .cluster > .corner::after,
 html[data-glass="1"] .send::after {
   content: "";
   position: absolute;

@@ -128,12 +128,21 @@ const SOUND_MAX_BYTES = 3 * 1024 * 1024;
 
 let t = makeT("ru");
 let myId = "";
+/* Пока человек не выбрал язык комнаты вручную, он следует за языком интерфейса:
+   так просил пользователь — «по умолчанию пусть всегда выбирается язык интерфейса».
+   Ссылка на конкретный комментарий (`?msg=`) — не «по умолчанию»: она ведёт в свою
+   языковую комнату, иначе переход из «Ответов» открывал бы чужой язык. */
+let roomLangPicked = !!params.get("msg");
 /* До v0.3.0 автором и голосующим был сам deviceId. Строки с ним никуда не делись из
    локальной базы, поэтому «моё» — это и алиас, и старый deviceId: иначе после обновления
    свои комментарии стали бы чужими (без 🗑), а собственные голоса — пропавшими. */
 let myIds = [];
 const isMine = (authorId) => !!authorId && myIds.includes(authorId);
 const among = (list) => (list || []).some((x) => myIds.includes(x));
+
+/* «Все языки» — режим чтения: общей комнаты «все языки» не существует, поэтому
+   отправка и присутствие уходят в конкретную комнату языка интерфейса. */
+const writeLang = () => (state.lang === "*" ? (state.settings && state.settings.uiLang) || "en" : state.lang);
 
 function storeGet(key) {
   return new Promise((resolve) => {
@@ -277,8 +286,10 @@ function initStandaloneWindow(raw, geom) {
 /* ---------- locale ---------- */
 
 function applyLocale() {
-  t = makeT(state.settings ? state.settings.uiLang : "ru");
-  document.documentElement.lang = state.settings ? state.settings.uiLang : "ru";
+  const uiLang = (state.settings && state.settings.uiLang) || "ru";
+  t = makeT(uiLang);
+  document.documentElement.lang = uiLang;
+  if (!roomLangPicked) state.lang = uiLang;
   $("fxTitle").textContent = t("fx.title");
   $("fxHint").textContent = t("fx.hint");
   $("fxSoon").textContent = t("fx.soon");
@@ -415,7 +426,7 @@ function renderHeader() {
   /* В кнопке — полное самоназвание языка («العربية», а не «ar»): код в три
      символа ничего не говорит, особенно на нелатинских языках. */
   const langBtn = $("langBtn");
-  const langLabel = el("b", null, langTitle(state.lang));
+  const langLabel = el("b", null, state.lang === "*" ? t("lang.all") : langTitle(state.lang));
   langLabel.dir = "auto";
   langBtn.replaceChildren(langLabel);
   langBtn.title = t("header.lang");
@@ -1491,7 +1502,7 @@ async function refresh() {
   const [feedRes, lentaRes, presenceRes, quotaRes, answersRes] = await Promise.all([
     send("feed:get", { url: state.url, lang: state.lang, view: state.view, period: state.period, sort: state.view === "top" ? "score" : "new", filter }),
     lentaCall,
-    send("presence", { url: state.url, lang: state.lang }),
+    send("presence", { url: state.url, lang: writeLang() }),
     send("quota:get"),
     // ответов всегда три: счётчик на табе обязан жить, даже когда открыт другой раздел
     send("answers:get", { lang: state.lentaLang, period: state.lentaPeriod, filter }),
@@ -1661,7 +1672,7 @@ function answerRowNode(row) {
    догрузится. Прежняя вкладка chat.html остаётся запасным путём — её выбирает сам
    background, если сайт не принимает оверлей. */
 function gotoPost(url, lang, msgId) {
-  if (normalizeUrl(url) === normalizeUrl(state.url) && lang === state.lang) {
+  if (normalizeUrl(url) === normalizeUrl(state.url) && (state.lang === "*" || lang === state.lang)) {
     jumpToMessage(msgId);
     return;
   }
@@ -1843,8 +1854,9 @@ function bindEvents() {
   $("langBtn").addEventListener("click", () =>
     openLangPop($("langBtn"), state.lang, (code) => {
       state.lang = code;
+      roomLangPicked = true;
       refresh();
-    }, false)
+    }, true)
   );
   $("lentaLangBtn").addEventListener("click", () =>
     openLangPop($("lentaLangBtn"), state.lentaLang, (code) => {
@@ -2100,7 +2112,7 @@ function bindEvents() {
     const res = await send("msg:post", {
       url: state.url,
       title: state.title,
-      lang: state.lang,
+      lang: writeLang(),
       text,
       quote: state.quote ? state.quote.text : "",
       replyTo: state.quote ? state.quote.id : "",
@@ -2266,7 +2278,7 @@ async function init() {
   }
   // браузер не даёт звуку стартовать без жеста: первое же касание будит AudioContext
   addEventListener("pointerdown", unlockSound, { capture: true });
-  await send("channel:open", { url: state.url, title: state.title, lang: state.lang, visible: !document.hidden });
+  await send("channel:open", { url: state.url, title: state.title, lang: writeLang(), visible: !document.hidden });
   await refresh();
   measurePanels();
   syncPanels("init");
@@ -2278,7 +2290,7 @@ async function init() {
   // маяк: раз в 20 секунд говорим фоновому скрипту, что эта комната жива, и говорим,
   // смотрит ли в неё человек — фоновая вкладка не должна считаться «онлайном»
   const ping = () =>
-    send("presence", { url: state.url, lang: state.lang, visible: !document.hidden })
+    send("presence", { url: state.url, lang: writeLang(), visible: !document.hidden })
       .then((r) => {
         if (r && typeof r.clients === "number") {
           state.clients = r.clients;

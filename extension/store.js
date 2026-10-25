@@ -615,9 +615,15 @@ export const mineIds = (id) => [id.pub, id.deviceId];
 export async function feed({ url, lang, view = "all", period = "recent", sort = "new", filter = true }) {
   const id = await getIdentity();
   return tx((st) => {
-    const ch = channelKey(canonical(st, url), lang);
-    const chan = st.channels[ch];
-    let list = chan ? chan.msgIds.map((mId) => st.messages[mId]).filter(Boolean) : [];
+    /* «Все языки» — это не отдельная комната, а чтение всех языковых каналов
+       одного адреса (включая склеенные зеркала: они лежат под общим room). */
+    const room = canonical(st, url);
+    const chans =
+      lang === "*"
+        ? Object.values(st.channels).filter((c) => c && c.url === room)
+        : [st.channels[channelKey(room, lang)]];
+    const ids = [...new Set(chans.filter(Boolean).flatMap((c) => c.msgIds))];
+    let list = ids.map((mId) => st.messages[mId]).filter(Boolean);
     if (view === "important") list = list.filter((m) => m.stars.length > 0);
     if (view === "mine") list = list.filter((m) => mineIds(id).includes(m.author.id));
     list = list.filter((m) => inPeriod(m, period));
