@@ -179,6 +179,109 @@ function applyStandSize(g) {
   if (g.h) style.setProperty("--stand-h", `${g.h}px`);
 }
 
+/* Сайт не открылся — чат живёт отдельной вкладкой. Chrome не пускает скрипты на свою
+   страницу ошибки, поэтому оверлея поверх неё не будет; зато окно чата здесь ведёт
+   себя как настоящий оверлей: таскается за шапку, тянется за угол, запоминает место
+   в том же orbita.geom, что и оверлей на живом сайте. */
+const STAND_MIN = { w: 460, h: 420 };
+
+function initStandaloneWindow(raw, geom) {
+  const wrap = document.querySelector(".wrap");
+  if (!wrap) return;
+  const host = siteHost();
+  const store = raw && typeof raw === "object" ? structuredClone(raw) : {};
+  if (!store.default || typeof store.default !== "object") store.default = {};
+  if (!store.sites || typeof store.sites !== "object") store.sites = {};
+
+  let w = Math.max(STAND_MIN.w, Number(geom.w) || 1180);
+  let h = Math.max(STAND_MIN.h, Number(geom.h) || 680);
+  let x = Number.isFinite(Number(geom.x)) ? Number(geom.x) : Math.round((innerWidth - w) / 2);
+  let y = Number.isFinite(Number(geom.y)) ? Number(geom.y) : Math.round((innerHeight - h) / 2);
+
+  const clamp = () => {
+    w = Math.min(Math.max(STAND_MIN.w, w), Math.max(STAND_MIN.w, innerWidth - 16));
+    h = Math.min(Math.max(STAND_MIN.h, h), Math.max(STAND_MIN.h, innerHeight - 16));
+    x = Math.min(Math.max(8, x), Math.max(8, innerWidth - w - 8));
+    y = Math.min(Math.max(8, y), Math.max(8, innerHeight - h - 8));
+  };
+
+  const paint = () => {
+    clamp();
+    wrap.style.position = "fixed";
+    wrap.style.left = `${Math.round(x)}px`;
+    wrap.style.top = `${Math.round(y)}px`;
+    wrap.style.width = `${Math.round(w)}px`;
+    wrap.style.height = `${Math.round(h)}px`;
+  };
+
+  let saveTimer = 0;
+  const save = () => {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => {
+      const box = { x: Math.round(x), y: Math.round(y), w: Math.round(w), h: Math.round(h) };
+      Object.assign(store.default, box);
+      store.sites[host] = { ...(store.sites[host] || {}), ...box };
+      storeSet(GEOM_KEY, store);
+    }, 250);
+  };
+
+  paint();
+
+  // тянем за шапку, но не за кнопки, поле поиска и селекты
+  const top = document.querySelector(".top");
+  top.addEventListener("pointerdown", (ev) => {
+    if (ev.button !== 0 || ev.target.closest("button, input, select, label, .search")) return;
+    const sx = ev.clientX;
+    const sy = ev.clientY;
+    const ox = x;
+    const oy = y;
+    const move = (e) => {
+      x = ox + (e.clientX - sx);
+      y = oy + (e.clientY - sy);
+      paint();
+    };
+    const done = () => {
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", done);
+      window.removeEventListener("pointercancel", done);
+      save();
+    };
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", done);
+    window.addEventListener("pointercancel", done);
+    ev.preventDefault();
+  });
+
+  // уголок в правом нижнем углу — размер
+  const grip = document.createElement("div");
+  grip.className = "stand-grip";
+  wrap.appendChild(grip);
+  grip.addEventListener("pointerdown", (ev) => {
+    if (ev.button !== 0) return;
+    const sx = ev.clientX;
+    const sy = ev.clientY;
+    const ow = w;
+    const oh = h;
+    const move = (e) => {
+      w = ow + (e.clientX - sx);
+      h = oh + (e.clientY - sy);
+      paint();
+    };
+    const done = () => {
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", done);
+      window.removeEventListener("pointercancel", done);
+      save();
+    };
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", done);
+    window.addEventListener("pointercancel", done);
+    ev.preventDefault();
+  });
+
+  window.addEventListener("resize", paint);
+}
+
 /* ---------- locale ---------- */
 
 function applyLocale() {
@@ -2088,6 +2191,7 @@ async function init() {
   ]);
   const siteGeom = geomFor(geomRaw, siteHost());
   applyStandSize(siteGeom);
+  if (!EMBEDDED) initStandaloneWindow(geomRaw, siteGeom);
   state.collapsed = collapsedRaw && typeof collapsedRaw === "object" ? collapsedRaw : {};
   state.theme = normalizeTheme(themeRaw);
   applyTheme(document.documentElement, state.theme);
