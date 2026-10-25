@@ -312,6 +312,11 @@ function applyLocale() {
       repo
     );
   }
+  const fxHelp = $("fxHelp");
+  if (fxHelp) {
+    fxHelp.title = t("fx.about");
+    fxHelp.setAttribute("aria-label", t("fx.about"));
+  }
   $("lentaTabs").setAttribute("aria-label", t("lenta.title"));
   $("lentaHint").textContent = t("lenta.hint");
   $("lblTop").textContent = t("view.top");
@@ -1820,6 +1825,17 @@ async function loadSettings() {
 
 /* ---------- bindings ---------- */
 
+/* Белый «?» и карточка — одно целое: кнопка остаётся на месте, карточка
+   разворачивается над ней. inert не даёт табам уходить в свёрнутый текст. */
+function setFxInfo(open) {
+  const foot = $("fxFoot");
+  if (!foot) return;
+  foot.dataset.open = open ? "1" : "0";
+  $("fxHelp").setAttribute("aria-expanded", String(open));
+  if (open) $("fxInfo").removeAttribute("inert");
+  else $("fxInfo").setAttribute("inert", "");
+}
+
 function closePopovers(except) {
   ["langPop", "uiLangPop", "profilePop", "themePop", "mirrorPop"].forEach((id) => {
     if (id !== except) $(id).hidden = true;
@@ -1874,8 +1890,13 @@ function bindEvents() {
     $("q").value = "";
     renderFeed();
   });
+  $("fxHelp").addEventListener("click", (ev) => {
+    ev.stopPropagation();
+    setFxInfo($("fxFoot").dataset.open !== "1");
+  });
   $("fxToggle").addEventListener("click", () => {
     $("fx").hidden = !$("fx").hidden;
+    setFxInfo(false);
     renderHeader();
     measurePanels();
     syncPanels();
@@ -2160,6 +2181,7 @@ function bindEvents() {
       mirror.hidden = true;
       renderHeader();
     }
+    if ($("fxFoot").dataset.open === "1" && !$("fxFoot").contains(ev.target)) setFxInfo(false);
   });
   addEventListener("keydown", (ev) => {
     if (ev.key === "Escape") {
@@ -2172,6 +2194,9 @@ function bindEvents() {
       else if (!$("mirrorPop").hidden) {
         $("mirrorPop").hidden = true;
         renderHeader();
+      } else if ($("fxFoot").dataset.open === "1") {
+        setFxInfo(false);
+        $("fxHelp").focus();
       } else close();
     }
   });
