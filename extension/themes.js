@@ -135,6 +135,10 @@ export const SPECIAL_SKINS = [
     mode: "light",
     glass: true,
     aurora: true,
+    /* Настоящая Aero-сцена и передний план из растений. Лежат в extension/bg/,
+       грузятся один раз; CSS-градиенты остаются подстраховкой, если файл не открылся. */
+    scene: "bg/aero.jpg",
+    grass: "bg/grass.jpg",
     preview: ["#8fe3ff", "#1f6fd0"],
     tokens: {
       ink: "#0d3550", muted: "#35627f", panel: "rgba(255,255,255,0.34)", panelAlt: "rgba(255,255,255,0.5)",
@@ -168,9 +172,13 @@ const AURORA =
 export const DEFAULT_THEME = {
   skin: "azure",
   blur: true,
+  liveSpeed: "normal",
   gradient: { ...SKINS[0].gradient, custom: false },
   background: { data: "", fit: "cover", alpha: 0.35 },
 };
+
+// «Живой фон»: множитель длительности анимаций (меньше — быстрее). off — стенд.
+const LIVE_SPEED = { off: 0, slow: 1.7, normal: 1, fast: 0.62 };
 
 // Simple glassy avatar gradients — one per author id, so anons look different
 // from message to message but stay stable while scrolling.
@@ -241,12 +249,16 @@ export function applyTheme(root, theme) {
   set("--grad", gradientCss(theme.gradient));
   set("--grad-alpha", String(theme.gradient.alpha ?? 0.2));
   set("--aurora", skin.aurora ? AURORA : "none");
+  set("--scene", skin.scene ? `url("${skin.scene}")` : "none");
+  set("--grass", skin.grass ? `url("${skin.grass}")` : "none");
+  set("--live-k", String(LIVE_SPEED[theme.liveSpeed] ?? 1));
   set("--bg-image", theme.background.data ? `url(${theme.background.data})` : "none");
   set("--bg-size", theme.background.fit === "tile" ? "auto" : theme.background.fit);
   set("--bg-repeat", theme.background.fit === "tile" ? "repeat" : "no-repeat");
   set("--bg-alpha", String(theme.background.data ? theme.background.alpha : 0));
   root.dataset.skin = skin.id;
   root.dataset.glass = skin.glass ? "1" : "0";
+  root.dataset.live = skin.glass && theme.liveSpeed !== "off" ? "1" : "0";
   root.dataset.blur = theme.blur === false ? "0" : "1";
   root.dataset.mode = skin.mode;
 }
@@ -256,6 +268,7 @@ export function normalizeTheme(raw) {
   if (!raw || typeof raw !== "object") return base;
   if (ALL_SKINS.some((s) => s.id === raw.skin)) base.skin = raw.skin;
   if (typeof raw.blur === "boolean") base.blur = raw.blur;
+  if (Object.prototype.hasOwnProperty.call(LIVE_SPEED, raw.liveSpeed)) base.liveSpeed = raw.liveSpeed;
   Object.assign(base.gradient, raw.gradient || {});
   Object.assign(base.background, raw.background || {});
   if (base.background.fit === "repeat") base.background.fit = "tile";

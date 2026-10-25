@@ -200,6 +200,15 @@ function applyLocale() {
   $("lblSpecial").textContent = t("theme.special");
   $("lblOpacity").textContent = t("theme.opacity");
   $("lblBlur").textContent = t("theme.blur");
+  $("lblLive").textContent = t("theme.live");
+  $("liveSpeed").replaceChildren(
+    ...["off", "slow", "normal", "fast"].map((k) => {
+      const o = document.createElement("option");
+      o.value = k;
+      o.textContent = t(`theme.live.${k}`);
+      return o;
+    })
+  );
   $("lblGrad").textContent = t("theme.gradient");
   $("lblAngle").textContent = t("theme.angle");
   $("lblGradAlpha").textContent = t("theme.alpha");
@@ -808,6 +817,8 @@ function paintThemeControls() {
   $("bgAlpha").value = String(Math.round(state.theme.background.alpha * 100));
   $("glassBlur").checked = state.theme.blur !== false;
   $("glassBlur").closest(".row").hidden = !skinById(state.theme.skin).glass;
+  $("liveSpeed").value = state.theme.liveSpeed || "normal";
+  $("liveSpeed").closest(".row").hidden = !skinById(state.theme.skin).glass;
   renderSkins();
 }
 
@@ -1815,6 +1826,11 @@ function bindEvents() {
   });
   $("glassBlur").addEventListener("change", (e) => {
     state.theme.blur = e.target.checked;
+    applyTheme(document.documentElement, state.theme);
+    saveTheme();
+  });
+  $("liveSpeed").addEventListener("change", (e) => {
+    state.theme.liveSpeed = e.target.value;
     applyTheme(document.documentElement, state.theme);
     saveTheme();
   });
