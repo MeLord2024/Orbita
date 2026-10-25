@@ -11,6 +11,17 @@
 // сфера — вырезка той же воды с вращающимся бликом.
 
 const HORIZON = 0.79; // где на картинке заканчивается небо и начинается вода
+
+/* «Тучка»: множитель яркости солнца от фазы. Два несоизмеримых периода дают
+   неровный ритм — солнце разгорается, уходит за облако (до 6 % яркости) и
+   возвращается. Вынесено отдельной функцией, чтобы это можно было проверить
+   тестом, а не на глаз. */
+export function cloudShade(phase) {
+  const wave = 0.5 + 0.5 * Math.sin(phase * 0.42 + Math.sin(phase * 0.13) * 1.6);
+  const k = Math.max(0, Math.min(1, (wave - 0.55) / (0.92 - 0.55)));
+  const cover = k * k * (3 - 2 * k);
+  return 1 - cover * 0.94;
+}
 const SUN = { x: 0.46, y: 0.04 };
 
 export function createScene(canvas) {
@@ -33,6 +44,9 @@ export function createScene(canvas) {
   let speed = 1;
   let sunTarget = 1;
   let sunLevel = 1;
+  /* «Тучка»: солнце само то разгорается, то уходит за облако. Ползунок задаёт
+     скорость этого цикла (он же общий speed сцены), а не яркость. */
+  let cloudPhase = Math.random() * 6.28;
   let bubblesOn = true;
   const bubbles = [];
   let bubbleSprite = null;
@@ -223,7 +237,8 @@ export function createScene(canvas) {
     const dt = Math.min(0.05, (now - last) / 1000 || 0);
     last = now;
     time += dt * speed;
-    sunLevel += (sunTarget - sunLevel) * Math.min(1, dt * 3.5);
+    cloudPhase += dt * speed;
+    sunLevel += (sunTarget * cloudShade(cloudPhase) - sunLevel) * Math.min(1, dt * 3.5);
     draw(dt);
     raf = requestAnimationFrame(tick);
   }
@@ -271,7 +286,7 @@ export function createScene(canvas) {
       const wasActive = active;
       active = !!next.active;
       bubblesOn = (next.bubbles || 0) > 0;
-      sunTarget = Math.max(0, Math.min(1, (next.sun || 0) / 100));
+      sunTarget = (next.sun || 0) > 0 ? 1 : 0;
       speed = 0.35 + (Math.max(next.bubbles || 0, next.sun || 0) / 100) * 1.85;
       resize();
       if (!active || wasActive !== active) apply();
