@@ -626,7 +626,7 @@ function reportButton(msg, reported) {
 
 /* Голоса: обе кнопки ведут себя как «важное» — пока счётчик нулевой, это круг,
    появилось число — овал с цифрой. Большое поле суммы остаётся между ними. */
-function voteRow(msg, mine, scoreVal) {
+function voteRow(msg, mine) {
   const frag = document.createDocumentFragment();
   const upCount = (msg.up || []).length;
   const downCount = (msg.down || []).length;
@@ -642,8 +642,7 @@ function voteRow(msg, mine, scoreVal) {
   down.setAttribute("aria-pressed", String(mine === "down"));
   if (downCount) down.appendChild(el("span", "vote-num", String(downCount)));
   down.addEventListener("click", () => send("vote", { msgId: msg.id, dir: "down" }));
-  const scoreBox = el("span", `score${scoreVal < 0 ? " neg" : ""}`, String(scoreVal));
-  frag.append(up, scoreBox, down);
+  frag.append(up, down);
   return frag;
 }
 
@@ -739,7 +738,6 @@ function toggleRevealed(msgId) {
 function messageNode(msg) {
   const collapsed = !!state.collapsed[msg.id];
   const mine = among(msg.up) ? "up" : among(msg.down) ? "down" : null;
-  const scoreVal = (msg.up || []).length - (msg.down || []).length;
   const starred = among(msg.stars);
   const reported = among(msg.reports);
   const reason = msg.hidden || null;
@@ -782,7 +780,7 @@ function messageNode(msg) {
   /* Панель голосов: 👍 и ⚑ в одной строке, под ними сумма, ниже 👎 и ⊟.
      Раскладку задают grid-области в chat.css, порядок вставки — только для чтения с экрана. */
   const votes = el("div", "votes");
-  votes.append(voteRow(msg, mine, scoreVal));
+  votes.append(voteRow(msg, mine));
   votes.append(reportButton(msg, reported));
   if (msg.author && isMine(msg.author.id)) votes.appendChild(deleteButton(msg));
   const toggle = el("button", "vbtn hide", collapsed ? "⊡" : "⊟");

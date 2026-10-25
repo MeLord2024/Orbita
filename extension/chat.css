@@ -988,10 +988,9 @@ html.fx-drag-shield .msg.fx-target {
 
 .votes .vbtn.up { grid-area: 1 / 1; }
 .votes .vbtn.report { grid-area: 1 / 2; }
-.votes .score { grid-area: 2 / 1; }
-.votes .vbtn.del { grid-area: 2 / 2; }
-.votes .vbtn.down { grid-area: 3 / 1; }
-.votes .vbtn.hide { grid-area: 3 / 2; }
+.votes .vbtn.down { grid-area: 2 / 1; }
+.votes .vbtn.hide { grid-area: 2 / 2; }
+.votes .vbtn.del { grid-area: 3 / 2; }
 
 /* счётчик внутри голоса: круг превращается в овал, как у «важного» */
 .votes .vbtn.has {
@@ -2600,6 +2599,7 @@ html[data-glass="1"] .bubble .vbtn.star {
 
 html[data-glass="1"] .bubble .vbtn.star.has {
   padding-right: 8px;
+  color: #0b5c8e;
 }
 
 html[data-glass="1"] .bubble .vbtn.star[aria-pressed="true"] {
@@ -2813,11 +2813,13 @@ html[data-glass="1"] .votes .vbtn.star.has {
   padding-right: 8px;
 }
 
+/* Число — просто цифра в цвет кнопки. Золотым оно становится только когда звезда
+   моя: чужая отметка не должна выглядеть как нажатая мной. */
 html[data-glass="1"] .star-num {
   font-size: 12px;
   font-weight: 700;
   line-height: 1;
-  color: #b07d00;
+  color: inherit;
 }
 
 html[data-glass="1"] .votes .vbtn.star[aria-pressed="true"] {
@@ -2827,7 +2829,8 @@ html[data-glass="1"] .votes .vbtn.star[aria-pressed="true"] {
   text-shadow: 0 0 9px rgba(255, 190, 60, 0.95);
 }
 
-html[data-glass="1"] .votes .vbtn.star[aria-pressed="true"] .star-num {
+html[data-glass="1"] .votes .vbtn.star[aria-pressed="true"] .star-num,
+html[data-glass="1"] .bubble .vbtn.star[aria-pressed="true"] .star-num {
   color: #8a5f00;
 }
 
