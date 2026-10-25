@@ -1,4 +1,4 @@
-# Orbita — чат поверх любого сайта
+# Orbita — Frutiger Aero чат поверх любого сайта
 
 <img src="docs/preview.jpg" alt="Orbita: прозрачное окно чата поверх страницы, скин Frutiger Aero" width="100%">
 
