@@ -137,25 +137,33 @@ export const SPECIAL_SKINS = [
     aurora: true,
     preview: ["#8fe3ff", "#1f6fd0"],
     tokens: {
-      ink: "#0d3550", muted: "#4d7f9c", panel: "rgba(255,255,255,0.34)", panelAlt: "rgba(255,255,255,0.5)",
+      ink: "#0d3550", muted: "#35627f", panel: "rgba(255,255,255,0.34)", panelAlt: "rgba(255,255,255,0.5)",
       line: "rgba(255,255,255,0.7)", bubble: "rgba(255,255,255,0.6)", bubbleInk: "#0e3350",
-      bubbleSub: "#4d7f9c", accent: "#17a8dd", accent2: "#0d7fb8", accentInk: "#ffffff",
+      bubbleSub: "#35627f", accent: "#17a8dd", accent2: "#0d7fb8", accentInk: "#ffffff",
       scoreBg: "rgba(255,255,255,0.72)", scoreInk: "#0e3350", link: "#0a6ea8", star: "#ffb703",
  flame: "#ff7a1a", gold: "#ffc93c",
       drawer: "rgba(255,255,255,0.28)", searchBg: "rgba(255,255,255,0.82)", searchInk: "#0e3350",
+      /* Aero-only: pale cyan for the top of glossy buttons, deep blue for the shadow
+         under them, navy for the medallions in the animations drawer. */
+      aqua: "#8fe6ff", deep: "rgba(8, 66, 112, 0.3)", medal: "#0f4a72", medal2: "#071e33",
     },
-    gradient: { from: "#9fe8ff", to: "#1f6fd0", angle: 155, alpha: 0.8 },
+    gradient: { from: "#cdf3ff", to: "#1a6fc4", angle: 155, alpha: 0.45 },
   },
 ];
 
 export const ALL_SKINS = [...SKINS, ...SPECIAL_SKINS];
 
-// Aurora wash for the glass skin: soft water/sky waves, pure CSS, no assets.
+/* Aurora wash for the glass skin: a still Aero scene in pure CSS, no assets.
+   Layers paint top-down, so the sky gradient goes last and everything else
+   (clouds, sun path on the water, two bubbles) sits on top of it. It is one
+   static paint on one element — nothing here animates or repaints. */
 const AURORA =
-  "radial-gradient(120% 80% at 12% 8%, rgba(255,255,255,.85) 0%, rgba(255,255,255,0) 55%)," +
-  "radial-gradient(90% 70% at 88% 12%, rgba(160,232,255,.75) 0%, rgba(160,232,255,0) 60%)," +
-  "radial-gradient(120% 90% at 50% 108%, rgba(18,110,180,.7) 0%, rgba(18,110,180,0) 62%)," +
-  "radial-gradient(70% 55% at 22% 78%, rgba(120,220,190,.5) 0%, rgba(120,220,190,0) 70%)";
+  "radial-gradient(46% 26% at 16% 11%, rgba(255,255,255,.95) 0%, rgba(255,255,255,0) 70%)," +
+  "radial-gradient(38% 20% at 76% 7%, rgba(255,255,255,.8) 0%, rgba(255,255,255,0) 72%)," +
+  "radial-gradient(54% 17% at 50% 67%, rgba(255,255,255,.85) 0%, rgba(255,255,255,0) 74%)," +
+  "radial-gradient(circle at 88% 81%, rgba(255,255,255,0) 34px, rgba(255,255,255,.6) 35px, rgba(200,240,255,.14) 39px, rgba(255,255,255,0) 41px)," +
+  "radial-gradient(circle at 11% 87%, rgba(255,255,255,0) 19px, rgba(255,255,255,.5) 20px, rgba(255,255,255,0) 23px)," +
+  "linear-gradient(180deg, rgba(214,246,255,.96) 0%, rgba(151,226,255,.92) 32%, rgba(92,185,235,.9) 62%, rgba(38,150,212,.92) 100%)";
 
 export const DEFAULT_THEME = {
   skin: "azure",

@@ -21,6 +21,11 @@
   --drawer: rgba(255, 255, 255, 0.45);
   --search-bg: rgba(255, 255, 255, 0.96);
   --search-ink: #0d2c4a;
+  /* glossy-glass extras, only the Frutiger Aero skin sets its own values */
+  --aqua: #8fe6ff;
+  --deep: rgba(8, 66, 112, 0.3);
+  --medal: #0f4a72;
+  --medal-2: #071e33;
   --grad: none;
   --grad-alpha: 0.18;
   --aurora: none;
@@ -2020,7 +2025,12 @@ html.drawers-float .search {
 
 /* ---------- special skin: Frutiger Aero glass ----------
    The skin sets data-glass="1" on <html>; everything below only restyles
-   surfaces, never the text colours, so readability is kept by the tokens. */
+   surfaces, never the text colours, so readability is kept by the tokens.
+
+   «Мокрое стекло» здесь — три статичных приёма, а не картинки и не фильтры:
+   верхняя белая кромка (inset 0 1px 0 #fff), градиент от белого к воде внутри
+   поверхности и мягкая синяя тень var(--deep) под ней. Ни один из них не
+   анимируется, поэтому кадров композитора в простое по-прежнему ноль. */
 html[data-glass="1"] {
   --radius: 18px;
 }
@@ -2042,67 +2052,233 @@ html[data-glass="1"][data-blur="1"] .notice {
   -webkit-backdrop-filter: blur(8px);
 }
 
-html[data-glass="1"] .bubble,
-html[data-glass="1"] .fx-card,
-html[data-glass="1"] .skin-card,
-html[data-glass="1"] .lenta-list li,
-html[data-glass="1"] .popover {
-  border-color: rgba(255, 255, 255, 0.8);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 8px 24px rgba(10, 60, 100, 0.14);
+/* сам корпус окна: светлая кромка по периметру, как у стеклянной пластины.
+   Рамка живёт на псевдоэлементе: внутренняя тень самого .wrap легла бы под слои
+   .bg и её никто бы не увидел. 1 px, без кликов, без анимации. */
+html[data-glass="1"] .wrap {
+  border-radius: 0 0 18px 18px;
+}
+
+html[data-glass="1"] .wrap::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+/* шапка — отдельная стеклянная полоса с бликом и лёгкой тенью под ней */
+html[data-glass="1"] .top {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(226, 246, 255, 0.34));
+  border-bottom-color: rgba(255, 255, 255, 0.75);
+  box-shadow: inset 0 1px 0 #fff, 0 1px 0 rgba(255, 255, 255, 0.45), 0 8px 18px -12px var(--deep);
+}
+
+/* подвал с полем ввода — та же пластина, но светлее к низу */
+html[data-glass="1"] .composer {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.86));
+  border-top-color: rgba(255, 255, 255, 0.85);
+  box-shadow: inset 0 1px 0 #fff;
+}
+
+html[data-glass="1"] .fx,
+html[data-glass="1"] .lenta {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.84), rgba(226, 247, 255, 0.66));
+  border-color: rgba(255, 255, 255, 0.7);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+/* Узкое окно: панели плавают поверх ленты, и полупрозрачная подложка там читается
+   плохо — под ними бежит текст сообщений. Поэтому плавающим панелям достаётся
+   плотное белое стекло, а не прозрачный градиент. */
+html.drawers-float[data-glass="1"] .fx,
+html.drawers-float[data-glass="1"] .lenta {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(232, 249, 255, 0.94));
+  box-shadow: inset 0 1px 0 #fff, 0 12px 28px -12px var(--deep);
+}
+
+html[data-glass="1"] .fx h3 {
+  color: var(--accent-2);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+/* пузырь сообщения: белое стекло с бликом сверху и водяной тенью снизу */
+html[data-glass="1"] .bubble {
+  border: 1px solid rgba(255, 255, 255, 0.92);
+  border-radius: 20px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.94) 0%, rgba(255, 255, 255, 0.78) 38%, rgba(226, 246, 255, 0.72) 100%);
+  box-shadow:
+    inset 0 1px 0 #fff,
+    inset 0 -1px 0 rgba(255, 255, 255, 0.6),
+    0 1px 0 rgba(255, 255, 255, 0.65),
+    0 12px 24px -12px var(--deep);
 }
 
 html[data-glass="1"] .bubble::before {
-  border-right-color: rgba(255, 255, 255, 0.72);
+  border-right-color: rgba(255, 255, 255, 0.94);
 }
 
+html[data-glass="1"] .bubble .quote {
+  border-left-color: var(--accent);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.8), rgba(216, 242, 255, 0.6));
+  border-radius: 0 10px 10px 0;
+}
+
+html[data-glass="1"] .chip {
+  border-color: rgba(255, 255, 255, 0.9);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(206, 240, 255, 0.72));
+  box-shadow: inset 0 1px 0 #fff;
+}
+
+/* медальоны панели анимаций: тёмный глянцевый квадрат под цветным значком, как
+   на референсе. Рамка через box-shadow, чтобы не сдвигать сам значок ни на пиксель. */
+html[data-glass="1"] .fx-card .emo {
+  border-radius: 14px;
+  background:
+    radial-gradient(64% 48% at 50% 12%, rgba(255, 255, 255, 0.52), rgba(255, 255, 255, 0) 62%),
+    linear-gradient(180deg, var(--medal), var(--medal-2));
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -10px 14px -10px #00131f,
+    0 6px 14px -8px var(--deep);
+}
+
+html[data-glass="1"] .fx-card {
+  border-color: rgba(255, 255, 255, 0.8);
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.6), rgba(222, 245, 255, 0.3));
+  box-shadow: inset 0 1px 0 #fff, 0 8px 18px -12px var(--deep);
+}
+
+html[data-glass="1"] .fx-card[aria-pressed="true"] {
+  border-color: var(--aqua);
+  box-shadow: inset 0 1px 0 #fff, inset 0 0 0 1px var(--accent), 0 0 14px -2px var(--accent);
+}
+
+/* кнопки шапки, вкладки и фильтры: белые глянцевые пилюли */
 html[data-glass="1"] .tool,
 html[data-glass="1"] .corner,
-html[data-glass="1"] .send,
-html[data-glass="1"] .mini,
 html[data-glass="1"] .views button,
 html[data-glass="1"] .lenta-tabs .tab,
 html[data-glass="1"] .lang-btn,
-html[data-glass="1"] .flag-btn,
-html[data-glass="1"] .search {
+html[data-glass="1"] .flag-btn {
+  border: 1px solid rgba(255, 255, 255, 0.9);
   border-radius: 999px;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 3px 10px rgba(10, 60, 100, 0.16);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(222, 245, 255, 0.55) 58%, rgba(184, 227, 248, 0.5));
+  box-shadow: inset 0 1px 0 #fff, inset 0 -3px 6px -4px rgba(255, 255, 255, 0.9), 0 3px 8px -4px var(--deep);
 }
 
-html[data-glass="1"] .send,
+/* включённое состояние — та самая синяя глянцевая кнопка */
 html[data-glass="1"] .corner[aria-pressed="true"],
+html[data-glass="1"] .tool[aria-pressed="true"],
 html[data-glass="1"] .views button[aria-pressed="true"],
-html[data-glass="1"] .lenta-tabs .tab[aria-pressed="true"] {
-  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0) 58%);
+html[data-glass="1"] .lenta-tabs .tab[aria-pressed="true"],
+html[data-glass="1"] .flag-btn[aria-pressed="true"] {
+  background: linear-gradient(180deg, var(--aqua) 0%, var(--accent) 46%, var(--accent-2) 100%);
+  border-color: rgba(255, 255, 255, 0.9);
+  color: var(--accent-ink);
+  text-shadow: 0 1px 1px rgba(0, 32, 60, 0.35);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 -7px 12px -8px rgba(0, 32, 60, 0.6),
+    0 5px 14px -6px var(--accent-2);
 }
 
+html[data-glass="1"] .send {
+  border: 1px solid rgba(255, 255, 255, 0.92);
+  border-radius: 999px;
+  background: linear-gradient(180deg, var(--aqua) 0%, var(--accent) 48%, var(--accent-2) 100%);
+  color: var(--accent-ink);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -8px 14px -8px rgba(0, 32, 60, 0.6),
+    0 7px 18px -8px var(--accent-2);
+}
+
+html[data-glass="1"] .send:hover {
+  border-color: #fff;
+  filter: brightness(1.07);
+}
+
+/* поля ввода: белое стекло, утопленное внутрь (тень сверху, а не снизу) */
+html[data-glass="1"] .search,
+html[data-glass="1"] .select,
+html[data-glass="1"] #text,
+html[data-glass="1"] .popover .row input[type="text"],
+html[data-glass="1"] .big-input {
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  background: linear-gradient(180deg, #ffffff, rgba(238, 251, 255, 0.92));
+  box-shadow: inset 0 2px 6px -3px rgba(84, 166, 214, 0.45), 0 2px 8px -5px var(--deep);
+}
+
+html[data-glass="1"] .search,
+html[data-glass="1"] .select {
+  border-radius: 999px;
+}
+
+html[data-glass="1"] #text {
+  border-radius: 16px;
+}
+
+html[data-glass="1"] #text:focus {
+  border-color: var(--aqua);
+  box-shadow: inset 0 2px 6px -3px rgba(84, 166, 214, 0.45), 0 0 0 3px rgba(143, 230, 255, 0.5);
+}
+
+html[data-glass="1"] .score {
+  border-radius: 999px;
+  border-color: rgba(255, 255, 255, 0.92);
+  background: linear-gradient(180deg, #fff, rgba(228, 246, 255, 0.9));
+  box-shadow: inset 0 1px 0 #fff, 0 2px 6px -4px var(--deep);
+}
+
+html[data-glass="1"] .vbtn {
+  border-radius: 999px;
+}
+
+html[data-glass="1"] .vbtn:hover {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(219, 243, 255, 0.8));
+  box-shadow: 0 2px 6px -4px var(--deep);
+}
+
+/* аватар — круг в белом кольце; кольцо это box-shadow, поэтому размер не меняется */
 html[data-glass="1"] .ava {
   border-radius: 50%;
-  border-color: rgba(255, 255, 255, 0.9);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 4px 14px rgba(10, 60, 100, 0.25);
+  border-color: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 0 0 2px #fff, inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 6px 16px -8px var(--deep);
 }
 
-html[data-glass="1"] .select,
-html[data-glass="1"] .popover .row input[type="text"] {
-  border: 1px solid rgba(255, 255, 255, 0.8);
+html[data-glass="1"] .strip {
   border-radius: 999px;
+  border-color: rgba(255, 255, 255, 0.8);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.85), rgba(206, 240, 255, 0.6));
+  box-shadow: inset 0 1px 0 #fff;
 }
 
 html[data-glass="1"] .popover {
+  border: 1px solid rgba(255, 255, 255, 0.95);
   border-radius: 20px;
-  background: color-mix(in srgb, #ffffff 62%, var(--panel));
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 16px 40px rgba(10, 60, 100, 0.28);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(233, 250, 255, 0.9));
+  box-shadow: inset 0 1px 0 #fff, 0 22px 46px -16px var(--deep);
 }
 
 html[data-glass="1"] .skin-card,
 html[data-glass="1"] .lenta-list li {
-  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.8), rgba(222, 245, 255, 0.55));
+  box-shadow: inset 0 1px 0 #fff, 0 8px 18px -12px var(--deep);
 }
 
 html[data-glass="1"] .skin-card .sw {
   border-radius: 10px;
 }
 
-html[data-glass="1"] .score,
-html[data-glass="1"] .strip {
-  border-radius: 999px;
+html[data-glass="1"] .feed::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #fff, rgba(172, 222, 245, 0.95));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.9);
 }
