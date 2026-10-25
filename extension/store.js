@@ -22,12 +22,8 @@ export function liveEffect(msg) {
   return Date.now() - Number(e.ts) < FX_TTL ? e : null;
 }
 /* Заряды на сутки, на устройство: огня много не бывает, но и не бесконечно,
-   а щит — редкий ответ на него, иначе «защитить» можно было бы весь чат.
-   Временно 30 огней — тестовая сборка для проверки нагрузки двух стилей. */
-export const FX_QUOTA = { flame: 30, shield: 1 };
-/* Огонь имеет два внешних стиля, но остаётся одной сущностью: щит, квота и
-   серверный формат общие, различается только рисунок. */
-export const FIRE_VARIANTS = ["plasma", "inferno"];
+   а щит — редкий ответ на него, иначе «защитить» можно было бы весь чат. */
+export const FX_QUOTA = { flame: 3, shield: 1 };
 export const REPORT_HIDE_AT = 3;
 // сообщество само решает, что не стоит читать: 10 минусов прячут комментарий
 export const DOWNVOTE_HIDE_AT = 10;
@@ -531,7 +527,7 @@ export async function report(msgId) {
    «в никуда» или поджечь то, что уже пылает. Сообщение под щитом огня не боится:
    защитник тушит пожар и сразу закрывает комментарий, поэтому второй огнеметчик
    сюда уже не пройдёт. Эффект живой и не сгорает сам: его снимает только щит. */
-export async function applyEffect(msgId, type, variant) {
+export async function applyEffect(msgId, type) {
   if (!Object.prototype.hasOwnProperty.call(FX_QUOTA, type)) return { error: "bad_effect" };
   const id = await getIdentity();
   return tx((st) => {
@@ -551,13 +547,7 @@ export async function applyEffect(msgId, type, variant) {
     if (used.length >= FX_QUOTA[type]) return { error: "quota", quota: quota() };
     used.push(now);
     st.fx[id.deviceId] = { ...(st.fx[id.deviceId] || {}), [type]: used };
-    const fireStyle = FIRE_VARIANTS.includes(variant) ? variant : FIRE_VARIANTS[0];
-    msg.effect = {
-      type,
-      ...(type === "flame" ? { variant: fireStyle } : {}),
-      by: id.anon ? "anon" : id.name || "anon",
-      ts: now,
-    };
+    msg.effect = { type, by: id.anon ? "anon" : id.name || "anon", ts: now };
     return { message: msg, quenched: prev === "flame", quota: quota() };
   });
 }

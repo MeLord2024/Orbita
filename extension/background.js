@@ -630,7 +630,7 @@ async function handle(msg, sender) {
       return res;
     }
     case "effect": {
-      const res = await store.applyEffect(msg.msgId, msg.type, msg.variant);
+      const res = await store.applyEffect(msg.msgId, msg.type);
       if (res && res.message) {
         pushPatch(msg.msgId, { effect: res.message.effect });
         broadcast("effect", { msgId: msg.msgId, effect: res.message.effect });

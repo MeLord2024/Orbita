@@ -4,7 +4,6 @@ import { LANG_META, flagSvg, langName } from "./flags.js";
 import { SKINS, SPECIAL_SKINS, DEFAULT_THEME, skinById, applyTheme, normalizeTheme, avatarArt } from "./themes.js";
 import { normalizeUrl } from "./sanitize.js";
 import { createScene } from "./scene.js";
-import { createFireLayer } from "./fire.js";
 import { play as playSound, unlock as unlockSound, SOUND_TONES } from "./sound.js";
 
 const params = new URLSearchParams(location.search);
@@ -20,7 +19,6 @@ const send = (cmd, payload = {}) => chrome.runtime.sendMessage({ cmd, ...payload
 const THEME_KEY = "orbita.theme";
 const COLLAPSED_KEY = "orbita.collapsed";
 const GEOM_KEY = "orbita.geom";
-const FIRE_KEY = "orbita.fireStyle";
 const NAME_MAX = 67;
 const BG_FITS = ["cover", "contain", "tile", "center", "repeat-x", "repeat-y"];
 const BG_MAX_PX = 1400;
@@ -54,7 +52,7 @@ addEventListener("message", (ev) => {
 /* Два рабочих значка тянутся мышкой на сообщение; остальные — витрина «скоро».
    max совпадает с FX_QUOTA в store.js: карточка показывает остаток заряда. */
 const EFFECTS = [
-  { id: "flame", art: "flame", name: "fx.flame", desc: "fx.flame.desc", max: 30, locked: false },
+  { id: "flame", art: "flame", name: "fx.flame", desc: "fx.flame.desc", max: 3, locked: false },
   { id: "shield", art: "shield", name: "fx.shield", desc: "fx.shield.desc", max: 1, locked: false },
   { id: "meteor", emo: "☄️", name: "fx.meteor", desc: "fx.locked", locked: true },
   { id: "storm", emo: "⛈️", name: "fx.storm", desc: "fx.locked", locked: true },
@@ -63,8 +61,6 @@ const EFFECTS = [
 ];
 const fxById = (id) => EFFECTS.find((fx) => fx.id === id) || null;/* старый бэкенд мог оставить эффект «dragon» — он тот же огонь */
 const fxType = (effect) => (effect ? (effect.type === "dragon" ? "flame" : effect.type) : null);
-const FIRE_STYLES = ["plasma", "inferno"];
-const fireVariant = (effect) => (effect && effect.variant === "inferno" ? "inferno" : "plasma");
 
 /* «последние» стоит первым и там, и там: это не окно по времени, а весь разговор
    по порядку времени — когда человек только что зашёл, ему нужна лента целиком. */
@@ -101,7 +97,6 @@ const state = {
   // чужие ответы на мои сообщения: id родителя → сколько раз ответили
   answered: new Map(),
   theme: normalizeTheme(null),
-  fireStyle: "plasma",
   collapsed: {},
   // решение сообщества спрятало комментарий — 👁 открывает его на это окно просмотра
   revealed: {},
@@ -116,9 +111,6 @@ const state = {
    «Пузыри» и «Солнце» задают, что рисовать, а скорость — максимум из них. */
 const scene = createScene(document.getElementById("bgScene"));
 scene.load("bg/aero.jpg");
-/* Один canvas на все горящие сообщения: частицы и языки пламени рисуются здесь,
-   а не десятками DOM-элементов, поэтому 30 огней не превращаются в 30 анимаций. */
-const fire = createFireLayer($("fxFire"), $("feed"));
 
 function paintScene() {
   const skin = skinById(state.theme.skin);
@@ -494,22 +486,14 @@ function fxLeft(fx) {
   return box ? box.left : fx.max;
 }
 
-function paintFirePick() {
-  document.documentElement.dataset.fire = state.fireStyle;
-  $("fireAero").setAttribute("aria-pressed", String(state.fireStyle === "plasma"));
-  $("fireFlash").setAttribute("aria-pressed", String(state.fireStyle === "inferno"));
-}
-
 function renderFx() {
   const grid = $("fxGrid");
-  paintFirePick();
   // карточки пересобираются после каждого нанесения — фокус вернём на тот же значок
   const wasFocused = document.activeElement && document.activeElement.dataset ? document.activeElement.dataset.fx : "";
   grid.replaceChildren();
   EFFECTS.forEach((fx) => {
     const card = el("div", `fx-card${fx.locked ? " locked" : ""}`);
     card.dataset.fx = fx.id;
-    if (fx.id === "flame") card.dataset.fire = state.fireStyle;
     /* Медальон рисует CSS по data-fx (PNG из extension/icons): старый вектор и
        эмодзи внутри больше не нужны ни одному скину. */
     const box = el("span", "emo");
@@ -518,14 +502,9 @@ function renderFx() {
       card.title = t("fx.locked");
     } else {
       const left = fxLeft(fx);
-      const qbox = state.fx && state.fx[fx.id];
-      const max = qbox && qbox.max ? qbox.max : fx.max;
-      card.appendChild(el("span", "fx-left", `${left}/${max}`));
+      card.appendChild(el("span", "fx-left", `${left}/${fx.max}`));
       if (left <= 0) card.classList.add("spent");
-      card.title =
-        fx.id === "flame"
-          ? `${t("fx.hint")} · ${state.fireStyle === "inferno" ? "Flash-инферно" : "Aero-плазма"} · ${t("fx.per_day")}: ${max}`
-          : `${t("fx.hint")} · ${t("fx.per_day")}: ${max}`;
+      card.title = `${t("fx.hint")} · ${t("fx.per_day")}: ${fx.max}`;
       card.setAttribute("aria-pressed", String(state.armed === fx.id));
       bindFxCard(card, fx);
     }
@@ -541,13 +520,6 @@ function armFx(id) {
   state.armed = state.armed === id ? null : id;
   renderFx();
   renderFeed();
-}
-
-function setFireStyle(style) {
-  if (!FIRE_STYLES.includes(style) || state.fireStyle === style) return;
-  state.fireStyle = style;
-  storeSet(FIRE_KEY, style);
-  renderFx();
 }
 
 /* Перетаскивание живёт целиком внутри кадра чата: «призрак» приклеен position:fixed
@@ -580,7 +552,6 @@ function startFxDrag(ev, card, fx) {
     root.classList.add("fx-dragging", `fx-drag-${fx.id}`);
     ghost = el("div", `fx-ghost fx-ghost-${fx.id}`);
     ghost.dataset.fx = fx.id;
-    if (fx.id === "flame") ghost.dataset.fire = state.fireStyle;
     ghost.style.left = `${x}px`;
     ghost.style.top = `${y}px`;
     document.body.appendChild(ghost);
@@ -659,7 +630,7 @@ const FX_ERRORS = {
 };
 
 async function applyFx(type, msgId) {
-  const res = await send("effect", { msgId, type, variant: type === "flame" ? state.fireStyle : "" });
+  const res = await send("effect", { msgId, type });
   if (!res) return;
   if (res.quota) state.fx = res.quota;
   state.armed = null;
@@ -676,7 +647,6 @@ async function applyFx(type, msgId) {
   flash(t(type === "shield" ? "fx.guarded" : "fx.flamed"));
   await refresh();
   renderFx();
-  if (type === "flame") fire.ignite(msgId);
 }
 
 function timeAgo(ts) {
@@ -852,7 +822,6 @@ function avatarBox(msg) {
     const meta = fxById(etype);
     const tag = el("i", `fx-tag fx-tag-${etype}`);
     tag.dataset.fx = etype;
-    if (etype === "flame") tag.dataset.fire = fireVariant(msg.effect);
     tag.title = `${msg.effect.by} · ${meta ? t(meta.name) : etype}`;
     ava.appendChild(tag);
   }
@@ -979,10 +948,7 @@ function messageNode(msg) {
      лента пересобирается при каждой синхронизации, и огонь должен продолжать
      гореть после перерисовки, а не вспыхивать заново на пару секунд. */
   const etype = fxType(msg.effect);
-  if (etype) {
-    row.classList.add(etype === "flame" ? "fx-flame" : "fx-shield");
-    if (etype === "flame") row.dataset.fire = fireVariant(msg.effect);
-  }
+  if (etype) row.classList.add(etype === "flame" ? "fx-flame" : "fx-shield");
   if (state.hit && state.hit.msgId === msg.id && Date.now() - state.hit.at < 1500) {
     row.classList.add("fx-hit", state.hit.type === "flame" ? "fx-hit-flame" : "fx-hit-shield");
     if (state.hit.quenched) row.classList.add("fx-quench");
@@ -1527,7 +1493,7 @@ function bindHostControls() {
 function feedSig(list) {
   let out = "";
   for (const m of list) {
-    out += `${m.id}~${(m.up || []).length},${(m.down || []).length},${(m.stars || []).length},${(m.reports || []).length}|${m.hidden || ""}|${fxType(m.effect) || ""}${fxType(m.effect) === "flame" ? `/${fireVariant(m.effect)}` : ""}|${m.replyTo || ""}|${(m.quote || "").length}|${m.text.length}|${(m.links || []).length}|${m.ts};`;
+    out += `${m.id}~${(m.up || []).length},${(m.down || []).length},${(m.stars || []).length},${(m.reports || []).length}|${m.hidden || ""}|${fxType(m.effect) || ""}|${m.replyTo || ""}|${(m.quote || "").length}|${m.text.length}|${(m.links || []).length}|${m.ts};`;
   }
   return out;
 }
@@ -1613,7 +1579,6 @@ function renderFeed() {
   if (!list.length) {
     feed.appendChild(el("p", "empty", state.view === "important" ? t("msg.no_important") : t("msg.empty")));
     jumpBottom = false;
-    fire.sync();
     return;
   }
   for (const msg of list) {
@@ -1624,7 +1589,6 @@ function renderFeed() {
   if (stickBottom || jumpBottom) feed.scrollTop = feed.scrollHeight;
   else feed.scrollTop = offset;
   jumpBottom = false;
-  fire.sync();
 }
 
 function renderLenta() {
@@ -1938,8 +1902,6 @@ function bindEvents() {
     $("q").value = "";
     renderFeed();
   });
-  $("fireAero").addEventListener("click", () => setFireStyle("plasma"));
-  $("fireFlash").addEventListener("click", () => setFireStyle("inferno"));
   $("fxHelp").addEventListener("click", (ev) => {
     ev.stopPropagation();
     setFxInfo($("fxFoot").dataset.open !== "1");
@@ -2317,13 +2279,11 @@ async function init() {
     state.title = document.title;
   }
   if (!EMBEDDED) document.documentElement.classList.add("standalone");
-  const [collapsedRaw, themeRaw, geomRaw, fireRaw] = await Promise.all([
+  const [collapsedRaw, themeRaw, geomRaw] = await Promise.all([
     storeGet(COLLAPSED_KEY),
     storeGet(THEME_KEY),
     storeGet(GEOM_KEY),
-    storeGet(FIRE_KEY),
   ]);
-  if (FIRE_STYLES.includes(fireRaw)) state.fireStyle = fireRaw;
   const siteGeom = geomFor(geomRaw, siteHost());
   applyStandSize(siteGeom);
   if (!EMBEDDED) initStandaloneWindow(geomRaw, siteGeom);
