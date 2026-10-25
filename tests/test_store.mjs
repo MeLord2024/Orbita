@@ -357,34 +357,69 @@ ok("feed shows at most 3 link chips per row", () => {
 });
 
 // effects: fire and guardian, both cost a per-day charge
-const fx1 = await store.applyEffect(ids[0], "flame");
+const fx1 = await store.applyEffect(ids[0], "flame", "inferno");
 const twiceFlame = await store.applyEffect(ids[0], "flame");
 const shielded = await store.applyEffect(ids[0], "shield");
 const onShielded = await store.applyEffect(ids[0], "flame");
 const twiceShield = await store.applyEffect(ids[0], "shield");
 const burned1 = await store.applyEffect(many[0], "flame");
 const burned2 = await store.applyEffect(many[1], "flame");
-const noCharge = await store.applyEffect(many[2], "flame");
 const noShield = await store.applyEffect(many[0], "shield");
 const unknownFx = await store.applyEffect(ids[0], "dragon");
 const untouched = await store.tx((st) => st.messages[many[2]].effect, true);
 const fxAfter = await store.fxQuota();
 ok("flame burns the message", () => assert.equal(fx1.message.effect.type, "flame"));
-ok("flame spends one of three charges", () => assert.equal(fx1.quota.flame.left, 2));
+ok("the chosen fire style survives on the effect", () => assert.equal(fx1.message.effect.variant, "inferno"));
+ok("a fire without a style defaults to plasma", () => assert.equal(burned1.message.effect.variant, "plasma"));
+ok("shield carries no fire style", () => assert.equal(shielded.message.effect.variant, undefined));
+ok("flame spends one of thirty charges", () => assert.equal(fx1.quota.flame.left, 29));
 ok("a burning comment is not lit twice", () => assert.equal(twiceFlame.error, "busy_flame"));
 ok("the guardian puts the fire out", () => assert.equal(shielded.message.effect.type, "shield"));
 ok("the client is told it extinguished something", () => assert.equal(shielded.quenched, true));
 ok("shield is a single charge per day", () => assert.equal(shielded.quota.shield.left, 0));
 ok("fire does not take under a shield", () => assert.equal(onShielded.error, "protected"));
 ok("a shielded comment is not shielded again", () => assert.equal(twiceShield.error, "busy_shield"));
-ok("the second flame spends another charge", () => assert.equal(burned1.quota.flame.left, 1));
-ok("the third flame is the last one for today", () => assert.equal(burned2.quota.flame.left, 0));
-ok("the fourth flame is refused", () => assert.equal(noCharge.error, "quota"));
+ok("the second flame spends another charge", () => assert.equal(burned1.quota.flame.left, 28));
+ok("the third flame spends the next charge", () => assert.equal(burned2.quota.flame.left, 27));
 ok("a refused effect does not touch the message", () => assert.equal(untouched, null));
 ok("no second shield today", () => assert.equal(noShield.error, "quota"));
 ok("a refused shield leaves the fire burning", () => assert.equal(burned1.message.effect.type, "flame"));
 ok("an unknown effect is refused", () => assert.equal(unknownFx.error, "bad_effect"));
-ok("fx quota reports both tokens", () => assert.equal(fxAfter.flame.left + fxAfter.shield.left, 0));
+ok("fx quota reports both tokens", () => assert.equal(fxAfter.flame.left + fxAfter.shield.left, 27));
+
+/* v0.5.0: тридцать огней на сутки — просили для теста нагрузки. Отдельная
+   комната, чтобы не тратить заряды основного блока выше. */
+const burnIds = [];
+await store.tx((st) => {
+  st.fx = {};
+  st.rates = {};
+  const room = "https://burn.example/room";
+  for (let i = 0; i < 31; i += 1) {
+    const id = `burn${i}`;
+    const ch = channelKey(room, "ru");
+    if (!st.channels[ch]) st.channels[ch] = { url: room, title: "", lang: "ru", msgIds: [], updatedAt: Date.now() };
+    st.messages[id] = {
+      id, ch, url: room, lang: "ru", ts: Date.now() + i,
+      author: { id: "d-burn", name: "", anon: true, avatar: "" },
+      text: `burn ${i}`, links: [], up: [], down: [], stars: [], reports: [], effect: null, quote: "",
+    };
+    st.channels[ch].msgIds.push(id);
+    burnIds.push(id);
+  }
+});
+let lastBurn = null;
+for (let i = 0; i < 30; i += 1) {
+  lastBurn = await store.applyEffect(burnIds[i], "flame", i % 2 ? "inferno" : "plasma");
+  if (lastBurn.error) break;
+}
+const overBurn = await store.applyEffect(burnIds[30], "flame");
+ok("thirty fires fit into the daily quota", () => {
+  assert.ok(!lastBurn.error, JSON.stringify(lastBurn));
+  assert.equal(lastBurn.quota.flame.left, 0);
+});
+ok("the thirty-first fire is refused", () => assert.equal(overBurn.error, "quota"));
+ok("both styles count against the same flame quota", () =>
+  assert.equal(lastBurn.message.effect.type, "flame"));
 
 // remote merge
 const merged = await store.mergeRemote([

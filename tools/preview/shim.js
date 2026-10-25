@@ -49,7 +49,7 @@
     mk(2, "I'm a tooltip!\nOr am I a speech bubble?", 12, 0, 0, "en", { effect: { type: "shield", by: "Vasya", ts: now - 4e5 } }),
     mk(3, "Смотрите ссылку https://news.site/top — там по теме, а bullshit тут ни при чём", 8, 0, 1, "en"),
     mk(4, "Оффтоп флуд, зажал", 0, 15, 0, "en"),
-    mk(5, "Важное: в 20:00 разбор темы, приходите", 31, 1, 4, "en", { effect: { type: "flame", by: "Kolya", ts: now - 6e5 } }),
+    mk(5, "Важное: в 20:00 разбор темы, приходите", 31, 1, 4, "en", { effect: { type: "flame", variant: "plasma", by: "Kolya", ts: now - 6e5 } }),
     mk(6, "Deutsch hier bitte", 4, 0, 0, "de"),
   ];
 
@@ -149,7 +149,7 @@
   };
 
   // те же заряды и запреты, что в store.js, чтобы drag можно было пощупать в превью
-  const FX_MAX = { flame: 3, shield: 1 };
+  const FX_MAX = { flame: 30, shield: 1 };
   const STAR_MAX = 10;
   const starLedger = {}; // сообщение → когда: снятая звезда возвращает свой заряд
   const starQuota = () => {
@@ -421,7 +421,7 @@
         if (quota[msg.type].left <= 0) return { error: "quota", quota };
         fxUsed()[msg.type] += 1;
         saveFx();
-        m.effect = { type: msg.type, by: "you", ts: Date.now() };
+        m.effect = { type: msg.type, ...(msg.type === "flame" ? { variant: msg.variant === "inferno" ? "inferno" : "plasma" } : {}), by: "you", ts: Date.now() };
         return { message: m, quenched: prev === "flame", quota: fxQuota() };
       }
       case "msg:delete": {
@@ -511,6 +511,23 @@
     messages.push(m);
     window.__orbitaSync();
     return m.id;
+  };
+  /* Дев-инструмент нагрузки: зажечь n сообщений текущей комнаты одним стилем.
+     Нужен, чтобы проверить 30 огней и FPS, не перетаскивая карточку тридцать раз. */
+  window.__orbitaFlood = (n = 30, variant = "plasma") => {
+    const room = new URL(location.href).searchParams.get("url") || location.href;
+    const lang = new URL(location.href).searchParams.get("lang") || "en";
+    for (let i = 0; i < n; i += 1) {
+      const m = mk(3000 + messages.length, `Burn test ${i + 1} — проверка нагрузки`, 0, 0, 0, lang, {
+        url: room,
+        ts: Date.now(),
+        effect: { type: "flame", variant: variant === "inferno" ? "inferno" : "plasma", by: "Test", ts: Date.now() },
+      });
+      m.author = { id: alias(`burn-${i}`), name: "Burn", anon: false, avatar: "", userId: null };
+      messages.push(m);
+    }
+    window.__orbitaSync();
+    return n;
   };
   /* событие «прилетел sync» без нового сообщения: на нём проверяют, что чат не пересобирает
      ленту, когда данные не изменились */

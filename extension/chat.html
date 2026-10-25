@@ -22,6 +22,14 @@
         <aside class="fx" id="fx">
           <h3 id="fxTitle">Анимации</h3>
           <p class="fx-hint" id="fxHint"></p>
+          <div class="fx-pick" id="fxPick" role="group" aria-label="Стиль огня">
+            <button class="fire-opt" id="fireAero" type="button" data-fire="plasma" aria-pressed="true" title="Aero-плазма">
+              Aero
+            </button>
+            <button class="fire-opt" id="fireFlash" type="button" data-fire="inferno" aria-pressed="false" title="Flash-инферно">
+              Flash
+            </button>
+          </div>
           <div class="fx-grid" id="fxGrid"></div>
           <footer class="fx-foot" id="fxFoot" data-open="0">
             <div class="fx-info" id="fxInfo" inert>
@@ -68,6 +76,7 @@
           </header>
 
           <div class="feed" id="feed"></div>
+          <canvas class="fx-fire" id="fxFire" aria-hidden="true"></canvas>
           <div class="notice" id="notice" hidden></div>
 
           <form class="composer" id="composer" autocomplete="off">
