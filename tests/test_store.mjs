@@ -414,6 +414,20 @@ ok("registered account keeps a picture avatar", () => assert.equal(regPic.avatar
 const rawText = await store.setIdentity({ avatar: "javascript:alert(1)" });
 ok("non-image avatar string rejected", () => assert.equal(rawText.avatar, ""));
 
+// one page over http and https is one room: a browser keeps whichever scheme the
+// person typed, and the two windows used to end up in different chats
+await store.tx((st) => { st.rates = {}; });
+await store.postMessage({ url: "http://scheme.example/page", title: "t", lang: "ru", text: "posted over http" });
+await store.tx((st) => { st.rates = {}; });
+await store.postMessage({ url: "https://scheme.example/page", title: "t", lang: "ru", text: "posted over https" });
+const schemeFeed = await store.feed({ url: "https://scheme.example/page", lang: "ru", view: "all", period: "all" });
+ok("http and https of one page share the room", () => {
+  assert.ok(schemeFeed.some((m) => m.text === "posted over http"));
+  assert.ok(schemeFeed.some((m) => m.text === "posted over https"));
+});
+const httpFeed = await store.feed({ url: "http://scheme.example/page", lang: "ru", view: "all", period: "all" });
+ok("the http address reads the same room", () => assert.equal(httpFeed.length, schemeFeed.length));
+
 // mirrors: several addresses reading and writing one room
 const HOME = "https://joyreactor.cc/";
 const MIRROR1 = "https://old.reactor.cc/";

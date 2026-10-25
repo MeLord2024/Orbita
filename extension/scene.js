@@ -31,7 +31,8 @@ export function createScene(canvas) {
   let time = 0;
   let active = false;
   let speed = 1;
-  let sunOn = true;
+  let sunTarget = 1;
+  let sunLevel = 1;
   let bubblesOn = true;
   const bubbles = [];
   let bubbleSprite = null;
@@ -123,10 +124,12 @@ export function createScene(canvas) {
   }
 
   function drawSun(t) {
-    if (!sunOn) return;
+    /* Уровень солнца едет за ползунком плавно (см. tick): на нуле оно гаснет
+       за ~секунду, а не пропадает кадром. */
+    if (sunLevel < 0.01) return;
     const cx = w * 0.5;
     const cy = h * 0.045;
-    const pulse = 0.85 + Math.sin(t * 0.8) * 0.15;
+    const pulse = (0.85 + Math.sin(t * 0.8) * 0.15) * sunLevel;
     ctx.save();
     ctx.globalCompositeOperation = "lighter";
     const core = ctx.createRadialGradient(cx, cy, 0, cx, cy, h * 0.55);
@@ -220,6 +223,7 @@ export function createScene(canvas) {
     const dt = Math.min(0.05, (now - last) / 1000 || 0);
     last = now;
     time += dt * speed;
+    sunLevel += (sunTarget - sunLevel) * Math.min(1, dt * 3.5);
     draw(dt);
     raf = requestAnimationFrame(tick);
   }
@@ -267,7 +271,7 @@ export function createScene(canvas) {
       const wasActive = active;
       active = !!next.active;
       bubblesOn = (next.bubbles || 0) > 0;
-      sunOn = (next.sun || 0) > 0;
+      sunTarget = Math.max(0, Math.min(1, (next.sun || 0) / 100));
       speed = 0.35 + (Math.max(next.bubbles || 0, next.sun || 0) / 100) * 1.85;
       resize();
       if (!active || wasActive !== active) apply();

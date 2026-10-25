@@ -241,7 +241,6 @@ function applyLocale() {
   $("mirrorBtn").title = t("mirror.btn");
   $("mirrorTitle").textContent = t("mirror.title");
   $("mirrorHint").textContent = t("mirror.hint");
-  $("mirrorInput").placeholder = t("mirror.placeholder");
   $("mirrorAdd").title = t("mirror.add");
   paintProfileSite();
   paintNameCount();

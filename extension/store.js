@@ -125,7 +125,13 @@ export function hostOf(url) {
 
 function canonical(st, url) {
   const u = normalizeUrl(url);
-  return (st.mirrors && st.mirrors[u]) || u;
+  /* http:// и https:// — одна комната. У несуществующего домена браузер
+     оставляет ту схему, которую человек набрал в адресной строке: Chrome
+     открыл https, Яндекс — http, и два окна оказались в разных чатах,
+     хотя адрес один. Для существующих сайтов http почти всегда редиректит
+     на https, так что склейка ничего не ломает. */
+  const same = u.replace(/^http:\/\//, "https://");
+  return (st.mirrors && (st.mirrors[same] || st.mirrors[u])) || same;
 }
 
 function groupOf(st, home) {
