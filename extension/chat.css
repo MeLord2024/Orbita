@@ -2754,7 +2754,7 @@ html[data-glass="1"] .chip {
 
 /* ---------- кнопки: глянцевые пилюли и круглые «капли» ---------- */
 html[data-glass="1"] .tools {
-  gap: 5px;
+  gap: 4px;
 }
 
 html[data-glass="1"] .cluster {
@@ -2817,7 +2817,7 @@ html[data-glass="1"] #fxToggle {
 html[data-glass="1"] .flag-btn,
 html[data-glass="1"] .lang-btn {
   height: 30px;
-  padding: 2px 9px 2px 6px;
+  padding: 2px 7px 2px 6px;
   font-size: 12px;
   border-radius: 999px;
   border: 2px solid rgba(255, 255, 255, 0.95);
@@ -2832,7 +2832,7 @@ html[data-glass="1"] .lang-btn {
 
 html[data-glass="1"] .select {
   height: 30px;
-  max-width: 104px;
+  max-width: 92px;
   padding: 0 8px;
   border-radius: 999px;
   border: 2px solid rgba(255, 255, 255, 0.95);
@@ -2908,7 +2908,9 @@ html[data-glass="1"] .send:hover {
 /* ---------- поля ввода ---------- */
 html[data-glass="1"] .search {
   height: 30px;
-  min-width: 100px;
+  /* поле поиска ужимается первым: лучше отдать ему место, чем переносить
+     ряд кнопок на вторую строку */
+  min-width: 72px;
   border-radius: 999px;
   border: 2px solid rgba(255, 255, 255, 0.97);
   background: linear-gradient(180deg, #ffffff, rgba(238, 251, 255, 0.94));

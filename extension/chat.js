@@ -193,8 +193,8 @@ function initStandaloneWindow(raw, geom) {
   if (!store.default || typeof store.default !== "object") store.default = {};
   if (!store.sites || typeof store.sites !== "object") store.sites = {};
 
-  let w = Math.max(STAND_MIN.w, Number(geom.w) || 1180);
-  let h = Math.max(STAND_MIN.h, Number(geom.h) || 680);
+  let w = Math.max(STAND_MIN.w, Number(geom.w) || 1240);
+  let h = Math.max(STAND_MIN.h, Number(geom.h) || 700);
   let x = Number.isFinite(Number(geom.x)) ? Number(geom.x) : Math.round((innerWidth - w) / 2);
   let y = Number.isFinite(Number(geom.y)) ? Number(geom.y) : Math.round((innerHeight - h) / 2);
 
