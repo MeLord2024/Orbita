@@ -504,7 +504,10 @@ function timeAgo(ts) {
   if (diff < 6e4) return t("time.now");
   if (diff < 36e5) return `${Math.floor(diff / 6e4)} ${t("time.min")}`;
   if (diff < 864e5) return `${Math.floor(diff / 36e5)} ${t("time.hour")}`;
-  return `${d.getDate()}.${String(d.getMonth() + 1).padStart(2, "0")}`;
+  const day = `${String(d.getDate()).padStart(2, "0")}.${String(d.getMonth() + 1).padStart(2, "0")}`;
+  /* старше года — добавляем год перед датой: в ленте за «всё время» иначе
+     невозможно отличить прошлогодний тред от вчерашнего */
+  return diff > 365 * 864e5 ? `${d.getFullYear()} ${day}` : day;
 }
 
 /* Стеклянный человечек: цвет выбирается хэшем id, поэтому человек выглядит

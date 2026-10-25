@@ -2638,6 +2638,9 @@ html[data-glass="1"] .cluster {
   gap: 4px;
 }
 
+/* Кнопки шапки: цвет и блик разделены. Цвет — background-color, блик — постоянный
+   градиент сверху; поэтому включение (aria-pressed) плавно перекрашивает кнопку
+   за полсекунды, а не щёлкает картинкой. */
 html[data-glass="1"] .tool,
 html[data-glass="1"] .corner {
   width: 30px;
@@ -2645,12 +2648,38 @@ html[data-glass="1"] .corner {
   font-size: 14px;
   border-radius: 50%;
   border: 2px solid rgba(255, 255, 255, 0.95);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(219, 245, 255, 0.72) 52%, rgba(168, 222, 248, 0.7) 100%);
+  background-color: rgba(226, 248, 255, 0.8);
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.3) 54%, rgba(255, 255, 255, 0.12) 100%);
   color: var(--ink);
   box-shadow:
     inset 0 2px 0 #fff,
-    inset 0 -6px 10px -8px rgba(20, 100, 160, 0.6),
+    inset 0 -6px 10px -8px rgba(20, 100, 160, 0.55),
     0 4px 10px -5px var(--deep);
+  transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease,
+    box-shadow 0.5s ease, text-shadow 0.5s ease, transform 0.12s ease;
+}
+
+/* мягкий верхний глянец: ровно то, что отличает «каплю» от плоского кружка */
+html[data-glass="1"] .top .tools > button::after,
+html[data-glass="1"] .top .cluster > button::after,
+html[data-glass="1"] .send::after {
+  content: "";
+  position: absolute;
+  left: 20%;
+  right: 20%;
+  top: 7%;
+  height: 36%;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0));
+  pointer-events: none;
+}
+
+html[data-glass="1"] .tool:active,
+html[data-glass="1"] .corner:active,
+html[data-glass="1"] .send:active,
+html[data-glass="1"] .views button:active,
+html[data-glass="1"] .lenta-tabs .tab:active {
+  transform: scale(0.94);
 }
 
 html[data-glass="1"] #fxToggle {
@@ -2669,11 +2698,13 @@ html[data-glass="1"] .lang-btn {
   font-size: 12px;
   border-radius: 999px;
   border: 2px solid rgba(255, 255, 255, 0.95);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(219, 245, 255, 0.72) 55%, rgba(168, 222, 248, 0.7));
+  background-color: rgba(226, 248, 255, 0.8);
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.25) 55%, rgba(255, 255, 255, 0.12));
   box-shadow:
     inset 0 2px 0 #fff,
-    inset 0 -6px 10px -8px rgba(20, 100, 160, 0.6),
+    inset 0 -6px 10px -8px rgba(20, 100, 160, 0.55),
     0 4px 10px -5px var(--deep);
+  transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
 }
 
 html[data-glass="1"] .select {
@@ -2694,12 +2725,15 @@ html[data-glass="1"] .views button {
   font-size: 12.5px;
   border-radius: 999px;
   border: 2px solid rgba(255, 255, 255, 0.9);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(206, 240, 255, 0.65));
+  background-color: rgba(226, 248, 255, 0.7);
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.2) 55%, rgba(255, 255, 255, 0.1));
   color: var(--ink);
   box-shadow:
     inset 0 2px 0 #fff,
     inset 0 -6px 10px -8px rgba(20, 100, 160, 0.5),
     0 3px 8px -5px var(--deep);
+  transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease,
+    box-shadow 0.5s ease, text-shadow 0.5s ease, transform 0.12s ease;
 }
 
 /* включённое состояние — насыщенная голубая капля */
@@ -2708,7 +2742,8 @@ html[data-glass="1"] .tool[aria-pressed="true"],
 html[data-glass="1"] .views button[aria-pressed="true"],
 html[data-glass="1"] .lenta-tabs .tab[aria-pressed="true"],
 html[data-glass="1"] .flag-btn[aria-pressed="true"] {
-  background: linear-gradient(180deg, #b9f1ff 0%, var(--accent) 44%, var(--accent-2) 100%);
+  background-color: var(--accent);
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.55) 0%, rgba(255, 255, 255, 0.06) 55%, rgba(255, 255, 255, 0.14) 100%);
   border-color: #fff;
   color: var(--accent-ink);
   text-shadow: 0 1px 1px rgba(0, 32, 60, 0.35);
@@ -2727,11 +2762,14 @@ html[data-glass="1"] .send {
   font-size: 0;
   border-radius: 50%;
   border: 2px solid rgba(255, 255, 255, 0.95);
+  position: relative;
+  background-color: color-mix(in srgb, var(--accent) 62%, transparent);
   background-image: url("icons/send.png"),
-    linear-gradient(180deg, #b9f1ff 0%, var(--accent) 46%, var(--accent-2) 100%);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.06) 52%, rgba(255, 255, 255, 0.22) 100%);
   background-size: 62% 62%, auto;
   background-position: center, center;
   background-repeat: no-repeat, no-repeat;
+  transition: background-color 0.4s ease, box-shadow 0.4s ease, transform 0.12s ease;
   color: var(--accent-ink);
   box-shadow:
     inset 0 2px 0 rgba(255, 255, 255, 0.98),
@@ -2900,12 +2938,16 @@ html[data-glass="1"] .lenta-tabs .tab {
   font-size: 11.5px;
   border-radius: 999px;
   border: 2px solid rgba(255, 255, 255, 0.92);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(206, 240, 255, 0.7));
+  background-color: rgba(226, 248, 255, 0.7);
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.22) 56%, rgba(255, 255, 255, 0.1));
   color: var(--ink);
   box-shadow:
     inset 0 2px 0 #fff,
     inset 0 -6px 10px -8px rgba(20, 100, 160, 0.5),
     0 3px 8px -5px var(--deep);
+  /* полсекунды на переход цвета: вкладка «Ответы» не вспыхивает синим, а наливается */
+  transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease,
+    box-shadow 0.5s ease, text-shadow 0.5s ease, transform 0.12s ease;
 }
 
 html[data-glass="1"] .lenta-list {
