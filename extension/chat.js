@@ -221,6 +221,7 @@ function applyLocale() {
   $("lblBubbles").textContent = t("theme.live.bubbles");
   $("lblSun").textContent = t("theme.live.sun");
   $("lblPlants").textContent = t("theme.live.plants");
+  $("lblSphere").textContent = t("theme.sphere");
   $("lblGrad").textContent = t("theme.gradient");
   $("lblAngle").textContent = t("theme.angle");
   $("lblGradAlpha").textContent = t("theme.alpha");
@@ -866,7 +867,7 @@ function paintThemeControls() {
   $("glassBlur").closest(".row").hidden = !skinById(state.theme.skin).glass;
   // ползунки живого фона и плотности панелей — только у стеклянного скина
   const glassy = skinById(state.theme.skin).glass;
-  ["panelAlpha", "liveBubbles", "liveSun", "livePlants"].forEach((id) => {
+  ["panelAlpha", "liveBubbles", "liveSun", "livePlants", "sphereSpeed"].forEach((id) => {
     $(id).closest(".row").hidden = !glassy;
   });
   $("lblLive").hidden = !glassy;
@@ -874,6 +875,7 @@ function paintThemeControls() {
   $("liveBubbles").value = String(state.theme.live?.bubbles ?? 60);
   $("liveSun").value = String(state.theme.live?.sun ?? 60);
   $("livePlants").value = String(state.theme.live?.plants ?? 60);
+  $("sphereSpeed").value = String(state.theme.sphereSpeed ?? 60);
   renderSkins();
 }
 
@@ -1902,6 +1904,11 @@ function bindEvents() {
   paintScene();
       saveTheme();
     });
+  });
+  $("sphereSpeed").addEventListener("input", (e) => {
+    state.theme.sphereSpeed = Number(e.target.value);
+    applyTheme(document.documentElement, state.theme);
+    saveTheme();
   });
   $("panelAlpha").addEventListener("input", (e) => {
     state.theme.panelAlpha = Number(e.target.value);

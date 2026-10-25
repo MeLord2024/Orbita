@@ -176,6 +176,7 @@ export const DEFAULT_THEME = {
      умолчанию выключено; включается галкой «Матовое стекло» в 🎨 */
   blur: false,
   live: { bubbles: 60, sun: 60, plants: 60 },
+  sphereSpeed: 60,
   panelAlpha: 10,
   gradient: { ...SPECIAL_SKINS[0].gradient, custom: false },
   background: { data: "", fit: "cover", alpha: 0.35 },
@@ -259,6 +260,9 @@ export function applyTheme(root, theme) {
     root.dataset[LIVE_ATTR[key]] = skin.glass && value > 0 ? "1" : "0";
   }
   set("--panel-a", String(Math.max(0, Math.min(100, Number(theme.panelAlpha) || 0)) / 100));
+  const sphere = Math.max(0, Math.min(100, Number(theme.sphereSpeed ?? 60)));
+  set("--k-sphere", String(liveK(sphere)));
+  root.dataset.sphere = skin.glass && sphere > 0 ? "1" : "0";
   set("--bg-image", theme.background.data ? `url(${theme.background.data})` : "none");
   set("--bg-size", theme.background.fit === "tile" ? "auto" : theme.background.fit);
   set("--bg-repeat", theme.background.fit === "tile" ? "repeat" : "no-repeat");
@@ -286,6 +290,9 @@ export function normalizeTheme(raw) {
   }
   if (Number.isFinite(Number(raw.panelAlpha))) {
     base.panelAlpha = Math.max(0, Math.min(100, Math.round(Number(raw.panelAlpha))));
+  }
+  if (Number.isFinite(Number(raw.sphereSpeed))) {
+    base.sphereSpeed = Math.max(0, Math.min(100, Math.round(Number(raw.sphereSpeed))));
   }
   if (typeof raw.blur === "boolean") base.blur = raw.blur;
   Object.assign(base.gradient, raw.gradient || {});

@@ -142,6 +142,60 @@ html.standalone .wrap {
   will-change: transform;
 }
 
+/* Стеклянный шар в правом нижнем углу: лежит ПОД слоем листьев, поэтому снизу
+   его прикрывают непрозрачные листики, как на референсе. Квадратный элемент
+   ровно по картинке — так блик внутри совпадает с шаром, а не с пустым боксом. */
+.bg-sphere {
+  inset: auto 2.6% 0.5% auto;
+  width: 19%;
+  aspect-ratio: 1;
+  background-image: url("bg/sphere.png");
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  z-index: 3;
+  transform-origin: 50% 55%;
+  will-change: transform;
+}
+
+.bg-sphere::after {
+  content: "";
+  position: absolute;
+  inset: 6%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 36% 30%, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.18) 26%, rgba(255, 255, 255, 0) 58%);
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+html[data-sphere="1"] .bg-sphere {
+  animation: sphereTurn calc(26s * var(--k-sphere, 1)) ease-in-out infinite alternate;
+}
+
+html[data-sphere="1"] .bg-sphere::after {
+  animation: sphereLight calc(9s * var(--k-sphere, 1)) ease-in-out infinite alternate;
+}
+
+@keyframes sphereTurn {
+  from {
+    transform: rotate(-3.2deg) scale(1);
+  }
+  to {
+    transform: rotate(3.2deg) scale(1.025);
+  }
+}
+
+/* «преломление»: блик внутри шара медленно гуляет и разгорается */
+@keyframes sphereLight {
+  from {
+    opacity: 0.22;
+    transform: translate3d(-4%, 5%, 0) scale(0.92);
+  }
+  to {
+    opacity: 0.9;
+    transform: translate3d(6%, -5%, 0) scale(1.08);
+  }
+}
+
 .bg-leaf-tl {
   background-image: url("bg/leaf-tl.png");
   background-position: left top;
@@ -184,15 +238,15 @@ html.standalone .wrap {
 }
 
 html[data-plant="1"] .bg-leaf-tl {
-  animation: leafSwayA calc(13s * var(--k-plants, 1)) ease-in-out infinite alternate;
+  animation: leafSwayA calc(9s * var(--k-plants, 1)) ease-in-out infinite alternate;
 }
 
 html[data-plant="1"] .bg-leaf-bl {
-  animation: leafSwayB calc(10s * var(--k-plants, 1)) ease-in-out infinite alternate;
+  animation: leafSwayB calc(7.5s * var(--k-plants, 1)) ease-in-out infinite alternate;
 }
 
 html[data-plant="1"] .bg-leaf-br {
-  animation: leafSwayC calc(15s * var(--k-plants, 1)) ease-in-out infinite alternate;
+  animation: leafSwayC calc(10s * var(--k-plants, 1)) ease-in-out infinite alternate;
 }
 
 html[data-plant="1"] .bg-leaf-br::after {
@@ -200,18 +254,18 @@ html[data-plant="1"] .bg-leaf-br::after {
 }
 
 @keyframes leafSwayA {
-  from { transform: rotate(-0.5deg) translate3d(0, 0, 0); }
-  to { transform: rotate(0.55deg) translate3d(0.4%, 0.3%, 0); }
+  from { transform: rotate(-1.4deg) translate3d(-0.4%, 0, 0) scale(1.01); }
+  to { transform: rotate(1.5deg) translate3d(0.7%, 0.5%, 0) scale(1.02); }
 }
 
 @keyframes leafSwayB {
-  from { transform: rotate(0.6deg) scale(1.01); }
-  to { transform: rotate(-0.7deg) scale(1.02); }
+  from { transform: rotate(1.8deg) translate3d(0.5%, 0, 0) scale(1.01); }
+  to { transform: rotate(-1.6deg) translate3d(-0.6%, 0.4%, 0) scale(1.035); }
 }
 
 @keyframes leafSwayC {
-  from { transform: rotate(0.4deg) translate3d(0, 0, 0); }
-  to { transform: rotate(-0.45deg) translate3d(-0.3%, -0.2%, 0); }
+  from { transform: rotate(1.3deg) translate3d(0.4%, 0, 0) scale(1.01); }
+  to { transform: rotate(-1.2deg) translate3d(-0.6%, -0.4%, 0) scale(1.03); }
 }
 
 @keyframes sphereGlint {
@@ -223,7 +277,9 @@ html[data-plant="1"] .bg-leaf-br::after {
   html[data-plant="1"] .bg-leaf-tl,
   html[data-plant="1"] .bg-leaf-bl,
   html[data-plant="1"] .bg-leaf-br,
-  html[data-plant="1"] .bg-leaf-br::after {
+  html[data-plant="1"] .bg-leaf-br::after,
+  html[data-sphere="1"] .bg-sphere,
+  html[data-sphere="1"] .bg-sphere::after {
     animation: none;
   }
 }
