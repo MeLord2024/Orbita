@@ -82,7 +82,7 @@ const state = {
   view: "all",
   period: "recent",
   lentaTab: "global",
-  lentaPeriod: "week",
+  lentaPeriod: "day",
   lentaLang: "*",
   jumpTo: params.get("msg") || "",
   q: "",
@@ -556,9 +556,14 @@ async function toggleCollapsed(msgId) {
 }
 
 function starButton(msg, starred) {
-  const star = el("button", "vbtn star", "★");
+  const total = (msg.stars || []).length;
+  /* Счётчик живёт внутри кнопки: нажали — круглая кнопка вытягивается в овал
+     и показывает «★ N», звёздочка горит золотым. Убрали свою звезду, а других
+     не осталось — кнопка снова круг с одной звёздочкой. */
+  const star = el("button", `vbtn star${total ? " has" : ""}`, "★");
+  if (total) star.appendChild(el("span", "star-num", String(total)));
   star.type = "button";
-  star.title = (msg.stars || []).length ? `${(msg.stars || []).length} ${t("msg.stars")}` : t("msg.star");
+  star.title = total ? `${total} ${t("msg.stars")}` : t("msg.star");
   star.setAttribute("aria-pressed", String(starred));
   star.addEventListener("click", async () => {
     const res = await send("star", { msgId: msg.id });
@@ -748,7 +753,6 @@ function messageNode(msg) {
   // hide and expand share one slot, so the button never jumps sideways
   const votes = el("div", "votes");
   const sideRow = el("div", "row");
-  const starCount = el("span", "stars-count", (msg.stars || []).length ? `★${msg.stars.length}` : "");
   const reply = el("button", "vbtn", "↩");
   reply.type = "button";
   reply.title = t("msg.reply");
@@ -763,7 +767,7 @@ function messageNode(msg) {
   toggle.title = collapsed ? t("msg.expand") : t("msg.hide");
   toggle.addEventListener("click", () => toggleCollapsed(msg.id));
   if (collapsed) reply.style.visibility = "hidden";
-  sideRow.append(starButton(msg, starred), starCount, reply, reportButton(msg, reported), toggle);
+  sideRow.append(starButton(msg, starred), reply, reportButton(msg, reported), toggle);
   if (msg.author && isMine(msg.author.id)) sideRow.appendChild(deleteButton(msg));
   votes.append(voteRow(msg, mine, scoreVal), sideRow);
   row.appendChild(votes);

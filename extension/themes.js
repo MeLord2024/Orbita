@@ -138,7 +138,6 @@ export const SPECIAL_SKINS = [
     /* Настоящая Aero-сцена и передний план из растений. Лежат в extension/bg/,
        грузятся один раз; CSS-градиенты остаются подстраховкой, если файл не открылся. */
     scene: "bg/aero.jpg",
-    grass: "bg/grass.jpg",
     preview: ["#8fe3ff", "#1f6fd0"],
     tokens: {
       ink: "#0d3550", muted: "#35627f", panel: "rgba(255,255,255,0.34)", panelAlt: "rgba(255,255,255,0.5)",
@@ -253,7 +252,6 @@ export function applyTheme(root, theme) {
   set("--grad-alpha", String(theme.gradient.alpha ?? 0.2));
   set("--aurora", skin.aurora ? AURORA : "none");
   set("--scene", skin.scene ? `url("${skin.scene}")` : "none");
-  set("--grass", skin.grass ? `url("${skin.grass}")` : "none");
   const live = theme.live || {};
   for (const key of LIVE_KEYS) {
     const value = Number(live[key]) || 0;

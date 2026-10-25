@@ -133,37 +133,97 @@ html.standalone .wrap {
   display: block;
 }
 
-.bg-grass {
-  background-image: var(--grass);
-  background-size: 100% auto;
-  background-position: center bottom;
+/* Листья и сфера — вырезанные PNG из листа пользователя. Каждый слой качается
+   своим трансформом: это композитор, а не перерисовка. Кромки, которыми картинки
+   обрезаны при вырезании, прячутся маской. */
+.bg-leaf {
   background-repeat: no-repeat;
-  mix-blend-mode: multiply;
-  /* мягкая кромка сверху: без маски срез травы шёл бы ровной горизонтальной
-     линией поперёк окна и читался как баг вёрстки */
-  -webkit-mask-image: linear-gradient(to top, #000 58%, rgba(0, 0, 0, 0.35) 84%, transparent 100%);
-  mask-image: linear-gradient(to top, #000 58%, rgba(0, 0, 0, 0.35) 84%, transparent 100%);
-  opacity: 0.62;
   z-index: 4;
-  transform-origin: 50% 100%;
   will-change: transform;
 }
 
-html[data-plant="1"] .bg-grass {
-  animation: grassSway calc(12s * var(--k-plants, 1)) ease-in-out infinite alternate;
+.bg-leaf-tl {
+  background-image: url("bg/leaf-tl.png");
+  background-position: left top;
+  background-size: 30% auto;
+  transform-origin: 0% 0%;
+  -webkit-mask-image: linear-gradient(120deg, #000 62%, rgba(0, 0, 0, 0.4) 82%, transparent 100%);
+  mask-image: linear-gradient(120deg, #000 62%, rgba(0, 0, 0, 0.4) 82%, transparent 100%);
 }
 
-@keyframes grassSway {
-  from {
-    transform: rotate(-0.35deg) scale(1.01);
-  }
-  to {
-    transform: rotate(0.35deg) scale(1.015);
-  }
+.bg-leaf-bl {
+  background-image: url("bg/leaf-bl.png");
+  background-position: left bottom;
+  background-size: 28% auto;
+  transform-origin: 0% 100%;
+  -webkit-mask-image: linear-gradient(to top, #000 55%, rgba(0, 0, 0, 0.4) 82%, transparent 100%);
+  mask-image: linear-gradient(to top, #000 55%, rgba(0, 0, 0, 0.4) 82%, transparent 100%);
+}
+
+.bg-leaf-br {
+  background-image: url("bg/leaf-br.png");
+  background-position: right bottom;
+  background-size: 26% auto;
+  transform-origin: 100% 100%;
+  -webkit-mask-image: linear-gradient(to left, #000 72%, rgba(0, 0, 0, 0.45) 88%, transparent 100%);
+  mask-image: linear-gradient(to left, #000 72%, rgba(0, 0, 0, 0.45) 88%, transparent 100%);
+}
+
+/* блик по стеклянной сфере: пятно света медленно скользит по шару */
+.bg-leaf-br::after {
+  content: "";
+  position: absolute;
+  left: 58%;
+  top: 32%;
+  width: 24%;
+  height: 24%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.25) 38%, rgba(255, 255, 255, 0) 70%);
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+html[data-plant="1"] .bg-leaf-tl {
+  animation: leafSwayA calc(13s * var(--k-plants, 1)) ease-in-out infinite alternate;
+}
+
+html[data-plant="1"] .bg-leaf-bl {
+  animation: leafSwayB calc(10s * var(--k-plants, 1)) ease-in-out infinite alternate;
+}
+
+html[data-plant="1"] .bg-leaf-br {
+  animation: leafSwayC calc(15s * var(--k-plants, 1)) ease-in-out infinite alternate;
+}
+
+html[data-plant="1"] .bg-leaf-br::after {
+  animation: sphereGlint calc(8s * var(--k-plants, 1)) ease-in-out infinite alternate;
+}
+
+@keyframes leafSwayA {
+  from { transform: rotate(-0.5deg) translate3d(0, 0, 0); }
+  to { transform: rotate(0.55deg) translate3d(0.4%, 0.3%, 0); }
+}
+
+@keyframes leafSwayB {
+  from { transform: rotate(0.6deg) scale(1.01); }
+  to { transform: rotate(-0.7deg) scale(1.02); }
+}
+
+@keyframes leafSwayC {
+  from { transform: rotate(0.4deg) translate3d(0, 0, 0); }
+  to { transform: rotate(-0.45deg) translate3d(-0.3%, -0.2%, 0); }
+}
+
+@keyframes sphereGlint {
+  from { opacity: 0.25; transform: translate3d(-6%, 4%, 0) scale(0.9); }
+  to { opacity: 0.8; transform: translate3d(10%, -6%, 0) scale(1.08); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html[data-plant="1"] .bg-grass {
+  html[data-plant="1"] .bg-leaf-tl,
+  html[data-plant="1"] .bg-leaf-bl,
+  html[data-plant="1"] .bg-leaf-br,
+  html[data-plant="1"] .bg-leaf-br::after {
     animation: none;
   }
 }
@@ -2094,7 +2154,7 @@ html[data-glass="1"] {
   --radius: 20px;
   /* панели стали шире: у значка теперь медальон 56 px и текст рядом с ним */
   --fx-col: 216px;
-  --fx-expand: 176px;
+  --fx-expand: 216px;
   --lenta-col: 288px;
 }
 
@@ -2252,11 +2312,17 @@ html[data-glass="1"] .fx-card:nth-child(even) {
 html[data-glass="1"] .fx-card:hover,
 html[data-glass="1"] .fx-card:focus-within,
 html[data-glass="1"] .fx-card[aria-pressed="true"] {
-  width: var(--fx-expand, 176px);
+  width: var(--fx-expand, 216px);
   z-index: 9;
   grid-template-columns: 52px minmax(0, 1fr);
   column-gap: 10px;
   padding: 8px 10px;
+  /* раскрытая плитка должна наглухо закрыть соседнюю, а не просвечивать */
+  background: linear-gradient(165deg, #ffffff 0%, #eaf9ff 44%, #cfeafb 100%);
+  box-shadow:
+    inset 0 2px 0 #fff,
+    0 14px 28px -14px var(--deep),
+    0 0 0 1px rgba(255, 255, 255, 0.9);
 }
 
 html[data-glass="1"] .fx-card .emo {
@@ -2669,7 +2735,35 @@ html[data-glass="1"] .votes .vbtn:hover {
   color: var(--accent-2);
 }
 
-html[data-glass="1"] .votes .vbtn.star[aria-pressed="true"],
+html[data-glass="1"] .votes .vbtn.star {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  transition: padding 0.12s ease, background 0.12s ease;
+}
+
+html[data-glass="1"] .votes .vbtn.star.has {
+  padding-right: 8px;
+}
+
+html[data-glass="1"] .star-num {
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  color: #b07d00;
+}
+
+html[data-glass="1"] .votes .vbtn.star[aria-pressed="true"] {
+  background: linear-gradient(180deg, #fff8e0, rgba(255, 214, 120, 0.55));
+  border-color: #f0b429;
+  color: #f0a500;
+  text-shadow: 0 0 9px rgba(255, 190, 60, 0.95);
+}
+
+html[data-glass="1"] .votes .vbtn.star[aria-pressed="true"] .star-num {
+  color: #8a5f00;
+}
+
 html[data-glass="1"] .votes .vbtn.report[aria-pressed="true"] {
   background: linear-gradient(180deg, #fff, rgba(206, 240, 255, 0.9));
   border-color: var(--accent);
@@ -2697,6 +2791,16 @@ html[data-glass="1"] .lenta-list::-webkit-scrollbar-thumb {
 /* подсказки над списками убраны: и жест, и назначение панелей понятны без них */
 html[data-glass="1"] .lenta-hint {
   display: none;
+}
+
+/* «HOT» перед фильтром периода читался как «НЕТ» и отнимал место — фильтр
+   встаёт на его место */
+html[data-glass="1"] #lblHot {
+  display: none;
+}
+
+html[data-glass="1"] .lenta-filters {
+  gap: 6px;
 }
 
 html[data-glass="1"] .score {
