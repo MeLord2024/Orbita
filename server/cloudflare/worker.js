@@ -435,6 +435,26 @@ async function presence(db, body) {
   return send({ ok: true, clients: await roomCount(db, token, t), now: t });
 }
 
+/* Global presence is deliberately separate from room presence.
+   No page URL, room, browsing history or raw device ID is stored here. */
+async function globalPresence(db, body) {
+  const client = asText(body.client).slice(0, 80);
+  if (!/^u[a-f0-9]{24}$/.test(client)) return send({ error: "bad_client" }, 400);
+  const now = Date.now();
+  await db.prepare(`insert into orb_global_pres (client, ts) values (?, ?)
+    on conflict(client) do update set ts = excluded.ts`).bind(client, now).run();
+  const row = await db.prepare("select count(*) as total from orb_global_pres where ts > ?")
+    .bind(now - 300000).first();
+  return send({ ok: true, online: Number(row?.total || 0), now });
+}
+
+async function globalStats(db) {
+  const now = Date.now();
+  const row = await db.prepare("select count(*) as total from orb_global_pres where ts > ?")
+    .bind(now - 300000).first();
+  return send({ ok: true, online: Number(row?.total || 0), now });
+}
+
 async function handle(req, env, ctx) {
   const url = new URL(req.url);
   const path = url.pathname;
@@ -458,9 +478,10 @@ async function handle(req, env, ctx) {
     });
   }
   if (path.endsWith("/api/health")) return send(await health(db, ctx));
+  if (path.endsWith("/api/global-stats")) return await globalStats(db);
   if (path.endsWith("/api/pull")) return send(await pull(db, url.searchParams));
 
-  const isWrite = ["/api/presence", "/api/push", "/api/patch", "/api/delete"].some((p) => path.endsWith(p));
+  const isWrite = ["/api/global-presence", "/api/presence", "/api/push", "/api/patch", "/api/delete"].some((p) => path.endsWith(p));
   if (!isWrite) return send({ error: "not_found", path }, 404);
   if (req.method !== "POST") return send({ error: "method_not_allowed" }, 405);
 
@@ -472,6 +493,7 @@ async function handle(req, env, ctx) {
   }
   body = body || {};
 
+  if (path.endsWith("/api/global-presence")) return await globalPresence(db, body);
   if (path.endsWith("/api/presence")) return await presence(db, body);
   if (path.endsWith("/api/push")) return await push(db, req, body);
   if (path.endsWith("/api/patch")) return await patch(db, body);
