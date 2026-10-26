@@ -455,6 +455,18 @@ async function globalStats(db) {
   return send({ ok: true, online: Number(row?.total || 0), now });
 }
 
+/* Fixed virtual URLs: these are room identifiers, not navigable external websites. */
+const GLOBAL_LANGS = ["ru", "en", "de", "fr", "es", "it", "ja", "zh"];
+async function globalRooms(db) {
+  const now = Date.now();
+  const out = {};
+  for (const lang of GLOBAL_LANGS) {
+    const room = `https://global.orbita.invalid/${lang}#${lang}`;
+    out[lang] = await roomCount(db, await roomToken(room), now);
+  }
+  return send({ ok: true, rooms: out, now });
+}
+
 async function handle(req, env, ctx) {
   const url = new URL(req.url);
   const path = url.pathname;
@@ -479,6 +491,7 @@ async function handle(req, env, ctx) {
   }
   if (path.endsWith("/api/health")) return send(await health(db, ctx));
   if (path.endsWith("/api/global-stats")) return await globalStats(db);
+  if (path.endsWith("/api/global-rooms")) return await globalRooms(db);
   if (path.endsWith("/api/pull")) return send(await pull(db, url.searchParams));
 
   const isWrite = ["/api/global-presence", "/api/presence", "/api/push", "/api/patch", "/api/delete"].some((p) => path.endsWith(p));
