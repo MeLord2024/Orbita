@@ -1,64 +1,49 @@
-# Orbita — Chat on Any Website
+# 🌐 Orbita — Chat on Any Website
 
 [**English**](README.md) · [Русский](README.ru.md)
 
-<a href="docs/preview.mp4"><img src="docs/preview.webp" alt="Orbita translucent Frutiger Aero chat overlay" width="100%"></a>
+<a href="docs/preview.mp4"><img src="docs/preview.webp" alt="Orbita translucent chat overlay" width="100%"></a>
 
-**[▶ Watch the 12-second preview](docs/preview.mp4)**
+**[▶ Watch the preview](docs/preview.mp4)**
 
-**One website. One conversation.** Orbita is a free, translucent chat overlay for Chromium browsers. Open an article, video or discussion, and talk to other people viewing the same URL — without leaving the page.
+**One page — one conversation.** Orbita is a free translucent chat overlay for Chromium browsers. Talk with other visitors without leaving the website. No account required.
 
-The default **Frutiger Aero** theme brings glass, gradients and a nostalgic early-web atmosphere.
+## ✨ Features
 
-## 🌍 New: global chats, subscriptions and live activity
+- **💬 Chat on websites:** floating, movable and resizable chat overlay with adjustable opacity.
+- **🌍 8 interface languages and global chats:** **Russian (Русский), English, German (Deutsch), French (Français), Spanish (Español), Italian (Italiano), Japanese (日本語), Chinese (中文)**. Each language has its own global conversation.
+- **🗣️ 54 chat languages:** choose a room language independently of the interface language.
+- **🔗 Page-based rooms:** conversations are grouped by URL and language; mirrored websites can share a room.
+- **👤 Anonymous participation:** site-specific nicknames and customizable avatars; no sign-up required.
+- **👍 Community interactions:** upvotes, downvotes, stars, replies, reports, top posts and message filters.
+- **🔥 Animated reactions:** fire, shield, fiery effects and other draggable effects with rechargeable charges.
+- **🔔 Replies and activity:** a dedicated Replies view, message navigation and consolidated interaction notifications in newer builds.
+- **📌 Subscriptions:** bookmark conversations and return to them.
+- **🟢 Live activity:** online indicators and a directory of active public global rooms.
+- **🎨 Customization:** Frutiger Aero glass styling, alternative themes, backgrounds, gradients and notification sounds.
+- **👑 Moderation in newer builds:** security-key administrator mode, individual message removal, and room cleanup with time-range preview and confirmation.
 
-**Orbita is no longer just a chat attached to a webpage — it also helps people discover conversations and stay connected.**
+## 🚀 Install from ZIP
 
-- **🌐 Eight global chats:** Russian, English, German, French, Spanish, Italian, Japanese and Chinese. The **Global Chat** button opens a dedicated tab in your interface language.
-- **🟢 Global online badge:** see the approximate number of recently connected Orbita installations on the extension icon, even without opening the chat. This is not the total lifetime installation count.
-- **👥 Live global-chat participant count:** the Global Chat button displays the number of people online and refreshes automatically.
-- **⭐ Follow discussions:** use **Subscribe** to save the current page's chat; subscriptions persist across browser restarts and are currently stored locally.
-- **🔥 Active chats:** under **Feed → Active rooms**, discover public global-language chats, current online participants and message counts for the selected period.
-- **🗂️ New feed navigation:** **All / Active rooms / Subscriptions**, with language and period filters.
+1. Open **[Releases](https://github.com/MeLord2024/Orbita/releases)** and download the version you want.
+2. Extract the ZIP into a permanent folder.
+3. Open `chrome://extensions`, enable **Developer mode**, then select **Load unpacked**.
+4. Select the extracted `extension` folder containing `manifest.json`.
+5. Open a website and click the Orbita extension icon (or use its configured shortcut).
 
-> **Coming later, not yet implemented:** cross-site full-text search and notifications for reactions or new messages in followed chats. For privacy, the Active rooms directory currently lists only the eight intentionally public global chats; it does not automatically publish arbitrary visited URLs.
+**Requires:** Chromium-based browser version 114 or newer. Orbita is currently distributed as an unpacked ZIP, not through Chrome Web Store.
 
-## ✨ Why Orbita?
+> **Version note:** GitHub's currently published release and source tree may lag behind the latest privately tested build. Check the release version before installing. Do not deploy an older server implementation over a newer live Worker.
 
-- **Chat anywhere:** Move, resize and adjust the opacity of a floating chat window on almost any website.
-- **No sign-up needed:** Start anonymously; choose a different nickname for each website.
-- **Rooms by page and language:** Conversations follow the page URL and selected language. You can also link mirrored sites into one room.
-- **Community reactions:** Upvotes, downvotes, stars, reporting and collapsible messages.
-- **Playful visual effects:** Drag fire, a shield, fiery horns, a flaming like or **Silence** onto messages. Silence pauses room animations for three minutes. Charges recover on a rolling 24-hour basis.
-- **Your activity in one place:** Global top posts, your messages and replies.
-- **Make it yours:** Multiple themes, backgrounds, gradients and notification sounds.
-- **International:** Interface available in 8 languages; 54 room languages.
+## 🔒 Privacy and security
 
-## 🚀 Install
+Public chat messages are not private communications. Server-side synchronization can be disabled for local-only use. Administrative secrets must be configured as server-side secrets and **must never be included in the extension ZIP or committed to GitHub**.
 
-**Requires:** Chrome or another Chromium-based browser (version 114+).
+## 📚 More information
 
-1. **[Download the latest release](https://github.com/MeLord2024/Orbita/releases/latest)** and extract the ZIP into a permanent folder.
-2. Open `chrome://extensions` and turn on **Developer mode**.
-3. Click **Load unpacked** and select the extracted **`extension`** folder (the one containing `manifest.json`).
-4. Open a website and press **Alt+O** (or **Alt+Shift+O**), or click the Orbita extension icon.
+- [Русское описание](README.ru.md)
+- [English feature reference](docs/FEATURES.en.md)
+- [Русская документация](docs/FEATURES.ru.md)
+- [Installation notes](INSTALL.md)
 
-> If the shortcut is already in use, change it at `chrome://extensions/shortcuts`. Orbita is currently distributed as an unpacked extension, not through the Chrome Web Store.
-
-## 🔒 Privacy & syncing
-
-Orbita can sync public room messages through a shared server. **Sync is enabled by default** and can be turned off in settings for local-only use. Messages are retained for 30 days on the shared server according to the project's documentation. **Do not treat public chat messages as private communications.**
-
-See the full documentation for technical details, storage behavior and deployment options.
-
-## 📚 Documentation
-
-| | English | Русский |
-|---|---|---|
-| Feature reference & technical details | [English documentation](docs/FEATURES.en.md) | [Полная документация](docs/FEATURES.ru.md) |
-| Installation guide | [Installation](INSTALL.md) *(currently in Russian)* | [Установка](INSTALL.md) |
-
-**Documentation:** latest release · [Releases](https://github.com/MeLord2024/Orbita/releases) · [Source code](https://github.com/MeLord2024/Orbita)
-
----
-*Orbita is an independent browser extension. This repository includes the extension source and optional server implementations.*
+*Orbita is an independent browser extension.*
