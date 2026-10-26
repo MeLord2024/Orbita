@@ -86,3 +86,6 @@ create table if not exists orb_global_pres (
   ts integer not null
 );
 create index if not exists orb_global_pres_ts on orb_global_pres (ts);
+
+/* Accelerates public global-room message counts in /api/discover. */
+create index if not exists orb_msg_url_lang_ts on orb_msg (url, lang, ts);
