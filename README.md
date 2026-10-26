@@ -1,6 +1,6 @@
 # 🌐 Orbita — Chat on Any Website
 
-[**English**](README.md) · [Русский](README.ru.md)
+**English** · [Русский](README.ru.md) · [Deutsch](README.de.md) · [Français](README.fr.md) · [Español](README.es.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [中文](README.zh.md)
 
 <a href="docs/preview.mp4"><img src="docs/preview.webp" alt="Orbita translucent chat overlay" width="100%"></a>
 
@@ -21,7 +21,6 @@
 - **📌 Subscriptions:** bookmark conversations and return to them.
 - **🟢 Live activity:** online indicators and a directory of active public global rooms.
 - **🎨 Customization:** Frutiger Aero glass styling, alternative themes, backgrounds, gradients and notification sounds.
-- **👑 Moderation in newer builds:** security-key administrator mode, individual message removal, and room cleanup with time-range preview and confirmation.
 
 ## 🚀 Install from ZIP
 
@@ -37,13 +36,14 @@
 
 ## 🔒 Privacy and security
 
-Public chat messages are not private communications. Server-side synchronization can be disabled for local-only use. Administrative secrets must be configured as server-side secrets and **must never be included in the extension ZIP or committed to GitHub**.
 
-## 📚 More information
+## 🌍 Languages
 
-- [Русское описание](README.ru.md)
-- [English feature reference](docs/FEATURES.en.md)
-- [Русская документация](docs/FEATURES.ru.md)
-- [Installation notes](INSTALL.md)
-
-*Orbita is an independent browser extension.*
+- [English](README.md)
+- [Русский](README.ru.md)
+- [Deutsch](README.de.md)
+- [Français](README.fr.md)
+- [Español](README.es.md)
+- [Italiano](README.it.md)
+- [日本語](README.ja.md)
+- [中文](README.zh.md)
