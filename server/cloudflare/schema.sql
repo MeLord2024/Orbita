@@ -77,3 +77,12 @@ create table if not exists orb_meta (
   val integer not null default 0,
   ts  integer not null default 0
 );
+
+
+/* Global extension presence: one pseudonymous installation per active browser.
+   Separate from room presence so closed chats still count. */
+create table if not exists orb_global_pres (
+  client text primary key,
+  ts integer not null
+);
+create index if not exists orb_global_pres_ts on orb_global_pres (ts);
