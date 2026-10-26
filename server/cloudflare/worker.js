@@ -462,7 +462,7 @@ async function globalRooms(db) {
   const out = {};
   for (const lang of GLOBAL_LANGS) {
     const room = `https://global.orbita.invalid/${lang}#${lang}`;
-    out[lang] = await roomCount(db, await roomToken(room), now);
+    out[lang] = await roomCount(db, await roomToken(await roomToken(room)), now);
   }
   return send({ ok: true, rooms: out, now });
 }
