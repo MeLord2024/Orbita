@@ -10,6 +10,19 @@
 
 The default **Frutiger Aero** theme brings glass, gradients and a nostalgic early-web atmosphere.
 
+## 🌍 New: global chats, subscriptions and live activity
+
+**Orbita is no longer just a chat attached to a webpage — it also helps people discover conversations and stay connected.**
+
+- **🌐 Eight global chats:** Russian, English, German, French, Spanish, Italian, Japanese and Chinese. The **Global Chat** button opens a dedicated tab in your interface language.
+- **🟢 Global online badge:** see the approximate number of recently connected Orbita installations on the extension icon, even without opening the chat. This is not the total lifetime installation count.
+- **👥 Live global-chat participant count:** the Global Chat button displays the number of people online and refreshes automatically.
+- **⭐ Follow discussions:** use **Subscribe** to save the current page's chat; subscriptions persist across browser restarts and are currently stored locally.
+- **🔥 Active chats:** under **Feed → Active rooms**, discover public global-language chats, current online participants and message counts for the selected period.
+- **🗂️ New feed navigation:** **All / Active rooms / Subscriptions**, with language and period filters.
+
+> **Coming later, not yet implemented:** cross-site full-text search and notifications for reactions or new messages in followed chats. For privacy, the Active rooms directory currently lists only the eight intentionally public global chats; it does not automatically publish arbitrary visited URLs.
+
 ## ✨ Why Orbita?
 
 - **Chat anywhere:** Move, resize and adjust the opacity of a floating chat window on almost any website.
@@ -45,7 +58,7 @@ See the full documentation for technical details, storage behavior and deploymen
 | Feature reference & technical details | [English documentation](docs/FEATURES.en.md) | [Полная документация](docs/FEATURES.ru.md) |
 | Installation guide | [Installation](INSTALL.md) *(currently in Russian)* | [Установка](INSTALL.md) |
 
-**Version documented:** v0.4.33 · [Releases](https://github.com/MeLord2024/Orbita/releases) · [Source code](https://github.com/MeLord2024/Orbita)
+**Documentation:** latest release · [Releases](https://github.com/MeLord2024/Orbita/releases) · [Source code](https://github.com/MeLord2024/Orbita)
 
 ---
 *Orbita is an independent browser extension. This repository includes the extension source and optional server implementations.*
