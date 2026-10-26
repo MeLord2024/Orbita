@@ -218,7 +218,7 @@ async function refreshBadges() {
       : `Orbita · ${count.toLocaleString()} users online` });
     // Clear old per-tab badges left by earlier versions of Orbita.
     const tabs = await chrome.tabs.query({});
-    await Promise.all(tabs.filter(t => t.id != null).map(t => chrome.action.setBadgeText({ tabId: t.id, text: "" }).catch(() => {})));
+    await Promise.all(tabs.filter(t => t.id != null).map(t => chrome.action.setBadgeText({ tabId: t.id, text: formatGlobalBadge(count) }).catch(() => {})));
   } catch { /* browser shutting down */ }
 }
 
