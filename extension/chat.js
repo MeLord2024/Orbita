@@ -1731,12 +1731,11 @@ function renderDiscoveryControls() {
   sub.setAttribute("aria-pressed", String(following));
 }
 function openDiscoveryRoom(row) {
-  if (/^https:\/\/global\\.orbita\\.invalid\/(ru|en|de|fr|es|it|ja|zh)$/.test(row.url)) {
-    send("global:open", { lang: row.lang }).catch(() => {});
-  } else {
-    send("site:open", { url: row.url, lang: row.lang }).catch(() => {});
-  }
+  const match = /^https:\/\/global[.]orbita[.]invalid\/(ru|en|de|fr|es|it|ja|zh)$/.exec(row.url);
+  if (match) send("global:open", { lang: match[1] }).catch(() => {});
+  else send("site:open", { url: row.url, lang: row.lang }).catch(() => {});
 }
+
 function discoveryRowNode(row, active) {
   const li = el("li", "discovery-room");
   const button = el("button", "post-link", String(row.title || hostOf(row.url)).slice(0, 140));
