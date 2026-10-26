@@ -201,7 +201,7 @@ async function globalRooms() {
   const prefs = await store.getSettings();
   if (!prefs.serverUrl || prefs.syncOn === false) return {};
   try {
-    const res = await fetch(prefs.serverUrl.replace(/\\/+$/, "") + "/api/global-rooms");
+    const res = await fetch(prefs.serverUrl.replace(new RegExp("/+$"), "") + "/api/global-rooms");
     if (!res.ok) return {};
     const data = await res.json();
     return data && data.ok && data.rooms ? data.rooms : {};
