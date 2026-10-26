@@ -16,6 +16,34 @@ const el = (tag, cls, text) => {
 };
 const send = (cmd, payload = {}) => chrome.runtime.sendMessage({ cmd, ...payload });
 
+const GLOBAL_LABELS = {
+  ru: "🇷🇺 Общая комната", en: "🇬🇧 Global room", de: "🇩🇪 Globaler Chat",
+  fr: "🇫🇷 Salon général", es: "🇪🇸 Sala global", it: "🇮🇹 Chat globale",
+  ja: "🇯🇵 グローバルルーム", zh: "🇨🇳 全球聊天室"
+};
+let globalRoomCounts = {};
+let lastGlobalRoomFetch = 0;
+function currentGlobalLang() {
+  const l = String(state.settings?.uiLang || "en").toLowerCase();
+  return GLOBAL_LABELS[l] ? l : "en";
+}
+function renderGlobalRoomButton() {
+  const btn = $("globalRoomBtn");
+  if (!btn) return;
+  const lang = currentGlobalLang();
+  const n = globalRoomCounts[lang];
+  btn.textContent = `${GLOBAL_LABELS[lang]} · 🟢 ${Number.isFinite(n) ? n : "—"}`;
+}
+async function refreshGlobalRooms(force = false) {
+  if (!force && Date.now() - lastGlobalRoomFetch < 90000) return;
+  lastGlobalRoomFetch = Date.now();
+  try {
+    const res = await send("global:stats");
+    if (res && res.rooms) globalRoomCounts = res.rooms;
+  } catch { /* keep the last known counts */ }
+  renderGlobalRoomButton();
+}
+
 const THEME_KEY = "orbita.theme";
 const COLLAPSED_KEY = "orbita.collapsed";
 const GEOM_KEY = "orbita.geom";
@@ -390,6 +418,7 @@ function applyLocale() {
   $("bgFit").replaceChildren();
   BG_FITS.forEach((f) => $("bgFit").add(new Option(t(`fit.${f}`), f)));
   renderHeader();
+  renderGlobalRoomButton();
   renderFx();
   renderComposer();
   renderSkins();
@@ -1569,6 +1598,7 @@ async function refresh() {
   state.answers = (answersRes && answersRes.rows) || [];
   state.answersUnread = (answersRes && answersRes.unread) || 0;
   state.clients = (presenceRes && presenceRes.clients) || 0;
+  refreshGlobalRooms();
   setGroup(presenceRes && presenceRes.group);
   if (quotaRes && quotaRes.quota) state.quota = quotaRes.quota;
   /* Заряды на карточках рисует renderFx(), а он раньше вызывался только до ответа
@@ -1943,6 +1973,7 @@ function bindEvents() {
     }, true)
   );
   $("uiLangBtn").addEventListener("click", toggleUiLangPop);
+  $("globalRoomBtn").addEventListener("click", () => send("global:open", { lang: currentGlobalLang() }));
   $("q").addEventListener("input", (e) => {
     state.q = e.target.value;
     renderFeed();
