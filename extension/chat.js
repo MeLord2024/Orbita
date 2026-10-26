@@ -104,6 +104,9 @@ const state = {
   view: "all",
   period: "recent",
   lentaTab: "global",
+  lentaSubtab: "all",
+  subscriptions: [],
+  discoveredRooms: [],
   lentaPeriod: "day",
   lentaLang: "*",
   jumpTo: params.get("msg") || "",
@@ -1583,18 +1586,23 @@ async function refresh() {
     state.lentaTab === "mine"
       ? send("mine:get", { lang: state.lentaLang, period: state.lentaPeriod, filter })
       : send("lenta:get", { url: "*", lang: state.lentaLang, period: state.lentaPeriod, filter });
-  const [feedRes, lentaRes, presenceRes, quotaRes, answersRes] = await Promise.all([
+  const discoveryCall = state.lentaTab === "global" && state.lentaSubtab === "active"
+    ? send("discover:get", { lang: state.lentaLang, period: state.lentaPeriod })
+    : Promise.resolve(null);
+  const [feedRes, lentaRes, presenceRes, quotaRes, answersRes, discoveryRes] = await Promise.all([
     send("feed:get", { url: state.url, lang: state.lang, view: state.view, period: state.period, sort: state.view === "top" ? "score" : "new", filter }),
     lentaCall,
     send("presence", { url: state.url, lang: writeLang() }),
     send("quota:get"),
     // ответов всегда три: счётчик на табе обязан жить, даже когда открыт другой раздел
     send("answers:get", { lang: state.lentaLang, period: state.lentaPeriod, filter }),
+    discoveryCall,
   ]);
   const next = (feedRes && feedRes.messages) || [];
   const sameFeed = feedSig(state.messages) === feedSig(next);
   state.messages = next;
   state.rows = (lentaRes && lentaRes.rows) || [];
+  if (discoveryRes) state.discoveredRooms = Array.isArray(discoveryRes.rooms) ? discoveryRes.rooms : [];
   state.answers = (answersRes && answersRes.rows) || [];
   state.answersUnread = (answersRes && answersRes.unread) || 0;
   state.clients = (presenceRes && presenceRes.clients) || 0;
@@ -1611,6 +1619,7 @@ async function refresh() {
   // пустая комната: отпечаток совпадает и на старте, а заглушку «пока пусто» всё равно нужно поставить
   if (!sameFeed || !$("feed").childElementCount) renderFeed();
   renderLenta();
+  renderDiscoveryControls();
   renderMirror();
   renderHeader();
   renderComposer();
@@ -1671,9 +1680,96 @@ function renderFeed() {
   jumpBottom = false;
 }
 
+/* Subscriptions are local to this browser profile. No visited URL is uploaded
+   merely because a user follows it. */
+const SUBSCRIPTIONS_KEY = "orbita.subscriptions.v1";
+const DISCOVERY_UI = {
+  ru: ["Всё", "Активные комнаты", "Подписки", "☆ Подписаться", "★ Вы подписаны", "Нет подписок", "Нет активных комнат"],
+  en: ["All", "Active rooms", "Subscriptions", "☆ Subscribe", "★ Subscribed", "No subscriptions", "No active rooms"],
+  de: ["Alle", "Aktive Räume", "Abos", "☆ Abonnieren", "★ Abonniert", "Keine Abos", "Keine aktiven Räume"],
+  fr: ["Tout", "Salons actifs", "Abonnements", "☆ S’abonner", "★ Abonné", "Aucun abonnement", "Aucun salon actif"],
+  es: ["Todo", "Salas activas", "Suscripciones", "☆ Suscribirse", "★ Suscrito", "Sin suscripciones", "Sin salas activas"],
+  it: ["Tutti", "Stanze attive", "Iscrizioni", "☆ Iscriviti", "★ Iscritto", "Nessuna iscrizione", "Nessuna stanza attiva"],
+  ja: ["すべて", "アクティブルーム", "購読", "☆ 購読する", "★ 購読中", "購読なし", "アクティブルームなし"],
+  zh: ["全部", "活跃聊天室", "订阅", "☆ 订阅", "★ 已订阅", "暂无订阅", "暂无活跃聊天室"]
+};
+function discoveryWords() { return DISCOVERY_UI[currentGlobalLang()] || DISCOVERY_UI.en; }
+function subKey(url, lang) { return `${normalizeUrl(url)}#${lang}`; }
+function isSubscribed() {
+  return state.subscriptions.some((r) => subKey(r.url, r.lang) === subKey(state.url, writeLang()));
+}
+async function loadSubscriptions() {
+  try {
+    const data = await chrome.storage.local.get(SUBSCRIPTIONS_KEY);
+    const rows = data[SUBSCRIPTIONS_KEY];
+    state.subscriptions = Array.isArray(rows) ? rows.filter((r) => r && typeof r.url === "string" && typeof r.lang === "string").slice(0, 100) : [];
+  } catch { state.subscriptions = []; }
+}
+async function toggleSubscription() {
+  const key = subKey(state.url, writeLang());
+  const before = state.subscriptions;
+  state.subscriptions = before.some((r) => subKey(r.url, r.lang) === key)
+    ? before.filter((r) => subKey(r.url, r.lang) !== key)
+    : [{ url: normalizeUrl(state.url), lang: writeLang(), title: String(state.title || hostOf(state.url)).slice(0, 140), added: Date.now() }, ...before].slice(0, 100);
+  try { await chrome.storage.local.set({ [SUBSCRIPTIONS_KEY]: state.subscriptions }); }
+  catch { state.subscriptions = before; }
+  renderDiscoveryControls();
+  if (state.lentaSubtab === "follow") renderLenta();
+}
+function renderDiscoveryControls() {
+  const words = discoveryWords();
+  const ids = ["lentaSubAll", "lentaSubActive", "lentaSubFollow"];
+  ids.forEach((id, i) => {
+    const btn = $(id);
+    btn.textContent = words[i];
+    btn.setAttribute("aria-pressed", String(state.lentaSubtab === ["all", "active", "follow"][i]));
+  });
+  $("lentaSubtabs").hidden = state.lentaTab !== "global";
+  const following = isSubscribed();
+  const sub = $("subscribeBtn");
+  sub.textContent = words[following ? 4 : 3];
+  sub.setAttribute("aria-pressed", String(following));
+}
+function openDiscoveryRoom(row) {
+  const match = /^https:\/\/global[.]orbita[.]invalid\/(ru|en|de|fr|es|it|ja|zh)$/.exec(row.url);
+  if (match) send("global:open", { lang: match[1] }).catch(() => {});
+  else send("site:open", { url: row.url, lang: row.lang }).catch(() => {});
+}
+
+function discoveryRowNode(row, active) {
+  const li = el("li", "discovery-room");
+  const button = el("button", "post-link", String(row.title || hostOf(row.url)).slice(0, 140));
+  button.type = "button";
+  button.addEventListener("click", () => openDiscoveryRoom(row));
+  const meta = el("div", "sub", active
+    ? `🟢 ${row.online || 0} · 💬 ${row.messages || 0}`
+    : `🌐 ${row.lang.toUpperCase()} · ${hostOf(row.url)}`);
+  li.append(button, meta);
+  if (!active) {
+    const remove = el("button", "subscription-remove", "✕");
+    remove.type = "button";
+    remove.title = "Unsubscribe";
+    remove.addEventListener("click", async () => {
+      state.subscriptions = state.subscriptions.filter((r) => subKey(r.url, r.lang) !== subKey(row.url, row.lang));
+      await chrome.storage.local.set({ [SUBSCRIPTIONS_KEY]: state.subscriptions });
+      renderDiscoveryControls();
+      renderLenta();
+    });
+    li.append(remove);
+  }
+  return li;
+}
+
 function renderLenta() {
   const list = $("lentaList");
   list.replaceChildren();
+  if (state.lentaTab === "global" && state.lentaSubtab !== "all") {
+    const active = state.lentaSubtab === "active";
+    const rows = active ? state.discoveredRooms : state.subscriptions.filter((r) => state.lentaLang === "*" || r.lang === state.lentaLang);
+    if (!rows.length) list.appendChild(el("li", "empty", discoveryWords()[active ? 6 : 5]));
+    else rows.forEach((row) => list.appendChild(discoveryRowNode(row, active)));
+    return;
+  }
   const answers = state.lentaTab === "answers";
   const rows = answers ? state.answers : state.rows;
   if (!rows.length) {
@@ -1944,6 +2040,14 @@ function bindEvents() {
     state.lentaPeriod = e.target.value;
     refresh();
   });
+  [["lentaSubAll", "all"], ["lentaSubActive", "active"], ["lentaSubFollow", "follow"]].forEach(([id, subtab]) => {
+    $(id).addEventListener("click", () => {
+      state.lentaSubtab = subtab;
+      renderDiscoveryControls();
+      refresh();
+    });
+  });
+  $("subscribeBtn").addEventListener("click", toggleSubscription);
   $("lentaTabGlobal").addEventListener("click", () => {
     if (state.lentaTab === "global") return;
     state.lentaTab = "global";
@@ -2396,6 +2500,7 @@ async function init() {
   }
   // браузер не даёт звуку стартовать без жеста: первое же касание будит AudioContext
   addEventListener("pointerdown", unlockSound, { capture: true });
+  await loadSubscriptions();
   await send("channel:open", { url: state.url, title: state.title, lang: writeLang(), visible: !document.hidden });
   await refresh();
   measurePanels();

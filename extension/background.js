@@ -580,6 +580,12 @@ async function handle(msg, sender) {
   const tabId = sender.tab && sender.tab.id;
   switch (msg.cmd) {
     case "global:stats": return { ok: true, online: globalOnline, rooms: await globalRooms() };
+    case "discover:get": {
+      const lang = /^[a-z*]{1,3}$/.test(String(msg.lang || "*")) ? msg.lang : "*";
+      const period = ["recent", "day", "week", "month", "year", "all"].includes(msg.period) ? msg.period : "day";
+      try { return await remote(`/api/discover?lang=${encodeURIComponent(lang)}&period=${period}`); }
+      catch { return { ok: false, rooms: [] }; }
+    }
     case "global:open": {
       const lang = String(msg.lang || "en").toLowerCase();
       if (!["ru","en","de","fr","es","it","ja","zh"].includes(lang)) return { ok: false };
