@@ -467,6 +467,30 @@ async function globalRooms(db) {
   return send({ ok: true, rooms: out, now });
 }
 
+/* First discovery iteration: only the eight deliberately public global rooms.
+   Arbitrary visited URLs are never exposed by the discovery API. */
+async function discoverRooms(db, params) {
+  const now = Date.now();
+  const windows = { recent: 86400000, day: 86400000, week: 604800000,
+    month: 2592000000, year: 31536000000, all: null };
+  const period = Object.prototype.hasOwnProperty.call(windows, params.get("period")) ? params.get("period") : "day";
+  const lang = asText(params.get("lang")).toLowerCase();
+  const langs = GLOBAL_LANGS.filter((code) => !lang || lang === "*" || lang === code);
+  const rows = [];
+  for (const code of langs) {
+    const url = `https://global.orbita.invalid/${code}`;
+    const room = `${url}#${code}`;
+    const online = await roomCount(db, await roomToken(await roomToken(room)), now);
+    const from = windows[period] === null ? 0 : now - windows[period];
+    const count = await db.prepare(`select count(*) as n from orb_msg
+      where url = ? and lang = ? and ts >= ?`).bind(url, code, from).first();
+    rows.push({ url, lang: code, title: `Orbita Global · ${code.toUpperCase()}`,
+      online, messages: Number(count?.n || 0) });
+  }
+  rows.sort((a, b) => b.online - a.online || b.messages - a.messages);
+  return send({ ok: true, period, rooms: rows, now });
+}
+
 async function handle(req, env, ctx) {
   const url = new URL(req.url);
   const path = url.pathname;
@@ -492,6 +516,7 @@ async function handle(req, env, ctx) {
   if (path.endsWith("/api/health")) return send(await health(db, ctx));
   if (path.endsWith("/api/global-stats")) return await globalStats(db);
   if (path.endsWith("/api/global-rooms")) return await globalRooms(db);
+  if (path.endsWith("/api/discover")) return await discoverRooms(db, url.searchParams);
   if (path.endsWith("/api/pull")) return send(await pull(db, url.searchParams));
 
   const isWrite = ["/api/global-presence", "/api/presence", "/api/push", "/api/patch", "/api/delete"].some((p) => path.endsWith(p));
