@@ -3608,3 +3608,20 @@ html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .flag-btn b 
   99.95% {left:2%;transform:scaleX(1);opacity:.94}
   100% {left:2%;transform:scaleX(-1);opacity:.94}
 }
+
+/* v0.4.34: global language-room entry, themed by existing CSS variables */
+.global-room-row { justify-content: flex-end; }
+.global-room-btn {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 5px 12px;
+  background: var(--panel-alt);
+  color: var(--ink);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 650;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.55);
+  cursor: pointer;
+}
+.global-room-btn:hover { background: var(--panel); }
+.global-room-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
