@@ -3625,3 +3625,23 @@ html:is([data-buttons="a"], [data-buttons="c"], [data-buttons="d"]) .flag-btn b 
 }
 .global-room-btn:hover { background: var(--panel); }
 .global-room-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* v0.4.35 — discovery and subscriptions */
+.lenta-subtabs { display: flex; gap: 3px; flex-wrap: wrap; padding: 5px 8px; }
+.lenta-subtabs[hidden] { display: none; }
+.lenta-subtabs button, .subscribe-btn, .subscription-remove {
+  font: inherit; font-size: 11px; cursor: pointer; color: var(--ink);
+  border: 1px solid var(--line); border-radius: 12px;
+  background: var(--panel-alt); padding: 5px 8px;
+}
+.lenta-subtabs button[aria-pressed="true"], .subscribe-btn[aria-pressed="true"] {
+  background: var(--panel); font-weight: 700;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,.12);
+}
+.subscribe-btn { margin-left: auto; white-space: nowrap; }
+.discovery-room { position: relative; }
+.discovery-room .post-link { overflow-wrap: anywhere; }
+.subscription-remove { float: right; margin-top: 4px; }
+.lenta-subtabs button:focus-visible, .subscribe-btn:focus-visible, .subscription-remove:focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 2px;
+}
