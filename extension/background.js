@@ -156,17 +156,70 @@ async function scheduleBadge() {
   badgeTimer = setTimeout(refreshBadges, 250);
 }
 
-async function refreshBadges() {
-  const tabs = await chrome.tabs.query({});
-  for (const tab of tabs) {
-    if (tab.id == null || !tab.url || !/^https?:/.test(tab.url)) continue;
-    const n = await clientsForUrl(tab.url);
-    try {
-      await chrome.action.setBadgeText({ tabId: tab.id, text: n ? (n > 99 ? "99+" : String(n)) : "" });
-    } catch {
-      /* tab gone */
-    }
+/* Global online counts active installations, not tabs or opened rooms.
+   MV3 alarms wake the service worker; no permanent background loop is assumed. */
+let globalOnline = null;
+let globalUpdatedAt = 0;
+let globalHeartbeatAt = 0;
+let globalHeartbeatBusy = false;
+const GLOBAL_HEARTBEAT_MS = 240000;
+
+function formatGlobalBadge(count) {
+  if (!Number.isFinite(count) || count < 1) return "";
+  if (count < 1000) return String(count);
+  if (count < 10000) return Math.floor(count / 1000) + "K+";
+  if (count < 1000000) return Math.floor(count / 1000) + "K";
+  return Math.floor(count / 1000000) + "M+";
+}
+
+async function globalHeartbeat(force = false) {
+  if (globalHeartbeatBusy || (!force && Date.now() - globalHeartbeatAt < GLOBAL_HEARTBEAT_MS)) return;
+  const prefs = await store.getSettings();
+  if (!prefs.serverUrl || prefs.syncOn === false) {
+    globalOnline = null;
+    await refreshBadges();
+    return;
   }
+  globalHeartbeatBusy = true;
+  try {
+    const identity = await store.getIdentity();
+    const res = await remote("/api/global-presence", { client: identity.pub });
+    if (!res || !res.ok || !Number.isFinite(Number(res.online))) throw Error("global presence unavailable");
+    globalOnline = Math.max(0, Number(res.online));
+    globalUpdatedAt = Date.now();
+    globalHeartbeatAt = Date.now();
+    await refreshBadges();
+  } catch {
+    if (Date.now() - globalUpdatedAt > 300000) globalOnline = null;
+    await refreshBadges();
+  } finally {
+    globalHeartbeatBusy = false;
+  }
+}
+
+async function globalRooms() {
+  const prefs = await store.getSettings();
+  if (!prefs.serverUrl || prefs.syncOn === false) return {};
+  try {
+    const res = await fetch(prefs.serverUrl.replace(/\\/+$/, "") + "/api/global-rooms");
+    if (!res.ok) return {};
+    const data = await res.json();
+    return data && data.ok && data.rooms ? data.rooms : {};
+  } catch { return {}; }
+}
+
+async function refreshBadges() {
+  // A single global badge is shared by every tab. Per-tab badges would override it.
+  const count = Date.now() - globalUpdatedAt <= 300000 ? globalOnline : null;
+  try {
+    await chrome.action.setBadgeText({ text: formatGlobalBadge(count) });
+    await chrome.action.setTitle({ title: count == null
+      ? "Orbita · global online unavailable"
+      : `Orbita · ${count.toLocaleString()} users online` });
+    // Clear old per-tab badges left by earlier versions of Orbita.
+    const tabs = await chrome.tabs.query({});
+    await Promise.all(tabs.filter(t => t.id != null).map(t => chrome.action.setBadgeText({ tabId: t.id, text: "" }).catch(() => {})));
+  } catch { /* browser shutting down */ }
 }
 
 function broadcast(event, payload) {
@@ -344,11 +397,14 @@ async function beatOnce() {
 
 chrome.alarms.create("orbita-sync", { periodInMinutes: 0.5 });
 chrome.alarms.create("orbita-badge", { periodInMinutes: 0.5 });
+chrome.alarms.create("orbita-global", { periodInMinutes: 2 });
 chrome.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name === "orbita-sync") liveTick();
   if (alarm.name === "orbita-badge") scheduleBadge();
+  if (alarm.name === "orbita-global") globalHeartbeat();
 });
 liveTick();
+globalHeartbeat(true);
 
 async function ensureContent(tab) {
   try {
@@ -523,6 +579,15 @@ chrome.tabs.onActivated.addListener(() => scheduleBadge());
 async function handle(msg, sender) {
   const tabId = sender.tab && sender.tab.id;
   switch (msg.cmd) {
+    case "global:stats": return { ok: true, online: globalOnline, rooms: await globalRooms() };
+    case "global:open": {
+      const lang = String(msg.lang || "en").toLowerCase();
+      if (!["ru","en","de","fr","es","it","ja","zh"].includes(lang)) return { ok: false };
+      const roomUrl = `https://global.orbita.invalid/${lang}`;
+      const tabUrl = chrome.runtime.getURL("chat.html") + `?url=${encodeURIComponent(roomUrl)}&title=${encodeURIComponent("Orbita Global · " + lang.toUpperCase())}&lang=${lang}`;
+      await chrome.tabs.create({ url: tabUrl });
+      return { ok: true };
+    }
     case "page:register": {
       if (tabId != null) tabUrls.set(tabId, msg.url);
       return { ok: true, hidden: await isHiddenDomain(msg.url) };
