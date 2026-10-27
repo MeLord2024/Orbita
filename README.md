@@ -22,6 +22,16 @@ Orbita is a free extension for Chromium browsers that adds a chat to any website
 - **🟢 Live activity:** online indicators and a directory of active public global rooms.
 - **🎨 Customization:** Frutiger Aero glass styling, alternative themes, backgrounds, gradients and notification sounds.
 
+## 📱 Orbita for Android — v0.3.22
+
+![Orbita Android — chat and social feed](docs/android-preview.png)
+
+Orbita is also available as a standalone Android app. Chat on websites and in language-based global rooms directly from your phone, without a browser extension.
+
+**Android features:** anonymous chats and avatars; global rooms and website-specific discussions; 8 interface languages and 54 room languages; likes, dislikes, stars, replies and reporting; social feed, search, filters and subscriptions; animated message effects; glass themes including Frutiger Aero and Blue-Grey.
+
+**Installation:** download `Orbita-android-v0.3.22.apk` from [GitHub Releases](https://github.com/MeLord2024/Orbita/releases), open the APK on your Android phone, and confirm installation. This is a testing build; allow installation from this source only if you trust the file.
+
 ## 🚀 Install from ZIP
 
 1. Open **[Releases](https://github.com/MeLord2024/Orbita/releases)** and download the version you want.
