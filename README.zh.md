@@ -4,7 +4,7 @@
 
 <a href="docs/preview.mp4"><img src="docs/preview.webp" alt="Orbita chat overlay preview" width="100%"></a>
 
-**一个页面，一场对话。** Orbita 是一款免费的 Chromium 浏览器扩展，可在网页上显示半透明聊天窗口。无需离开当前页面，即可与其他访问者交流，也无需注册。
+Orbita 是一款免费的 Chromium 浏览器扩展，可在任何网站上添加聊天窗口。无需离开当前页面，即可与其他访问者交流。匿名使用，无需注册。支持按语言划分的聊天室、互动表态、订阅、动态信息流和个性化设置。
 
 ## ✨ 主要功能
 
