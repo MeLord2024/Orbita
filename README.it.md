@@ -4,7 +4,7 @@
 
 <a href="docs/preview.mp4"><img src="docs/preview.webp" alt="Orbita chat overlay preview" width="100%"></a>
 
-**Una pagina, una conversazione.** Orbita è un'estensione gratuita che mostra una chat trasparente sopra i siti web nei browser Chromium. Parla con gli altri visitatori senza lasciare la pagina e senza registrarti.
+Orbita è un'estensione gratuita per browser Chromium che aggiunge una chat a qualsiasi sito web. Parla con gli altri visitatori senza lasciare la pagina. Anonimato e nessuna registrazione. Chat per lingua, reazioni, iscrizioni, feed delle attività e personalizzazione.
 
 ## ✨ Funzionalità
 
