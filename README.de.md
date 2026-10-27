@@ -4,7 +4,7 @@
 
 <a href="docs/preview.mp4"><img src="docs/preview.webp" alt="Orbita chat overlay preview" width="100%"></a>
 
-**Eine Seite, ein Gespräch.** Orbita ist eine kostenlose, transparente Chat-Einblendung für Chromium-Browser. Unterhalte dich mit anderen Besuchern einer Website, ohne die Seite zu verlassen. Keine Registrierung erforderlich.
+Orbita ist eine kostenlose Erweiterung für Chromium-Browser, die einen Chat auf jeder Website ermöglicht. Unterhalte dich mit anderen Besuchern, ohne die Seite zu verlassen. Anonym und ohne Registrierung. Sprachbasierte Chats, Reaktionen, Abonnements, Aktivitätsfeed und individuelle Anpassungen.
 
 ## ✨ Funktionen
 
