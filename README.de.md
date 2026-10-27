@@ -20,6 +20,16 @@ Orbita ist eine kostenlose Erweiterung für Chromium-Browser, die einen Chat auf
 - 🟢 **Live-Aktivität:** Online-Anzeigen und Verzeichnis öffentlicher globaler Chats.
 - 🎨 **Design:** Frutiger Aero, weitere Designs, Hintergründe, Farbverläufe und Sounds.
 
+## 📱 Orbita für Android — v0.3.22
+
+![Orbita Android — Chat und Feed](docs/android-preview.png)
+
+Orbita gibt es auch als eigenständige Android-App. Unterhalte dich in globalen Sprachchats und Chats zu einzelnen Websites direkt auf dem Smartphone, ohne Browser-Erweiterung.
+
+**Funktionen:** anonyme Chats und Avatare; globale und websitebezogene Räume; 8 Oberflächensprachen und 54 Raumsprachen; Likes, Dislikes, Sterne, Antworten und Meldungen; Feed, Suche, Filter und Abonnements; animierte Nachrichteneffekte; Glasdesigns wie Frutiger Aero und Blue-Grey.
+
+**Installation:** `Orbita-android-v0.3.22.apk` unter [Releases](https://github.com/MeLord2024/Orbita/releases) herunterladen und auf Android öffnen. Es handelt sich um eine Testversion: Installation aus dieser Quelle nur erlauben, wenn du der Datei vertraust.
+
 ## 🚀 Installation aus ZIP
 
 1. Unter [Releases](https://github.com/MeLord2024/Orbita/releases) die gewünschte ZIP-Version herunterladen.
