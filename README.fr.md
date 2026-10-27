@@ -20,6 +20,16 @@ Orbita est une extension gratuite pour les navigateurs Chromium qui ajoute un ch
 - 🟢 **Activité en direct :** indicateurs de présence et répertoire des salons mondiaux publics.
 - 🎨 **Personnalisation :** Frutiger Aero, thèmes, arrière-plans, dégradés et sons.
 
+## 📱 Orbita pour Android — v0.3.22
+
+![Orbita Android — chat et fil d’actualité](docs/android-preview.png)
+
+Orbita existe également sous forme d’application Android autonome. Discutez dans les salons mondiaux par langue ou dans les salons liés aux sites web, directement sur votre téléphone.
+
+**Fonctionnalités :** discussions anonymes et avatars ; salons mondiaux et par site ; 8 langues d’interface et 54 langues de salon ; votes, étoiles, réponses et signalements ; fil d’actualité, recherche, filtres et abonnements ; effets de messages animés ; thèmes en verre Frutiger Aero et Blue-Grey.
+
+**Installation :** téléchargez `Orbita-android-v0.3.22.apk` depuis [Releases](https://github.com/MeLord2024/Orbita/releases), ouvrez-le sur Android et confirmez l’installation. Version de test : n’autorisez cette source que si vous faites confiance au fichier.
+
 ## 🚀 Installation depuis le ZIP
 
 1. Téléchargez une version dans [Releases](https://github.com/MeLord2024/Orbita/releases).
