@@ -20,6 +20,16 @@ Orbita 是一款免费的 Chromium 浏览器扩展，可在任何网站上添加
 - 🟢 **实时活动：** 在线人数提示及公开全球聊天室目录。
 - 🎨 **个性化：** Frutiger Aero 玻璃风格、主题、背景、渐变和提示音。
 
+## 📱 Android 版 Orbita — v0.3.22
+
+![Orbita Android — 聊天与动态信息流](docs/android-preview.png)
+
+Orbita 也提供独立的 Android 应用。无需浏览器扩展，即可在手机上参与按语言划分的全球聊天室和网站专属讨论。
+
+**主要功能：** 匿名聊天和头像、全球及网站聊天室、8 种界面语言和 54 种聊天室语言、赞成与反对、星标、回复和举报、动态信息流、搜索、筛选及订阅、消息动画效果，以及 Frutiger Aero 和 Blue-Grey 玻璃主题。
+
+**安装方式：** 从 [Releases](https://github.com/MeLord2024/Orbita/releases)下载`Orbita-android-v0.3.22.apk`，在 Android 手机上打开并确认安装。这是测试版本，请仅在信任文件来源时允许安装。
+
 ## 🚀 通过 ZIP 安装
 
 1. 前往 [Releases](https://github.com/MeLord2024/Orbita/releases) 下载所需版本的 ZIP。
