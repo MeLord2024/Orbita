@@ -20,6 +20,16 @@ Orbitaは、あらゆるウェブサイトにチャットを追加できるChrom
 - 🟢 **オンライン状況：** 接続人数の表示と公開グローバルルーム一覧。
 - 🎨 **カスタマイズ：** Frutiger Aero、テーマ、背景、グラデーション、通知音。
 
+## 📱 Android版 Orbita — v0.3.22
+
+![Orbita Android — チャットとフィード](docs/android-preview.png)
+
+OrbitaはAndroidアプリとしても利用できます。ブラウザー拡張機能を使わず、スマートフォンから言語別グローバルチャットやウェブサイト別の会話に参加できます。
+
+**主な機能：** 匿名チャットとアバター、グローバルルームとサイト別ルーム、8言語の画面表示と54のルーム言語、いいね・低評価・スター・返信・通報、フィード・検索・フィルター・購読、アニメーション効果、Frutiger AeroとBlue-Greyのガラステーマ。
+
+**インストール：** [Releases](https://github.com/MeLord2024/Orbita/releases)から`Orbita-android-v0.3.22.apk`をダウンロードし、Androidで開いてインストールしてください。テスト版のため、信頼できるファイルの場合のみインストールを許可してください。
+
 ## 🚀 ZIPからインストール
 
 1. [Releases](https://github.com/MeLord2024/Orbita/releases)からZIPをダウンロードします。
