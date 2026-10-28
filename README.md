@@ -6,12 +6,13 @@
 
 **[▶ Watch the preview](docs/preview.mp4)**
 
-Orbita is a free extension for Chromium browsers that adds a chat to any website. Talk with other visitors without leaving the page. Stay anonymous — no registration required. Language-based chats, reactions, subscriptions, activity feed, and customization.
+Orbita is a free extension for Chromium browsers that adds a chat to any website. Talk with other visitors without leaving the page. Stay anonymous — no registration required. Explore 85 thematic categories, create topics, and join open real-time discussions. Language-based chats, reactions, subscriptions, activity feed, and customization.
 
 ## ✨ Features
 
 - **💬 Chat on websites:** floating, movable and resizable chat overlay with adjustable opacity.
 - **🌍 8 interface languages and global chats:** **Russian (Русский), English, German (Deutsch), French (Français), Spanish (Español), Italian (Italiano), Japanese (日本語), Chinese (中文)**. Each language has its own global conversation.
+- **🧩 85 thematic categories:** discover public discussions by interest, browse topics, and create your own topics within categories. Topic discussions are available without joining a private server.
 - **🗣️ 54 chat languages:** choose a room language independently of the interface language.
 - **🔗 Page-based rooms:** conversations are grouped by URL and language; mirrored websites can share a room.
 - **👤 Anonymous participation:** site-specific nicknames and customizable avatars; no sign-up required.
