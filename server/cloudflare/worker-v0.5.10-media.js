@@ -898,10 +898,18 @@ async function handleMediaRequest(request,env){
  if(!env.MEDIA)return json({error:'media_storage_unconfigured'},503);
  if(path==='/api/media'&&request.method==='POST'){
   // Anonymous upload MUST have abuse controls before being enabled publicly.
-  if(!env.MEDIA_RATE_LIMIT)return json({error:'media_rate_limit_unconfigured'},503);
+  if(!env.DB)return json({error:'media_rate_limit_unconfigured'},503);
+  // Enforce anonymous upload quotas using the existing D1 orb_rate table.
+  // No additional bindings or database migrations beyond MEDIA are required.
+  const now=Date.now();
   const remote=request.headers.get('CF-Connecting-IP')||'unknown';
-  const allowed=await env.MEDIA_RATE_LIMIT.limit({key:remote});
-  if(!allowed.success)return json({error:'too_many_uploads'},429);
+  const hash=(await digest('SHA-256',remote+'|'+Math.floor(now/86400000)+'|media')).slice(0,32);
+  const bucket='media|'+hash;
+  const recent=await env.DB.prepare('SELECT count(*) AS n FROM orb_rate WHERE bucket=? AND ts>?').bind(bucket,now-300000).first();
+  if(Number(recent?.n||0)>=8)return json({error:'too_many_uploads'},429);
+  const daily=await env.DB.prepare('SELECT count(*) AS n FROM orb_rate WHERE bucket=? AND ts>?').bind(bucket,now-86400000).first();
+  if(Number(daily?.n||0)>=50)return json({error:'too_many_uploads'},429);
+  await env.DB.prepare('INSERT INTO orb_rate(bucket,ts) VALUES(?,?)').bind(bucket,now).run();
   if(Number(request.headers.get('Content-Length')||0)>1408000)return json({error:'file_too_large'},413);
   let body;try{body=await request.json()}catch{return json({error:'invalid_json'},400)}
   const mime=String(body?.mime||'').toLowerCase();
@@ -949,8 +957,9 @@ async function handleMediaRequest(request,env){
 async function handle(req, env, ctx) {
   const url = new URL(req.url);
   const path = url.pathname;
-  const mediaResponse = await handleMediaRequest(req, env);
-  if (mediaResponse) return mediaResponse;
+  // Isolated media routing: leave all existing Orbita PC and Android chat API routes unchanged.
+  const mediaResponse=await handleMediaRequest(req,env);
+  if(mediaResponse)return mediaResponse;
 
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
   if (!env || !env.DB) return send({ error: "not_configured" }, 500);
